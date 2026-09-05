@@ -37,7 +37,7 @@ export function AuthLayout({ title, subtitle, children, footer }: {
             </div>
           </div>
           <p className="max-w-md text-xs text-muted-foreground">
-            "We resolved 612 disputed parcels in our first quarter on TerraTrust." — Director, Lagos Land Bureau
+            "We resolved 612 disputed parcels in our first quarter on TerraTrust." — Land Records Directorate, Karnataka
           </p>
         </div>
       </div>

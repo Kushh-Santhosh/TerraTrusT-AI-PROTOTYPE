@@ -3,40 +3,65 @@ import { AppShell } from "@/components/layout/AppShell";
 import { DataTable, KpiRow, Pill } from "@/components/ui-ext/Scaffold";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/government/parcels")({
-  head: () => ({ meta: [{ title: "Parcels — TerraTrust AI" }] }),
+  head: () => ({ meta: [{ title: "Parcels Registry — TerraTrust AI" }] }),
   component: Page,
 });
 
 const rows = [
-  { id: "TT-8421-LG", region: "Lagos", lga: "Eti-Osa", area: "540 sqm", owner: "Amara Okonkwo", status: "Verified" },
-  { id: "TT-7188-LG", region: "Lagos", lga: "Ikoyi", area: "1,240 sqm", owner: "B. Adetola", status: "Verified" },
-  { id: "TT-5512-AB", region: "FCT", lga: "Wuse", area: "1,800 sqm", owner: "Disputed", status: "Disputed" },
-  { id: "TT-2210-KD", region: "Kaduna", lga: "Birnin Gwari", area: "1.24 ha", owner: "Amara Okonkwo", status: "Pending" },
-  { id: "TT-9930-OY", region: "Oyo", lga: "Ibadan North", area: "880 sqm", owner: "Amara Okonkwo", status: "Verified" },
-  { id: "TT-4422-RV", region: "Rivers", lga: "Port Harcourt", area: "620 sqm", owner: "K. Fubara", status: "Verified" },
+  { id: "KA-BLR-0412", region: "Karnataka", taluk: "Bengaluru East", area: "540 sqm", owner: "Ananya Sharma", status: "Verified" },
+  { id: "MH-PUN-0891", region: "Maharashtra", taluk: "Haveli / Pune", area: "1,240 sqm", owner: "Prashant Deshmukh", status: "Verified" },
+  { id: "DL-GUR-0518", region: "Haryana", taluk: "Gurugram South", area: "1,800 sqm", owner: "Disputed Record", status: "Disputed" },
+  { id: "KA-MYS-0143", region: "Karnataka", taluk: "Mysuru Urban", area: "1.24 ha", owner: "Kushal Santhosh", status: "Pending" },
+  { id: "MH-MUM-0319", region: "Maharashtra", taluk: "Andheri West", area: "880 sqm", owner: "Vikram Malhotra", status: "Verified" },
+  { id: "KA-BLR-0992", region: "Karnataka", taluk: "Bengaluru South", area: "620 sqm", owner: "Dr. Vandana Rao", status: "Verified" },
 ];
 
 function Page() {
   return (
-    <AppShell title="Parcel registry" subtitle="Read-only access to the national parcel registry. 2,418,332 entries indexed."
-      actions={<Button variant="outline"><Download className="h-4 w-4" /> Export region</Button>}>
-      <KpiRow items={[
-        { label: "Total parcels", value: "2.41M" },
-        { label: "Verified", value: "91.5%" },
-        { label: "Pending", value: "6.2%" },
-        { label: "Disputed", value: "1.2%" },
-      ]} />
+    <AppShell
+      title="Land Records Registry"
+      subtitle="Read-only access to state cadastral parcel registry. 2,418,332 entries synchronized with Bhoomi & Mahabhulekh."
+      requiredRole={["government", "admin"]}
+      actions={
+        <Button
+          variant="outline"
+          onClick={() => toast.success("Exporting regional cadastre CSV (Karnataka & Maharashtra zones)...")}
+        >
+          <Download className="h-4 w-4" /> Export region
+        </Button>
+      }
+    >
+      <KpiRow
+        items={[
+          { label: "Total cadastral parcels", value: "2.41M" },
+          { label: "Verified / clean title", value: "91.5%" },
+          { label: "Pending verification", value: "6.2%" },
+          { label: "Encumbered / disputed", value: "1.2%" },
+        ]}
+      />
       <div className="mt-6">
-        <DataTable rows={rows} columns={[
-          { key: "id", label: "Passport", render: r => <span className="font-mono text-xs">{r.id}</span> },
-          { key: "region", label: "Region", render: r => r.region },
-          { key: "lga", label: "LGA", render: r => <span className="text-muted-foreground">{r.lga}</span> },
-          { key: "area", label: "Area", render: r => r.area },
-          { key: "owner", label: "Owner", render: r => <span className="text-muted-foreground">{r.owner}</span> },
-          { key: "s", label: "Status", render: r => <Pill tone={r.status === "Verified" ? "success" : r.status === "Disputed" ? "danger" : "warning"}>{r.status}</Pill> },
-        ]} />
+        <DataTable
+          rows={rows}
+          columns={[
+            { key: "id", label: "Passport ID", render: r => <span className="font-mono text-xs font-medium">{r.id}</span> },
+            { key: "region", label: "State", render: r => r.region },
+            { key: "taluk", label: "Taluk / Tehsil", render: r => <span className="text-muted-foreground">{r.taluk}</span> },
+            { key: "area", label: "Area", render: r => r.area },
+            { key: "owner", label: "Owner of Record", render: r => <span className="text-muted-foreground">{r.owner}</span> },
+            {
+              key: "s",
+              label: "Status",
+              render: r => (
+                <Pill tone={r.status === "Verified" ? "success" : r.status === "Disputed" ? "danger" : "warning"}>
+                  {r.status}
+                </Pill>
+              ),
+            },
+          ]}
+        />
       </div>
     </AppShell>
   );
