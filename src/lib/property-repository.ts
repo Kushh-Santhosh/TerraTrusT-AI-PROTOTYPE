@@ -82,9 +82,31 @@ export function mapPropertyRow(row: {
   };
 }
 
+export function getRegisteredLocalProperties(): Property[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem("terratrust_registered_properties");
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveRegisteredLocalProperty(prop: Property): void {
+  if (typeof window === "undefined") return;
+  try {
+    const existing = getRegisteredLocalProperties().filter((p) => p.id !== prop.id && p.passportId !== prop.passportId);
+    localStorage.setItem("terratrust_registered_properties", JSON.stringify([prop, ...existing]));
+  } catch {}
+}
+
 /** Loads properties owned by a citizen user */
 export async function loadOwnedProperties(userId: string): Promise<Property[]> {
-  if (!supabaseConfigured || !userId) return demoProperties;
+  const localProps = getRegisteredLocalProperties();
+
+  if (!supabaseConfigured || !userId) {
+    return [...localProps, ...demoProperties];
+  }
 
   try {
     const { data, error } = await supabase
@@ -95,38 +117,46 @@ export async function loadOwnedProperties(userId: string): Promise<Property[]> {
       .eq("owner_id", userId)
       .order("created_at", { ascending: false });
 
-    if (error || !data?.length) return demoProperties;
-    return data.map((row) => mapPropertyRow({ ...row, documents: row.property_documents }));
+    if (error || !data?.length) {
+      return [...localProps, ...demoProperties];
+    }
+    const mapped = data.map((row) => mapPropertyRow({ ...row, documents: row.property_documents }));
+    // Deduplicate by ID so authoritative Supabase rows are not duplicated by local cache
+    const mappedIds = new Set(mapped.map((p) => p.id));
+    const nonDupeLocal = localProps.filter((p) => !mappedIds.has(p.id));
+    return [...mapped, ...nonDupeLocal];
   } catch {
-    return demoProperties;
+    return [...localProps, ...demoProperties];
   }
 }
 
 /** Loads a single property by its UUID or passport ID */
 export async function loadPropertyById(idOrPassport: string): Promise<Property | null> {
-  if (!supabaseConfigured) {
-    return demoProperties.find((p) => p.id === idOrPassport || p.passportId === idOrPassport) ?? null;
-  }
+  // Query authoritative Supabase first
+  if (supabaseConfigured) {
+    try {
+      const query = supabase
+        .from("properties")
+        .select(
+          "id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
+        );
 
-  try {
-    const query = supabase
-      .from("properties")
-      .select(
-        "id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
-      );
+      const { data, error } = isUuid(idOrPassport)
+        ? await query.eq("id", idOrPassport).maybeSingle()
+        : await query.eq("passport_id", idOrPassport).maybeSingle();
 
-    const { data, error } = isUuid(idOrPassport)
-      ? await query.eq("id", idOrPassport).maybeSingle()
-      : await query.eq("passport_id", idOrPassport).maybeSingle();
-
-    if (error || !data) {
-      return demoProperties.find((p) => p.id === idOrPassport || p.passportId === idOrPassport) ?? null;
+      if (data && !error) {
+        return mapPropertyRow({ ...data, documents: data.property_documents });
+      }
+    } catch {
+      // Fallback to local cache
     }
-
-    return mapPropertyRow({ ...data, documents: data.property_documents });
-  } catch {
-    return demoProperties.find((p) => p.id === idOrPassport || p.passportId === idOrPassport) ?? null;
   }
+
+  const local = getRegisteredLocalProperties().find((p) => p.id === idOrPassport || p.passportId === idOrPassport);
+  if (local) return local;
+
+  return demoProperties.find((p) => p.id === idOrPassport || p.passportId === idOrPassport) ?? null;
 }
 
 /** Loads shared properties for institutional roles (Government, Surveyor, Bank, Admin) */

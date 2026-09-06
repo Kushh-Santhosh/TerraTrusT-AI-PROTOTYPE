@@ -13,11 +13,13 @@ import { getEncumbrances, getNearbyInfra, getRiskIndicators, getOwnershipHistory
 import { getFraudReport } from "@/lib/fraud-engine";
 import { ConfidenceBreakdown } from "@/components/ui-ext/ConfidenceBreakdown";
 import { EncumbrancePanel, NearbyInfraPanel, RiskIndicatorsPanel, OwnershipHistoryPanel } from "@/components/ui-ext/IntelPanels";
+import { loadPropertyById } from "@/lib/property-repository";
+import type { Property } from "@/lib/types";
 
 export const Route = createFileRoute("/properties/$id")({
   head: ({ params }) => ({ meta: [{ title: `Property ${params.id} — TerraTrust AI` }] }),
-  loader: ({ params }) => {
-    const p = properties.find(p => p.id === params.id);
+  loader: async ({ params }) => {
+    const p = await loadPropertyById(params.id);
     if (!p) throw notFound();
     return { property: p };
   },
@@ -28,7 +30,7 @@ export const Route = createFileRoute("/properties/$id")({
 });
 
 function PassportPage() {
-  const { property: p } = Route.useLoaderData() as { property: (typeof properties)[number] };
+  const { property: p } = Route.useLoaderData() as { property: Property };
   const pathname = useRouterState({ select: s => s.location.pathname });
   if (pathname !== `/properties/${p.id}`) return <Outlet />;
   const confidence = computeConfidence(p);
@@ -64,17 +66,17 @@ function PassportPage() {
           <div>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-primary" />
-              <span className="font-medium text-foreground">Property Passport</span>
+              <span className="font-medium text-foreground">Evidence / Trust Summary</span>
               <span>· <span className="font-mono">{p.passportId}</span></span>
               <StatusBadge status={p.status} />
             </div>
             <h2 className="font-display mt-3 text-4xl">{p.title}</h2>
             <p className="text-sm text-muted-foreground">{p.address}</p>
             <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <KV k="AI valuation" v={`$${p.valuation.toLocaleString()}`} tone="primary" />
+              <KV k="AI valuation" v={`₹${p.valuation.toLocaleString("en-IN")}`} tone="primary" />
               <KV k="Area" v={`${p.area.toLocaleString()} m²`} />
               <KV k="Type" v={p.type} />
-              <KV k="Owned since" v={new Date(p.ownerSince).toLocaleDateString("en", { month: "short", year: "numeric" })} />
+              <KV k="Owned since" v={new Date(p.ownerSince).toLocaleDateString("en-IN", { month: "short", year: "numeric" })} />
             </div>
           </div>
           <div className="flex flex-col items-center border-t border-border pt-6 md:border-l md:border-t-0 md:pl-8 md:pt-0">

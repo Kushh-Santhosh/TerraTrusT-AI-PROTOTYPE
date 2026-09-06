@@ -198,17 +198,17 @@ export function AppShell({
   };
 
   return (
-    <div className="grid min-h-screen w-full grid-cols-[260px_1fr] bg-background">
+    <div className="flex min-h-screen w-full flex-col md:grid md:grid-cols-[260px_1fr] bg-background">
       {/* Left Sidebar */}
-      <aside className="sticky top-0 h-screen border-r border-border bg-surface-elevated flex flex-col justify-between">
+      <aside className="hidden md:flex sticky top-0 h-screen border-r border-border bg-surface-elevated flex-col justify-between">
         <div>
           <div className="flex h-16 items-center px-5 border-b border-border/40">
             <Link to="/"><Logo /></Link>
           </div>
-          <nav className="flex flex-col gap-6 overflow-y-auto px-3 py-4 max-h-[calc(100vh-8.5rem)]">
+          <nav className="flex flex-col gap-6 overflow-y-auto px-3 py-4 max-h-[calc(100vh-8.5rem)]" suppressHydrationWarning>
             {navGroups.map(group => (
               <div key={group.group}>
-                <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{group.group}</p>
+                <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground" suppressHydrationWarning>{group.group}</p>
                 <div className="flex flex-col gap-0.5">
                   {group.items.map(item => {
                     const active = pathname === item.to || (item.to !== "/dashboard" && pathname.startsWith(item.to));
@@ -249,7 +249,10 @@ export function AppShell({
       {/* Main Content Area */}
       <div className="flex min-w-0 flex-col">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-8 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-4 md:px-8 backdrop-blur-xl">
+          <div className="flex items-center md:hidden mr-1">
+            <Link to="/"><Logo /></Link>
+          </div>
           <div className="relative w-full max-w-md">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input className="h-9 pl-9 text-xs" placeholder="Search parcels, passport IDs, surveys…" />
@@ -266,26 +269,26 @@ export function AppShell({
                 </AvatarFallback>
               </Avatar>
               <div className="hidden text-left md:block">
-                <p className="text-xs font-medium leading-tight text-foreground truncate max-w-[140px]">{displayName}</p>
-                <p className="text-[10px] capitalize text-muted-foreground">{roleLabel}</p>
+                <p className="text-xs font-medium leading-tight text-foreground truncate max-w-[140px]" suppressHydrationWarning>{displayName}</p>
+                <p className="text-[10px] capitalize text-muted-foreground" suppressHydrationWarning>{roleLabel}</p>
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Title & Actions Banner */}
-        <div className="border-b border-border bg-background px-8 py-6">
+        <div className="border-b border-border bg-background px-4 md:px-8 py-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h1 className="font-display text-3xl md:text-4xl text-foreground">{title}</h1>
-              {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
+              <h1 className="font-display text-2xl md:text-4xl text-foreground">{title}</h1>
+              {subtitle && <p className="mt-1 text-xs md:text-sm text-muted-foreground">{subtitle}</p>}
             </div>
             {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
           </div>
         </div>
 
         {/* Protected Route Enforcement */}
-        <main className="min-w-0 flex-1 px-8 py-8">
+        <main className="min-w-0 flex-1 px-4 md:px-8 py-6 md:py-8">
           {!isAuthorized() ? (
             <div className="surface-card max-w-xl p-8 text-center mx-auto my-12 border-destructive/30">
               <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive mb-4">

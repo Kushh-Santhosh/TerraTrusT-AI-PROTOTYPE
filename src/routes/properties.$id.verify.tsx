@@ -5,7 +5,6 @@ import { Crumbs, Pill, SectionTitle } from "@/components/ui-ext/Scaffold";
 import { Button } from "@/components/ui/button";
 import { VerificationWorkflowPanel } from "@/components/ui-ext/VerificationWorkflowPanel";
 import { HowTerraTrustWorks } from "@/components/ui-ext/HowTerraTrustWorks";
-import { properties } from "@/lib/mock-data";
 import {
   STEP_NAMES,
   activeProvider,
@@ -15,6 +14,7 @@ import {
   type WorkflowStep,
 } from "@/lib/verification-workflow";
 import { MapPin, Play, RotateCcw, Ruler, User2, Workflow } from "lucide-react";
+import { loadPropertyById } from "@/lib/property-repository";
 
 export const Route = createFileRoute("/properties/$id/verify")({
   head: () => ({
@@ -23,8 +23,8 @@ export const Route = createFileRoute("/properties/$id/verify")({
       { name: "description", content: "Run the n8n-orchestrated verification workflow: OCR, fraud, boundary, risk, confidence, decision." },
     ],
   }),
-  loader: ({ params }) => {
-    const p = properties.find(x => x.id === params.id);
+  loader: async ({ params }) => {
+    const p = await loadPropertyById(params.id);
     if (!p) throw notFound();
     return { property: p };
   },

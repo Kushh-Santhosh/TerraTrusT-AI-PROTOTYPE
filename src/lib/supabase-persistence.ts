@@ -98,6 +98,45 @@ export async function savePropertyDocument(input: {
 }
 
 /**
+ * Uploads a document binary file to Supabase Storage bucket 'property-documents'
+ */
+export async function uploadPropertyDocumentBinary(input: {
+  userId: string;
+  propertyId: string;
+  file: File;
+}): Promise<{ storagePath: string | null; error: string | null }> {
+  if (!supabaseConfigured) {
+    return { storagePath: null, error: "Supabase not configured" };
+  }
+
+  try {
+    const cleanName = input.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const uniqueStamp = Date.now().toString(36);
+    // Path conforms to RLS: <userId>/<propertyId>/<uniqueStamp>_<filename>
+    const storagePath = `${input.userId}/${input.propertyId}/${uniqueStamp}_${cleanName}`;
+
+    const { error } = await supabase.storage
+      .from("property-documents")
+      .upload(storagePath, input.file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+    if (error) {
+      return { storagePath: null, error: error.message };
+    }
+
+    return { storagePath, error: null };
+  } catch (err) {
+    return {
+      storagePath: null,
+      error: err instanceof Error ? err.message : "Storage upload exception",
+    };
+  }
+}
+
+
+/**
  * Records community verification decision via RPC
  */
 export async function recordCommunityDecision(input: {

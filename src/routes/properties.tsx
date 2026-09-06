@@ -2,59 +2,186 @@ import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-r
 import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { properties } from "@/lib/mock-data";
-import { Filter, Grid3x3, List, Plus, Search, MapPin } from "lucide-react";
-import { useState } from "react";
+import { properties as fallbackProperties } from "@/lib/mock-data";
+import { loadOwnedProperties } from "@/lib/property-repository";
+import { useAuth } from "@/lib/auth";
+import { Filter, Grid3x3, List, Plus, Search, MapPin, Building2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import type { Property } from "@/lib/types";
 
 export const Route = createFileRoute("/properties")({
   head: () => ({ meta: [{ title: "Properties — TerraTrust AI" }] }),
   component: PropertiesPage,
 });
 
+function formatInr(val: number): string {
+  if (!val) return "₹0";
+  if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
+  if (val >= 100000) return `₹${(val / 100000).toFixed(1)} Lakh`;
+  return `₹${val.toLocaleString("en-IN")}`;
+}
+
 function PropertiesPage() {
+  const { user } = useAuth();
   const [view, setView] = useState<"grid" | "list">("grid");
-  const pathname = useRouterState({ select: s => s.location.pathname });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [propertiesList, setPropertiesList] = useState<Property[]>(fallbackProperties);
+  const [loading, setLoading] = useState(true);
+
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    if (user?.id) {
+      loadOwnedProperties(user.id).then((data) => {
+        if (data && data.length > 0) {
+          setPropertiesList(data);
+        }
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
+    }
+  }, [user?.id]);
+
   if (pathname.replace(/\/$/, "") !== "/properties") return <Outlet />;
+
+  const filteredProperties = propertiesList.filter((p) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      p.title.toLowerCase().includes(q) ||
+      p.passportId.toLowerCase().includes(q) ||
+      p.address.toLowerCase().includes(q) ||
+      p.region.toLowerCase().includes(q)
+    );
+  });
+
   return (
-    <AppShell title="Properties" subtitle="Your Property Passports across regions and types."
-      actions={<Button className="rounded-full"><Plus className="h-4 w-4" /> New passport</Button>}>
+    <AppShell
+      title="Properties"
+      subtitle="Your Property Passports across Indian states, urban parcels, and agricultural holdings."
+      actions={
+        <Link to="/properties/new">
+          <Button className="rounded-full gap-1.5">
+            <Plus className="h-4 w-4" /> Register Property
+          </Button>
+        </Link>
+      }
+    >
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-64">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="h-10 pl-9" placeholder="Search by address, passport ID, owner…" />
+          <Input
+            className="h-10 pl-9"
+            placeholder="Search by title, passport ID, city, or address…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-        <Button variant="outline" className="h-10"><Filter className="h-4 w-4" /> Filter</Button>
+        <Button variant="outline" className="h-10">
+          <Filter className="h-4 w-4" /> Filter
+        </Button>
         <div className="ml-auto flex rounded-md border border-border bg-surface p-1">
-          <button onClick={() => setView("grid")} className={cn("rounded p-1.5", view === "grid" ? "bg-muted" : "text-muted-foreground")}><Grid3x3 className="h-4 w-4" /></button>
-          <button onClick={() => setView("list")} className={cn("rounded p-1.5", view === "list" ? "bg-muted" : "text-muted-foreground")}><List className="h-4 w-4" /></button>
+          <button
+            onClick={() => setView("grid")}
+            className={cn("rounded p-1.5", view === "grid" ? "bg-muted" : "text-muted-foreground")}
+            aria-label="Grid view"
+          >
+            <Grid3x3 className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setView("list")}
+            className={cn("rounded p-1.5", view === "list" ? "bg-muted" : "text-muted-foreground")}
+            aria-label="List view"
+          >
+            <List className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
-      {view === "grid" ? (
+      {filteredProperties.length === 0 ? (
+        /* Empty State */
+        <div className="surface-card flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-dashed border-border">
+          <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10 text-primary mb-4">
+            <Building2 className="h-8 w-8" />
+          </div>
+          <h3 className="font-display text-xl font-bold text-foreground">
+            No properties registered yet
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground max-w-md">
+            You haven't registered any land parcels or property passports yet. Register your first parcel to establish GIS boundary and AI verification.
+          </p>
+          <div className="mt-6">
+            <Link to="/properties/new">
+              <Button className="rounded-full gap-2 px-6">
+                <Plus className="h-4 w-4" /> Register Property
+              </Button>
+            </Link>
+          </div>
+        </div>
+      ) : view === "grid" ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {properties.map(p => (
-            <Link key={p.id} to="/properties/$id" params={{ id: p.id }} className="surface-card group overflow-hidden transition hover:shadow-[var(--shadow-elev)]">
+          {filteredProperties.map((p) => (
+            <Link
+              key={p.id}
+              to="/properties/$id"
+              params={{ id: p.id }}
+              className="surface-card group overflow-hidden transition hover:shadow-[var(--shadow-elev)]"
+            >
               <div className="relative h-36 overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
                 <svg viewBox="0 0 200 100" className="absolute inset-0 h-full w-full">
-                  <pattern id={`g${p.id}`} width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="oklch(0.9 0.01 250)" /></pattern>
+                  <pattern id={`g${p.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M20 0H0V20" fill="none" stroke="oklch(0.9 0.01 250)" />
+                  </pattern>
                   <rect width="200" height="100" fill={`url(#g${p.id})`} />
-                  <polygon points="60,30 140,28 158,68 80,76 50,60" fill="oklch(0.45 0.08 195 / 0.2)" stroke="oklch(0.45 0.08 195)" strokeWidth="1.5" />
+                  <polygon
+                    points="60,30 140,28 158,68 80,76 50,60"
+                    fill="oklch(0.45 0.08 195 / 0.2)"
+                    stroke="oklch(0.45 0.08 195)"
+                    strokeWidth="1.5"
+                  />
                 </svg>
-                <div className="absolute right-3 top-3"><StatusBadge status={p.status} /></div>
+                <div className="absolute right-3 top-3">
+                  <StatusBadge status={p.status} />
+                </div>
               </div>
               <div className="p-4">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{p.passportId}</p>
-                <p className="mt-1 font-medium text-foreground group-hover:text-primary">{p.title}</p>
-                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{p.region}, {p.country}</p>
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {p.passportId}
+                </p>
+                <p className="mt-1 font-medium text-foreground group-hover:text-primary truncate">
+                  {p.title}
+                </p>
+                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground truncate">
+                  <MapPin className="h-3 w-3 shrink-0" />
+                  {p.region}, {p.country}
+                </p>
                 <div className="mt-4 flex items-end justify-between">
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">AI valuation</p>
-                    <p className="font-display text-xl">${(p.valuation/1000).toFixed(0)}k</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      AI valuation
+                    </p>
+                    <p className="font-display text-lg font-bold text-foreground">
+                      {formatInr(p.valuation)}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Trust</p>
-                    <p className={`font-display text-xl ${p.trustScore >= 85 ? "text-success" : p.trustScore >= 65 ? "text-primary" : p.trustScore >= 45 ? "text-warning" : "text-destructive"}`}>{p.trustScore}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Trust
+                    </p>
+                    <p
+                      className={`font-display text-xl font-bold ${
+                        p.trustScore >= 85
+                          ? "text-success"
+                          : p.trustScore >= 65
+                            ? "text-primary"
+                            : p.trustScore >= 45
+                              ? "text-warning"
+                              : "text-destructive"
+                      }`}
+                    >
+                      {p.trustScore}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -75,14 +202,27 @@ function PropertiesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {properties.map(p => (
-                <tr key={p.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-3"><Link to="/properties/$id" params={{ id: p.id }} className="font-medium hover:text-primary">{p.title}</Link><p className="text-xs text-muted-foreground">{p.address}</p></td>
-                  <td className="px-4 py-3 font-mono text-xs">{p.passportId}</td>
+              {filteredProperties.map((p) => (
+                <tr key={p.id} className="hover:bg-muted/30 transition">
+                  <td className="px-4 py-3">
+                    <Link
+                      to="/properties/$id"
+                      params={{ id: p.id }}
+                      className="font-medium hover:text-primary transition"
+                    >
+                      {p.title}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">{p.address}</p>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-primary font-medium">
+                    {p.passportId}
+                  </td>
                   <td className="px-4 py-3 capitalize text-muted-foreground">{p.type}</td>
-                  <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
-                  <td className="px-4 py-3">{p.trustScore}</td>
-                  <td className="px-4 py-3 text-right font-medium">${(p.valuation/1000).toFixed(0)}k</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={p.status} />
+                  </td>
+                  <td className="px-4 py-3 font-semibold">{p.trustScore}</td>
+                  <td className="px-4 py-3 text-right font-medium">{formatInr(p.valuation)}</td>
                 </tr>
               ))}
             </tbody>

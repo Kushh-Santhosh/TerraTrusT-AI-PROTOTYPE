@@ -110,18 +110,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     : "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env.local.";
 
   const loadProfile = async (user: User | null) => {
+    if (demoUser) {
+      setProfile({
+        id: demoUser.id,
+        email: demoUser.email,
+        full_name: demoUser.full_name,
+        role: demoUser.role,
+        region: demoUser.region,
+      });
+      return;
+    }
     if (!user) {
-      if (demoUser) {
-        setProfile({
-          id: demoUser.id,
-          email: demoUser.email,
-          full_name: demoUser.full_name,
-          role: demoUser.role,
-          region: demoUser.region,
-        });
-      } else {
-        setProfile(null);
-      }
+      setProfile(null);
       return;
     }
     try {
@@ -173,11 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       setSession(data.session);
-      if (data.session?.user) {
-        loadProfile(data.session.user).finally(() => {
-          if (mounted) setLoading(false);
-        });
-      } else if (demoUser) {
+      if (demoUser) {
         setProfile({
           id: demoUser.id,
           email: demoUser.email,
@@ -186,6 +182,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           region: demoUser.region,
         });
         if (mounted) setLoading(false);
+      } else if (data.session?.user) {
+        loadProfile(data.session.user).finally(() => {
+          if (mounted) setLoading(false);
+        });
       } else {
         if (mounted) setLoading(false);
       }
