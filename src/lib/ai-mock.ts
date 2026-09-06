@@ -1,27 +1,27 @@
-// Mock data for AI-powered feature screens.
+// Mock data for AI-powered feature screens (India localized).
 
 export const valuationFactors = [
-  { label: "Location desirability (Lekki Phase 1)", weight: 32, direction: "up" as const, note: "Top 5% premium corridor in Lagos coastal zone." },
-  { label: "Recent comparable sales (12 nearby)", weight: 24, direction: "up" as const, note: "Median sale ₦125M · 90-day window." },
-  { label: "Verified title chain", weight: 14, direction: "up" as const, note: "Unbroken transfer history since 2002." },
-  { label: "Macro headwinds (FX volatility)", weight: -9, direction: "down" as const, note: "USD/NGN swings reduce dollar-equivalent value." },
-  { label: "Distance to flood risk zone", weight: -4, direction: "down" as const, note: "1.8km from 100-year floodplain." },
-  { label: "Infrastructure (road + utilities)", weight: 11, direction: "up" as const, note: "Tarred dual carriageway, public water grid." },
+  { label: "Location desirability (Indiranagar, Bengaluru)", weight: 32, direction: "up" as const, note: "Top 5% premium corridor in Bengaluru Urban district." },
+  { label: "Recent comparable sales (12 nearby)", weight: 24, direction: "up" as const, note: "Median registered sale ₹2.40 Cr · 90-day window." },
+  { label: "Verified title chain", weight: 14, direction: "up" as const, note: "Unbroken transfer history since 1998." },
+  { label: "Guideline value adjustment", weight: -9, direction: "down" as const, note: "State stamp duty revision alignment." },
+  { label: "Distance to flood risk zone", weight: -4, direction: "down" as const, note: "2.4km from natural drainage buffer." },
+  { label: "Infrastructure (road + utilities)", weight: 11, direction: "up" as const, note: "60ft asphalt road, BWSSB water, BESCOM grid." },
 ];
 
 export const fraudSignals = [
-  { label: "Duplicate boundary overlap", weight: 38, direction: "down" as const, note: "Polygon shares 12% area with TT-7710-LG (filed 2021)." },
-  { label: "Document fingerprint mismatch", weight: 21, direction: "down" as const, note: "Survey plan watermark inconsistent with bureau template v2023." },
-  { label: "Signature anomaly score", weight: 14, direction: "down" as const, note: "92% match to known forgery cluster #FC-204." },
-  { label: "Bureau cross-validation", weight: 10, direction: "up" as const, note: "Lagos Bureau acknowledges parcel exists." },
-  { label: "Owner verified ID", weight: 8, direction: "up" as const, note: "NIN + BVN matched." },
+  { label: "Duplicate boundary overlap", weight: 38, direction: "down" as const, note: "Polygon checked against Bhoomi registry survey numbers." },
+  { label: "Document watermark verification", weight: 21, direction: "down" as const, note: "Stamp paper e-Challan verified with Treasury portal." },
+  { label: "Signature anomaly score", weight: 14, direction: "down" as const, note: "98% biometric & signature match." },
+  { label: "Revenue department cross-validation", weight: 10, direction: "up" as const, note: "State Land Revenue records acknowledge parcel survey number." },
+  { label: "Owner verified identity", weight: 8, direction: "up" as const, note: "Aadhaar + PAN verification matched via DigiLocker." },
 ];
 
 export const valuationHistory = [
-  { m: "Jan", value: 248 }, { m: "Feb", value: 252 }, { m: "Mar", value: 261 },
-  { m: "Apr", value: 258 }, { m: "May", value: 269 }, { m: "Jun", value: 274 },
-  { m: "Jul", value: 281 }, { m: "Aug", value: 285 }, { m: "Sep", value: 290 },
-  { m: "Oct", value: 295 }, { m: "Nov", value: 301 }, { m: "Dec", value: 312 },
+  { m: "Jan", value: 218 }, { m: "Feb", value: 222 }, { m: "Mar", value: 226 },
+  { m: "Apr", value: 225 }, { m: "May", value: 231 }, { m: "Jun", value: 234 },
+  { m: "Jul", value: 238 }, { m: "Aug", value: 240 }, { m: "Sep", value: 242 },
+  { m: "Oct", value: 245 }, { m: "Nov", value: 248 }, { m: "Dec", value: 252 },
 ];
 
 export const ndviSeries = [
@@ -40,45 +40,45 @@ export const ndviSeries = [
 ];
 
 export const ownershipChain = [
-  { year: 1998, owner: "Federal Land Registry", event: "Original allocation", confidence: 88 },
-  { year: 2002, owner: "Adebayo Estates Ltd.", event: "Corporate acquisition", confidence: 91 },
-  { year: 2011, owner: "Chinedu Okafor", event: "Private transfer", confidence: 94 },
-  { year: 2019, owner: "Amara Okonkwo", event: "Verified deed transfer", confidence: 96 },
+  { year: 1982, owner: "Government of Karnataka", event: "Revenue grant allotment", confidence: 92 },
+  { year: 1994, owner: "M. Murthy", event: "BDA allotment sale", confidence: 91 },
+  { year: 2009, owner: "S. Murthy", event: "Family partition deed", confidence: 94 },
+  { year: 2019, owner: "Ananya Sharma", event: "Registered sale deed", confidence: 98 },
 ];
 
 export const aiRecommendations = [
-  { id: "r1", priority: "high" as const, title: "Upload tax clearance for Kaduna Farmland", impact: "+13 trust pts", reason: "Closes the documentation gap and unlocks bank-collateral eligibility.", cta: "Upload now" },
-  { id: "r2", priority: "high" as const, title: "Resolve 0.4m boundary overlap with TT-2210-KD", impact: "Removes dispute risk", reason: "AI detected polygon intersection with neighbor parcel — re-survey recommended.", cta: "Open survey request" },
-  { id: "r3", priority: "medium" as const, title: "Refresh satellite scan (last: 47 days ago)", impact: "+4 confidence pts", reason: "Newer imagery improves boundary detection accuracy by ~6%.", cta: "Refresh imagery" },
-  { id: "r4", priority: "medium" as const, title: "Add second attestor to Abuja plot", impact: "Reaches community gold tier", reason: "Properties with ≥3 community attestations clear bureau review 2.3× faster.", cta: "Invite attestor" },
-  { id: "r5", priority: "low" as const, title: "Enable monthly AI passport refresh", impact: "Automated trust drift alerts", reason: "Get notified when any score drops more than 5 points.", cta: "Enable" },
+  { id: "r1", priority: "high" as const, title: "Upload BBMP property tax receipt 2024-25", impact: "+12 trust pts", reason: "Closes the documentation gap and unlocks institutional bank loan approvals.", cta: "Upload now" },
+  { id: "r2", priority: "high" as const, title: "Surveyor field verification for Mysuru Farm", impact: "Eliminates boundary dispute risk", reason: "GIS polygon alignment recommended with Bhoomi survey coordinates.", cta: "Open survey request" },
+  { id: "r3", priority: "medium" as const, title: "Refresh Cartosat / Sentinel-2 satellite scan", impact: "+4 confidence pts", reason: "Recent optical pass improves boundary detection precision to ±0.2m.", cta: "Refresh imagery" },
+  { id: "r4", priority: "medium" as const, title: "Request neighborhood attestation in Indiranagar", impact: "Reaches community gold tier", reason: "Properties with ≥3 verified local attestations clear revenue queue 2.4× faster.", cta: "Invite attestor" },
+  { id: "r5", priority: "low" as const, title: "Enable monthly AI passport refresh", impact: "Automated trust drift alerts", reason: "Get notified if any guideline valuation or encumbrance status changes.", cta: "Enable" },
 ];
 
 export const ocrFields = [
-  { label: "Owner name", value: "Amara N. Okonkwo", confidence: 98 },
-  { label: "Plot number", value: "Block 14 / Plot 7B", confidence: 96 },
-  { label: "Survey ref.", value: "LG/SUR/2023/8421", confidence: 99 },
-  { label: "Area (sqm)", value: "540.20", confidence: 94 },
-  { label: "Issued date", value: "14 March 2024", confidence: 92 },
-  { label: "Issuing authority", value: "Lagos State Land Bureau", confidence: 97 },
-  { label: "Bureau stamp ID", value: "LSLB-2024-00831", confidence: 88 },
-  { label: "Coordinates (centroid)", value: "6.4413° N, 3.4709° E", confidence: 91 },
+  { label: "Owner name", value: "Ananya Sharma", confidence: 99 },
+  { label: "Survey / Plot number", value: "Sy. No. 42 / Site 7B", confidence: 97 },
+  { label: "Sub-Registrar ref.", value: "KA-BLR-SR-2024-8421", confidence: 99 },
+  { label: "Area (sqm)", value: "540.20", confidence: 96 },
+  { label: "Registration date", value: "14 March 2024", confidence: 98 },
+  { label: "Issuing authority", value: "Karnataka Department of Stamps & Registration", confidence: 98 },
+  { label: "e-Challan stamp ID", value: "KA-GRAS-2024-00831", confidence: 95 },
+  { label: "Centroid coordinates", value: "12.9567° N, 77.6200° E", confidence: 96 },
 ];
 
 export const verificationSuggestions = [
-  { id: "v1", action: "Cross-check coordinates with Bureau dataset", confidence: 96, status: "Auto-passed" as const },
-  { id: "v2", action: "Request community attestation (≥2 neighbors)", confidence: 81, status: "Suggested" as const },
-  { id: "v3", action: "Surveyor field re-measurement", confidence: 72, status: "Suggested" as const },
-  { id: "v4", action: "Re-issue survey plan with watermark v2024", confidence: 64, status: "Optional" as const },
-  { id: "v5", action: "Tax clearance reconciliation", confidence: 88, status: "Auto-passed" as const },
+  { id: "v1", action: "Cross-check coordinates with Bhoomi spatial dataset", confidence: 98, status: "Auto-passed" as const },
+  { id: "v2", action: "Request neighborhood attestation (≥2 resident verifiers)", confidence: 85, status: "Suggested" as const },
+  { id: "v3", action: "Empanelled surveyor field inspection", confidence: 78, status: "Suggested" as const },
+  { id: "v4", action: "Sub-registrar Kaveri 2.0 deed verification", confidence: 92, status: "Auto-passed" as const },
+  { id: "v5", action: "Encumbrance certificate (Form 15) reconciliation", confidence: 94, status: "Auto-passed" as const },
 ];
 
 export const riskBreakdown = [
-  { label: "Title / legal risk", value: 12, tone: "success" as const },
-  { label: "Boundary integrity", value: 28, tone: "warning" as const },
-  { label: "Environmental (flood, erosion)", value: 18, tone: "success" as const },
-  { label: "Market / valuation drift", value: 34, tone: "warning" as const },
-  { label: "Fraud signal exposure", value: 9, tone: "success" as const },
+  { label: "Title / legal risk", value: 8, tone: "success" as const },
+  { label: "Boundary integrity", value: 14, tone: "success" as const },
+  { label: "Environmental (flood buffer, lake bed)", value: 12, tone: "success" as const },
+  { label: "Guideline / market drift", value: 18, tone: "warning" as const },
+  { label: "Fraud signal exposure", value: 4, tone: "success" as const },
 ];
 
 export const landHealth = {
@@ -87,8 +87,8 @@ export const landHealth = {
 };
 
 export const recommendationsForDoc = [
-  "Owner name matches NIN registry — high confidence.",
-  "Survey reference cross-validates with Lagos Bureau dataset.",
-  "Plot coordinates within stated boundary polygon (0.4m drift).",
-  "Stamp ID matches valid issuance window (Q1 2024).",
+  "Owner name matches Aadhaar & PAN verification records — 99% confidence.",
+  "Survey reference cross-validates with Karnataka Revenue / Bhoomi database.",
+  "Site coordinates within stated survey parcel polygon (0.4m drift).",
+  "e-Stamp ID verified against State Treasury reconciliation logs.",
 ];

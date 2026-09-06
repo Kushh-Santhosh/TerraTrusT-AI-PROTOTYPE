@@ -28,11 +28,15 @@ function Page() {
       actions={
         <Button asChild className="rounded-full">
           <Link to="/bank/loans">
-            <FileCheck2 className="h-4 w-4" /> Active Loan Book
+            <FileCheck2 className="h-4 w-4 mr-1" /> Active Loan Book
           </Link>
         </Button>
       }
     >
+      <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+        <strong className="text-foreground">PROTOTYPE SAMPLE DATA:</strong> Simulated institutional mortgage underwriting queue for demonstration purposes.
+      </div>
+
       <KpiRow
         items={[
           { label: "Active applications", value: "184" },

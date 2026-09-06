@@ -23,6 +23,9 @@ function Page() {
       requiredRole={["bank", "admin"]}
     >
       <Crumbs items={[{ label: "Bank", to: "/bank" }, { label: "Loans" }]} />
+      <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+        <strong className="text-foreground">PROTOTYPE SAMPLE DATA:</strong> Simulated institutional mortgage loan book for demonstration purposes.
+      </div>
       <KpiRow
         items={[
           { label: "Total Outstanding", value: "₹248.5 Cr" },

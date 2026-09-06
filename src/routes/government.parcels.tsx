@@ -34,6 +34,10 @@ function Page() {
         </Button>
       }
     >
+      <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+        <strong className="text-foreground">PROTOTYPE CADASTRAL REGISTRY:</strong> Demonstration parcel registry schema modeled after state revenue land records datasets.
+      </div>
+
       <KpiRow
         items={[
           { label: "Total cadastral parcels", value: "2.41M" },

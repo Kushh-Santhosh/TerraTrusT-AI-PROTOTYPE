@@ -486,7 +486,7 @@ export function RegisterPropertyWizard() {
               to="/properties/$id"
               params={{ id: submissionSuccess.propertyId }}
             >
-              <Button className="rounded-full gap-1.5">
+              <Button id="btn-open-property-passport" className="rounded-full gap-1.5">
                 Open Property Passport <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -597,7 +597,7 @@ export function RegisterPropertyWizard() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Country">
-                  <Input value={country} disabled className="bg-muted/50 cursor-not-allowed font-medium" />
+                  <Input id="property-country-input" value={country} disabled className="bg-muted/50 cursor-not-allowed font-medium" />
                 </Field>
 
                 <Field label="State / Union Territory" hint="Select from all Indian states/UTs">

@@ -14,6 +14,7 @@ import { getFraudReport } from "@/lib/fraud-engine";
 import { ConfidenceBreakdown } from "@/components/ui-ext/ConfidenceBreakdown";
 import { EncumbrancePanel, NearbyInfraPanel, RiskIndicatorsPanel, OwnershipHistoryPanel } from "@/components/ui-ext/IntelPanels";
 import { loadPropertyById } from "@/lib/property-repository";
+import { PropertySubNav } from "@/components/property/PropertySubNav";
 import type { Property } from "@/lib/types";
 
 export const Route = createFileRoute("/properties/$id")({
@@ -91,7 +92,10 @@ function PassportPage() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      {/* Property Sub-Routes Toolbar */}
+      <PropertySubNav propertyId={p.id} activeTab="overview" />
+
+      <div className="mt-4 grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Tabs defaultValue="overview">
             <TabsList className="bg-muted/60 flex-wrap h-auto">

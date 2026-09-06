@@ -1,23 +1,23 @@
-// Extended, internally-consistent mock dataset for demo realism.
+// Extended, internally-consistent mock dataset for demo realism (India localized).
 // Programmatically generated so totals match across screens.
 
 type LandUse = "residential" | "agricultural" | "commercial" | "industrial" | "mixed";
 type Status = "verified" | "pending" | "disputed" | "review";
 
 const REGIONS = [
-  { name: "Lagos",     country: "Nigeria",       lat: 6.5244,  lng: 3.3792,  prefix: "LG" },
-  { name: "FCT Abuja", country: "Nigeria",       lat: 9.0765,  lng: 7.3986,  prefix: "AB" },
-  { name: "Kano",      country: "Nigeria",       lat: 12.0022, lng: 8.5919,  prefix: "KN" },
-  { name: "Oyo",       country: "Nigeria",       lat: 7.8526,  lng: 3.9319,  prefix: "OY" },
-  { name: "Kaduna",    country: "Nigeria",       lat: 10.5105, lng: 7.4165,  prefix: "KD" },
-  { name: "Rivers",    country: "Nigeria",       lat: 4.8156,  lng: 7.0498,  prefix: "RV" },
-  { name: "Nairobi",   country: "Kenya",         lat: -1.2921, lng: 36.8219, prefix: "NB" },
-  { name: "Accra",     country: "Ghana",         lat: 5.6037,  lng: -0.1870, prefix: "AC" },
-  { name: "Kigali",    country: "Rwanda",        lat: -1.9706, lng: 30.1044, prefix: "KG" },
+  { name: "Bengaluru",  country: "India", lat: 12.9716, lng: 77.5946, prefix: "BLR" },
+  { name: "Mysuru",     country: "India", lat: 12.2958, lng: 76.6394, prefix: "MYS" },
+  { name: "Pune",       country: "India", lat: 18.5204, lng: 73.8567, prefix: "PUN" },
+  { name: "Gurugram",   country: "India", lat: 28.4595, lng: 77.0266, prefix: "GUR" },
+  { name: "Hyderabad",  country: "India", lat: 17.3850, lng: 78.4867, prefix: "HYD" },
+  { name: "Mumbai",     country: "India", lat: 19.0760, lng: 72.8777, prefix: "MUM" },
+  { name: "Delhi",      country: "India", lat: 28.7041, lng: 77.1025, prefix: "DEL" },
+  { name: "Chennai",    country: "India", lat: 13.0827, lng: 80.2707, prefix: "CHE" },
+  { name: "Kolkata",    country: "India", lat: 22.5726, lng: 88.3639, prefix: "KOL" },
 ] as const;
 
-const FIRST = ["Amara","Tunde","Chinwe","Ifeoma","Kemi","Adaeze","Sani","Yusuf","Hadiza","Bukola","Ngozi","Femi","Tariq","Aisha","Obinna","Funke","Zainab","Ade","Bisi","Olayinka","Chima","Rashid","Salim","Halima","Uche","Damilola","Wairimu","Kwame","Akosua","Eric"];
-const LAST  = ["Okonkwo","Adebayo","Eze","Bello","Hassan","Abubakar","Olawale","Idris","Mensah","Owusu","Mwangi","Karanja","Diop","Yusuf","Mukasa","Nwosu","Achebe","Kamau","Njoroge","Ouma","Boateng","Asante","Tijani","Olatunji","Etim"];
+const FIRST = ["Ananya","Aarav","Aditi","Rohan","Pooja","Vikram","Kushal","Priya","Siddharth","Sneha","Meera","Arjun","Neha","Rahul","Kavya","Karan","Sunita","Amit","Divya","Rajesh"];
+const LAST  = ["Sharma","Verma","Nair","Patel","Reddy","Iyer","Kulkarni","Deshmukh","Gupta","Malhotra","Joshi","Singh","Rao","Bhatt","Chopra","Pillai","Menon"];
 
 const USES: LandUse[]   = ["residential","agricultural","commercial","industrial","mixed"];
 const STATUSES: Status[] = ["verified","verified","verified","pending","pending","review","disputed"];
@@ -56,7 +56,7 @@ export interface PropertyLite {
   trust: number;
   confidence: number;
   area: number;          // sqm
-  valuation: number;     // USD
+  valuation: number;     // INR
   owner: string;
   ownerId: string;
   region: string;
@@ -88,12 +88,12 @@ function makeProperty(i: number, owners: OwnerLite[]): PropertyLite {
   const owner = owners[int(0, owners.length - 1)];
   const use = pick(USES);
   const status = pick(STATUSES);
-  const baseValue = use === "commercial" ? 380_000
-                  : use === "industrial" ? 520_000
-                  : use === "residential" ? 180_000
-                  : use === "mixed"       ? 220_000
-                  :                          42_000;
-  const valuation = Math.round(baseValue * (0.55 + rand() * 1.4));
+  const baseValue = use === "commercial" ? 48_000_000
+                  : use === "industrial" ? 65_000_000
+                  : use === "residential" ? 24_000_000
+                  : use === "mixed"       ? 28_000_000
+                  :                          8_500_000;
+  const valuation = Math.round(baseValue * (0.65 + rand() * 1.3));
   const trust = status === "verified" ? int(82, 98)
               : status === "review"   ? int(60, 80)
               : status === "pending"  ? int(48, 72)
@@ -111,8 +111,8 @@ function makeProperty(i: number, owners: OwnerLite[]): PropertyLite {
     ownerId: owner.id,
     region: r.name,
     country: r.country,
-    lat: r.lat + (rand() - 0.5) * 0.5,
-    lng: r.lng + (rand() - 0.5) * 0.5,
+    lat: r.lat + (rand() - 0.5) * 0.05,
+    lng: r.lng + (rand() - 0.5) * 0.05,
     registeredAt: registered.toISOString().slice(0, 10),
     lastVerifiedAt: lastVer.toISOString().slice(0, 10),
     fraudFlags: status === "disputed" ? int(1, 4) : (rand() > 0.86 ? 1 : 0),
@@ -139,20 +139,20 @@ export interface AttestationLite {
   id: string;
   passportId: string;
   attester: string;
-  relation: "neighbour" | "council" | "chief" | "tenant";
+  relation: "neighbour" | "council" | "surveyor" | "tenant";
   comment: string;
   at: string;
   status: "endorsed" | "pending" | "rejected";
 }
 
-const RELATIONS: AttestationLite["relation"][] = ["neighbour","council","chief","tenant"];
+const RELATIONS: AttestationLite["relation"][] = ["neighbour","council","surveyor","tenant"];
 const COMMENTS = [
-  "Has lived on this land for over a decade — undisputed.",
-  "Boundary stones match the survey plan.",
-  "Family compound recognised by the community council.",
-  "No competing claims known in this ward.",
-  "Tax receipts consistent with claimed possession.",
-  "Confirmed during the 2024 community land audit.",
+  "Has occupied and held undisputed possession of this plot for over 15 years.",
+  "Cadastral boundary survey stones match village naksha.",
+  "Family property recognized by local Gram Panchayat / Ward Committee.",
+  "No competing encumbrance or litigation recorded in this survey number.",
+  "Property tax SAS receipts consistent with claimed possession.",
+  "Confirmed during the 2024 revenue land resurvey.",
 ];
 
 export const attestationsExtended: AttestationLite[] = Array.from({ length: 86 }, (_, i) => {
@@ -208,9 +208,9 @@ const ACTIONS = [
   "approved passport",
   "issued digital signature",
   "uploaded survey report",
-  "rejected document",
-  "escalated dispute to bureau",
-  "synced parcel with national registry",
+  "rejected unverified deed",
+  "escalated dispute to revenue collectorate",
+  "synced parcel with state registry",
   "verified community attestation",
   "flagged boundary overlap",
 ];
@@ -242,22 +242,23 @@ export const regionalAggregates = REGIONS.map(r => {
   };
 });
 
-// Impact metrics — calibrated against national land-authority baselines
+// Impact metrics — calibrated against state revenue department baselines
 export const impactMetrics = {
   timeSavedDaysPerCase: 47,
   manualBaselineDays: 52,
   digitalCaseDays: 5,
   fraudReductionPct: 78,
-  govSavingsUsdYear: 184_000_000,
+  govSavingsInrYear: 1450_00_00_000, // ₹1,450 Cr
+  govSavingsUsdYear: 1450_00_00_000,
   citizenSatisfactionPct: 94,
   verificationSpeedupX: 9.4,
   parcelsPerHourScale: 1_200,
   uptimePct: 99.98,
   sdgs: [
-    { id: 1,  label: "No Poverty",                       hit: "Secure tenure unlocks credit for the under-banked." },
-    { id: 5,  label: "Gender Equality",                  hit: "Women's land rights formalised on the registry." },
-    { id: 10, label: "Reduced Inequalities",             hit: "Same passport for rural and urban parcels." },
-    { id: 11, label: "Sustainable Cities & Communities", hit: "Digital cadastre for planning and resilience." },
-    { id: 16, label: "Peace, Justice & Strong Institutions", hit: "Auditable land records reduce dispute backlog." },
+    { id: 1,  label: "No Poverty",                       hit: "Clear registered tenure unlocks formal banking credit." },
+    { id: 5,  label: "Gender Equality",                  hit: "Women's land ownership formalised in municipal records." },
+    { id: 10, label: "Reduced Inequalities",             hit: "Equal verification rigor for rural and urban holdings." },
+    { id: 11, label: "Sustainable Cities & Communities", hit: "Digital cadastral overlays for smart urban planning." },
+    { id: 16, label: "Peace, Justice & Strong Institutions", hit: "Immutable title audit trails reduce civil litigation backlog." },
   ],
 };

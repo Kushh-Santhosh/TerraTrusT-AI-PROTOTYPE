@@ -15,6 +15,7 @@ import {
 } from "@/lib/verification-workflow";
 import { MapPin, Play, RotateCcw, Ruler, User2, Workflow } from "lucide-react";
 import { loadPropertyById } from "@/lib/property-repository";
+import { PropertySubNav } from "@/components/property/PropertySubNav";
 
 export const Route = createFileRoute("/properties/$id/verify")({
   head: () => ({
@@ -83,6 +84,7 @@ function Page() {
         </>
       }>
       <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: property.passportId, to: "/properties/$id" }, { label: "Live verification" }]} />
+      <PropertySubNav propertyId={property.id} activeTab="verify" />
 
       <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <Workflow className="h-4 w-4 text-primary" />

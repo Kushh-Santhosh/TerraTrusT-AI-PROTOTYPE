@@ -38,15 +38,15 @@ export function getValuationReport(p: Property): ValuationReport {
     { label: "Nearby hospitals",         weight: 5,
       reasoning: "Federal Medical Centre 1.8km; private specialist clinic 0.9km." },
     { label: "Public transport",         weight: 7,
-      reasoning: "BRT stop 480m away; ferry terminal 2.1km." },
+      reasoning: "Metro station 480m away; city bus connectivity within 300m." },
     { label: "Recent comparable sales",  weight: 18,
-      reasoning: `12 verified sales within 1km in the last 90 days · median $${Math.round(p.valuation/1000 * 0.92)}k.` },
+      reasoning: `12 verified sub-registrar deeds within 1km in the last 90 days · median ₹${(p.valuation / 10000000).toFixed(2)} Cr.` },
     { label: "Property size",            weight: 9,
       reasoning: `${p.area.toLocaleString()} m² · ${p.area > 1000 ? "above" : "below"} neighbourhood median.` },
     { label: "Infrastructure score",     weight: 8,
-      reasoning: "Public water, 33kV power, fibre internet on the block." },
+      reasoning: "Municipal water grid, 11kV power, high-speed optical fibre on street." },
     { label: "Risk indicators",          weight: p.status === "disputed" ? -14 : -3,
-      reasoning: p.status === "disputed" ? "Active dispute compresses bid pool ~22%." : "Minor FX exposure on USD-pegged buyers." },
+      reasoning: p.status === "disputed" ? "Active dispute compresses bid pool ~22%." : "State circle rate revision aligned." },
     { label: "Market trend (12m)",       weight: 4,
       reasoning: `${(2 + r(2) * 6).toFixed(1)}% YoY appreciation in segment.` },
   ];
@@ -66,7 +66,7 @@ export function getValuationReport(p: Property): ValuationReport {
   }));
 
   const narrative =
-    `Composite of comparable sales, infrastructure quality, and registry-confirmed area yields a central estimate of $${estimate.toLocaleString()} ` +
+    `Composite of sub-registrar deed comparables, infrastructure access, and registry-confirmed area yields a central estimate of ₹${estimate.toLocaleString("en-IN")} ` +
     `with a ${Math.round(spread * 100)}% confidence band. Headline driver: ${factors.sort((a,b)=>Math.abs(b.weight)-Math.abs(a.weight))[0].label.toLowerCase()}.`;
 
   return { estimate, low, high, confidence, factors, comparables, narrative };

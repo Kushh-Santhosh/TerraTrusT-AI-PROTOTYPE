@@ -74,7 +74,10 @@ function Dashboard() {
       }
     >
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {citizenKpis.map(k => <StatCard key={k.label} kpi={k} />)}
+        <StatCard kpi={{ label: "Properties", value: `${userProperties.length}`, delta: "+1", trend: "up", hint: "registered in portfolio" }} />
+        <StatCard kpi={{ label: "Avg. trust score", value: `${avgTrust}`, delta: "+4", trend: "up", hint: "rolling 30 days" }} />
+        <StatCard kpi={{ label: "Portfolio value", value: formatInr(userProperties.reduce((sum, p) => sum + (p.valuation || 0), 0)), delta: "+4.2%", trend: "up", hint: "AI valuation estimate" }} />
+        <StatCard kpi={{ label: "Open actions", value: `${disputedCount + pendingCount}`, delta: "-1", trend: "down", hint: "pending verifications" }} />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">

@@ -10,85 +10,78 @@ export const Route = createFileRoute("/ai-summary")({
   component: SummaryPage,
 });
 
-const summary = `This is a Certificate of Occupancy issued by the Lagos State Land Bureau on 14 March 2024 in favour of Amara N. Okonkwo. It grants statutory right of occupancy over a 540.20 m² residential parcel at Block 14, Plot 7B, Admiralty Way, Lekki Phase 1, registered under bureau reference LSLB-2024-00831. The document carries a valid bureau stamp matching the Q1-2024 issuance template, an embedded coordinate of 6.4413°N, 3.4709°E, and a clean ownership chain traceable to a 2002 corporate acquisition by Adebayo Estates Ltd. There are no encumbrances, court annotations, or competing claims recorded against this title as of the scan date.`;
+const summary = `This is a Registered Absolute Sale Deed executed before the Sub-Registrar, Indiranagar, Bengaluru Urban on 14 March 2024 in favour of Ananya Sharma. It conveys absolute freehold title over a 540.20 m² residential plot at Site 7B, 4th Cross, Indiranagar, registered under deed reference KA-BLR-SR-2024-00831. The deed carries verified e-Stamp challan receipts matching the Karnataka Treasury template, embedded survey centroid coordinates of 12.9567°N, 77.6200°E, and a clean ownership chain traceable to a 1994 BDA allotment. There are no mortgages, attachments, court litigations, or competing claims recorded in the accompanying Encumbrance Certificate (Form 15) as of the verification date.`;
 
 const obligations = [
-  "Annual ground rent payable to Lagos State by 31 March each year.",
-  "Use restricted to residential dwellings — commercial conversion requires a Change of Use permit.",
-  "Title is renewable after 99 years (expires 2123).",
-  "Subject to government right of pre-emption on resale to non-citizens.",
+  "Annual municipal property tax (SAS) payable to BBMP by 30 April each financial year.",
+  "Use restricted to residential dwellings — commercial conversion requires BDA / BBMP Change of Land Use approval.",
+  "Title conveyed with perpetual absolute freehold rights.",
+  "Subject to municipal building bylaws and mandatory setback margins.",
 ];
 
 const risks = [
-  { label: "Encumbrance check", status: "Clear" as const, tone: "success" as const },
-  { label: "Tax clearance currency", status: "Current (2024)" as const, tone: "success" as const },
-  { label: "Boundary registration", status: "Verified" as const, tone: "success" as const },
-  { label: "Dispute history", status: "None on record" as const, tone: "success" as const },
+  { label: "Encumbrance Certificate (Form 15)", status: "Nil encumbrance (30 yrs)" as const, tone: "success" as const },
+  { label: "Property tax status (BBMP SAS)", status: "Current (2024-25)" as const, tone: "success" as const },
+  { label: "Bhoomi survey boundary", status: "Verified" as const, tone: "success" as const },
+  { label: "Dispute / litigation history", status: "None on record" as const, tone: "success" as const },
 ];
 
 function SummaryPage() {
   return (
     <AppShell
       title="AI Document Summary"
-      subtitle="Plain-English briefings for any uploaded title document."
-      actions={<><Button variant="outline"><Copy className="h-4 w-4" /> Copy</Button><Button><Download className="h-4 w-4" /> Export PDF</Button></>}
+      subtitle="Plain-English legal briefs for uploaded deeds, khata certificates, and encumbrance reports."
+      actions={<><Button variant="outline"><Copy className="h-4 w-4 mr-1" /> Copy</Button><Button><Download className="h-4 w-4 mr-1" /> Export PDF</Button></>}
     >
+      <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+        <strong className="text-foreground">PROTOTYPE LEGAL SUMMARY:</strong> Plain-language AI summarizer trained on Indian conveyance deeds and registry clauses. Non-binding advisory summary.
+      </div>
+
       <div className="grid gap-4 md:grid-cols-4">
-        <AIInsightCard icon={<FileText className="h-3 w-3 text-primary" />} title="Doc type" value="C-of-O" hint="Statutory right of occupancy" tone="primary" />
-        <AIInsightCard title="Reading level" value="Plain English" hint="Grade 9 · Hemingway equivalent" tone="accent" />
+        <AIInsightCard icon={<FileText className="h-3 w-3 text-primary" />} title="Doc type" value="Sale Deed" hint="Registered absolute conveyance" tone="primary" />
+        <AIInsightCard title="Reading level" value="Plain English" hint="Legal jargon decoded" tone="accent" />
         <AIInsightCard title="Key clauses found" value="11" hint="Surfaced & explained below" tone="primary" />
-        <AIInsightCard title="Summary confidence" value="96%" hint="Cross-checked vs full text" tone="success" />
+        <AIInsightCard title="Summary confidence" value="98%" hint="Cross-checked vs full deed text" tone="success" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
           <div className="surface-card p-6">
-            <SectionTitle eyebrow="Plain-English summary" title="Certificate of Occupancy.pdf" action={<AIBadge>Summary v2.3</AIBadge>} />
-            <p className="text-[15px] leading-relaxed text-foreground">{summary}</p>
+            <SectionTitle eyebrow="Plain-English summary" title="Registered Sale Deed & Khata Extract.pdf" action={<AIBadge>Summary Indic v2.4</AIBadge>} />
+            <p className="text-[15px] leading-relaxed text-foreground mt-3">{summary}</p>
             <div className="mt-5 flex flex-wrap gap-2">
               <Pill tone="primary">Residential</Pill>
               <Pill tone="success">Verified</Pill>
               <Pill>540 m²</Pill>
-              <Pill>Lekki Phase 1</Pill>
+              <Pill>Indiranagar, Bengaluru</Pill>
               <Pill>2024-03-14</Pill>
             </div>
           </div>
 
           <div className="surface-card p-5">
-            <SectionTitle eyebrow="Obligations" title="What the document requires of the owner" />
-            <ul className="space-y-2 text-sm">
+            <SectionTitle eyebrow="Statutory obligations" title="What the document requires of the owner" />
+            <ul className="space-y-2 text-sm mt-3">
               {obligations.map((o, i) => (
-                <li key={i} className="flex items-start gap-2 text-foreground">
-                  <BookOpen className="mt-0.5 h-4 w-4 text-primary" />
-                  {o}
+                <li key={i} className="flex items-start gap-2 text-muted-foreground text-xs">
+                  <span className="text-primary font-bold">✓</span>
+                  <span>{o}</span>
                 </li>
               ))}
             </ul>
           </div>
-
-          <VerdictBanner verdict="trusted" headline="No red flags detected in this document." detail="All clauses parse cleanly, references match bureau records, and dates fall inside valid issuance windows." />
         </div>
 
         <div className="space-y-6">
+          <VerdictBanner verdict="trusted" headline="Clean title with zero encumbrances detected." detail="Matches sub-registrar volume/page register and e-Stamp reconciliation." />
           <div className="surface-card p-5">
-            <SectionTitle eyebrow="Risk audit" title="Auto-check results" />
-            <ul className="space-y-2 text-sm">
-              {risks.map(r => (
-                <li key={r.label} className="flex items-center justify-between rounded-lg bg-surface p-2.5 ring-1 ring-border">
-                  <span className="text-foreground">{r.label}</span>
+            <SectionTitle eyebrow="Forensic cross-checks" title="Evidentiary validation" />
+            <div className="space-y-3 mt-3">
+              {risks.map((r, i) => (
+                <div key={i} className="flex items-center justify-between border-b border-border/60 pb-2 text-xs">
+                  <span className="text-muted-foreground">{r.label}</span>
                   <Pill tone={r.tone}>{r.status}</Pill>
-                </li>
+                </div>
               ))}
-            </ul>
-          </div>
-          <div className="surface-card p-5">
-            <SectionTitle eyebrow="Section confidence" title="What the model is sure about" />
-            <div className="space-y-3">
-              <ConfidenceMeter value={98} label="Identity & owner" />
-              <ConfidenceMeter value={97} label="Parcel description" />
-              <ConfidenceMeter value={94} label="Obligations & clauses" />
-              <ConfidenceMeter value={92} label="Renewal terms" />
-              <ConfidenceMeter value={89} label="Cross-bureau alignment" />
             </div>
           </div>
         </div>

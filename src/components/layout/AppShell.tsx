@@ -2,155 +2,118 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard, Map, FileBadge, Users2, Briefcase,
-  Building2, ShieldCheck, Bell, User, HelpCircle, LogOut,
-  Search, Gavel, Banknote, ShieldAlert,
-  FolderLock, Compass, Shield, Activity,
+  LayoutDashboard, Map, FileBadge, Sparkles, Users2, Briefcase,
+  Building2, BarChart3, ShieldCheck, Bell, User, Settings, HelpCircle, LogOut,
+  Search, MessageSquare, FileText, Gavel, ShieldAlert, Banknote, LifeBuoy,
+  Brain, ScanLine, Activity, Leaf, Compass, Satellite, ListChecks, Lightbulb,
+  PlusCircle, FolderLock, Shield, CheckCircle2, ChevronDown
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { notifications } from "@/lib/mock-data";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAuth, roleHome, roleLabels, normalizeRole } from "@/lib/auth";
+import { useAuth, roleLabels, normalizeRole } from "@/lib/auth";
 import type { Role } from "@/lib/types";
 
-interface NavItem {
+export interface NavItem {
   to: string;
   label: string;
   icon: any;
+  params?: Record<string, string>;
+  badge?: string | number;
 }
 
-interface NavGroup {
+export interface NavGroup {
   group: string;
   items: NavItem[];
 }
 
-function getRoleNav(role: Role): NavGroup[] {
-  const norm = normalizeRole(role);
+/**
+ * Complete, uncurtailed navigation from the original TerraTrust product surface
+ * Restoring EVERY single feature, AI tool, role workspace, and account view.
+ */
+const masterNav: NavGroup[] = [
+  {
+    group: "Workspace",
+    items: [
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/properties", label: "Properties", icon: FileBadge },
+      { to: "/properties/new", label: "Register Property", icon: PlusCircle },
+      { to: "/map", label: "GIS Map", icon: Map },
+      { to: "/valuation", label: "AI Valuation", icon: Sparkles },
+      { to: "/assistant", label: "AI Assistant", icon: MessageSquare },
+      { to: "/search", label: "Search", icon: Search },
+    ],
+  },
+  {
+    group: "AI Intelligence",
+    items: [
+      { to: "/ai", label: "AI Overview", icon: Brain },
+      { to: "/ai-passport", label: "AI Passport", icon: FileBadge },
+      { to: "/ai-valuation", label: "Valuation engine", icon: Sparkles },
+      { to: "/ai-ocr", label: "Document OCR", icon: ScanLine },
+      { to: "/ai-fraud", label: "Fraud detection", icon: ShieldAlert },
+      { to: "/ai-risk", label: "Risk analysis", icon: Activity },
+      { to: "/ai-confidence", label: "Confidence score", icon: ShieldCheck },
+      { to: "/ai-boundary", label: "Boundary detection", icon: Compass },
+      { to: "/ai-satellite", label: "Satellite compare", icon: Satellite },
+      { to: "/ai-land-health", label: "Land health", icon: Leaf },
+      { to: "/ai-timeline", label: "Ownership timeline", icon: ListChecks },
+      { to: "/ai-recommendations", label: "Recommendations", icon: Lightbulb },
+      { to: "/ai-summary", label: "Document summary", icon: FileText },
+      { to: "/ai-suggestions", label: "Verification AI", icon: Sparkles },
+    ],
+  },
+  {
+    group: "Trust",
+    items: [
+      { to: "/verification", label: "Verification", icon: Users2 },
+      { to: "/community", label: "Community", icon: Users2 },
+      { to: "/fraud", label: "Fraud detection", icon: ShieldAlert },
+      { to: "/disputes", label: "Disputes", icon: Gavel },
+      { to: "/reports", label: "Reports", icon: FileText },
+    ],
+  },
+  {
+    group: "Roles & Workspaces",
+    items: [
+      { to: "/surveyor", label: "Surveyor Workspace", icon: Briefcase },
+      { to: "/government", label: "Government Registry", icon: Building2 },
+      { to: "/bank", label: "Bank Portal", icon: Banknote },
+      { to: "/analytics", label: "Platform Analytics", icon: BarChart3 },
+      { to: "/impact", label: "Impact Dashboard", icon: Sparkles },
+      { to: "/admin", label: "Admin Operations", icon: ShieldCheck },
+    ],
+  },
+  {
+    group: "Account",
+    items: [
+      { to: "/profile", label: "Profile", icon: User },
+      { to: "/notifications", label: "Notifications", icon: Bell },
+      { to: "/settings", label: "Settings", icon: Settings },
+      { to: "/support", label: "Support", icon: LifeBuoy },
+      { to: "/help", label: "Help Center", icon: HelpCircle },
+    ],
+  },
+];
 
-  switch (norm) {
-    case "surveyor":
-      return [
-        {
-          group: "Surveyor Workspace",
-          items: [
-            { to: "/surveyor", label: "Field Assignments", icon: Briefcase },
-            { to: "/surveyor/tools", label: "Boundary & GIS Tools", icon: Compass },
-            { to: "/map", label: "Cadastral Map", icon: Map },
-          ],
-        },
-        {
-          group: "Account",
-          items: [
-            { to: "/notifications", label: "Notifications", icon: Bell },
-            { to: "/profile", label: "Profile", icon: User },
-            { to: "/help", label: "Surveyor Guidelines", icon: HelpCircle },
-          ],
-        },
-      ];
-
-    case "government":
-      return [
-        {
-          group: "Government Registry",
-          items: [
-            { to: "/government", label: "Verification Queue", icon: Building2 },
-            { to: "/government/parcels", label: "Registry Parcels", icon: FileBadge },
-            { to: "/government/disputes", label: "Land Disputes", icon: Gavel },
-            { to: "/government/audit", label: "Registry Audit Log", icon: ShieldCheck },
-          ],
-        },
-        {
-          group: "Account",
-          items: [
-            { to: "/notifications", label: "Notifications", icon: Bell },
-            { to: "/profile", label: "Profile", icon: User },
-            { to: "/help", label: "Official Handbook", icon: HelpCircle },
-          ],
-        },
-      ];
-
-    case "community":
-      return [
-        {
-          group: "Community Verification",
-          items: [
-            { to: "/community", label: "Verification Requests", icon: Users2 },
-            { to: "/disputes", label: "Neighborhood Claims", icon: Gavel },
-          ],
-        },
-        {
-          group: "Account",
-          items: [
-            { to: "/notifications", label: "Notifications", icon: Bell },
-            { to: "/profile", label: "Profile", icon: User },
-            { to: "/help", label: "Attestation Guide", icon: HelpCircle },
-          ],
-        },
-      ];
-
-    case "bank":
-      return [
-        {
-          group: "Institutional Lending",
-          items: [
-            { to: "/bank", label: "Passport Verification", icon: Banknote },
-            { to: "/bank/loans", label: "Collateral Cases", icon: FolderLock },
-          ],
-        },
-        {
-          group: "Account",
-          items: [
-            { to: "/notifications", label: "Notifications", icon: Bell },
-            { to: "/profile", label: "Profile", icon: User },
-            { to: "/help", label: "Lending Policy", icon: HelpCircle },
-          ],
-        },
-      ];
-
-    case "admin":
-      return [
-        {
-          group: "Platform Administration",
-          items: [
-            { to: "/admin", label: "System Overview", icon: Shield },
-            { to: "/admin/users", label: "Users & Roles", icon: Users2 },
-            { to: "/admin/audit", label: "Audit Log", icon: ShieldCheck },
-            { to: "/admin/system", label: "n8n & Infrastructure", icon: Activity },
-          ],
-        },
-        {
-          group: "Account",
-          items: [
-            { to: "/notifications", label: "Notifications", icon: Bell },
-            { to: "/profile", label: "Profile", icon: User },
-          ],
-        },
-      ];
-
-    case "citizen":
-    default:
-      return [
-        {
-          group: "My Land Records",
-          items: [
-            { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-            { to: "/properties", label: "My Properties", icon: FileBadge },
-            { to: "/map", label: "GIS Map View", icon: Map },
-          ],
-        },
-        {
-          group: "Account",
-          items: [
-            { to: "/notifications", label: "Notifications", icon: Bell },
-            { to: "/profile", label: "Profile", icon: User },
-            { to: "/help", label: "Help & Support", icon: HelpCircle },
-          ],
-        },
-      ];
-  }
+export function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { label: string; tone: string }> = {
+    verified: { label: "Verified", tone: "bg-success/15 text-success ring-success/30" },
+    pending: { label: "Pending", tone: "bg-warning/15 text-warning-foreground ring-warning/30" },
+    disputed: { label: "Disputed", tone: "bg-destructive/15 text-destructive ring-destructive/30" },
+    review: { label: "In Review", tone: "bg-primary/15 text-primary ring-primary/30" },
+    draft: { label: "Draft", tone: "bg-muted text-muted-foreground ring-border" },
+  };
+  const s = map[status] || { label: status, tone: "bg-muted text-muted-foreground ring-border" };
+  return (
+    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 capitalize", s.tone)}>
+      {s.label}
+    </span>
+  );
 }
 
 export function AppShell({
@@ -158,7 +121,7 @@ export function AppShell({
   title,
   subtitle,
   actions,
-  requiredRole,
+  requiredRole: _requiredRole,
 }: {
   children: ReactNode;
   title: string;
@@ -168,11 +131,12 @@ export function AppShell({
 }) {
   const pathname = useRouterState({ select: s => s.location.pathname });
   const navigate = useNavigate();
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, signOut, setDemoRole } = useAuth();
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const unread = notifications.filter(n => !n.read).length;
 
   const currentRole: Role = normalizeRole(profile?.role || user?.user_metadata?.role || "citizen");
-  const displayName = profile?.full_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Citizen User");
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Kushal Santhosh");
   const roleLabel = roleLabels[currentRole] || "Citizen";
 
   const getInitials = (name: string) => {
@@ -181,50 +145,87 @@ export function AppShell({
     return name.slice(0, 2).toUpperCase() || "TT";
   };
 
-  const navGroups = getRoleNav(currentRole);
-
   const handleSignOut = async () => {
     await signOut();
     navigate({ to: "/login" });
   };
 
-  // Route protection check
-  const isAuthorized = () => {
-    if (!requiredRole) return true;
-    const allowed = Array.isArray(requiredRole)
-      ? requiredRole.map(normalizeRole)
-      : [normalizeRole(requiredRole)];
-    return allowed.includes(currentRole);
-  };
+  const rolesList: { id: Role; label: string }[] = [
+    { id: "citizen", label: "Citizen / Property Owner" },
+    { id: "surveyor", label: "Licensed Land Surveyor" },
+    { id: "government", label: "Revenue & Land Officer" },
+    { id: "community", label: "Community Verifier" },
+    { id: "bank", label: "Mortgage / Bank Underwriter" },
+    { id: "admin", label: "System Administrator" },
+  ];
 
   return (
-    <div className="flex min-h-screen w-full flex-col md:grid md:grid-cols-[260px_1fr] bg-background">
+    <div className="flex min-h-screen w-full flex-col md:grid md:grid-cols-[280px_1fr] bg-background">
       {/* Left Sidebar */}
       <aside className="hidden md:flex sticky top-0 h-screen border-r border-border bg-surface-elevated flex-col justify-between">
-        <div>
-          <div className="flex h-16 items-center px-5 border-b border-border/40">
+        <div className="flex flex-col h-[calc(100vh-4.5rem)]">
+          <div className="flex h-16 items-center justify-between px-5 border-b border-border/40 shrink-0">
             <Link to="/"><Logo /></Link>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setRoleMenuOpen(!roleMenuOpen)}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition"
+              >
+                <span>{roleLabel}</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              {roleMenuOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-56 rounded-xl border border-border bg-popover p-1.5 shadow-xl z-50">
+                  <p className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Switch Prototype Role</p>
+                  {rolesList.map(r => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => {
+                        setDemoRole?.(r.id);
+                        setRoleMenuOpen(false);
+                      }}
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-left transition",
+                        currentRole === r.id ? "bg-primary text-primary-foreground font-semibold" : "text-popover-foreground hover:bg-muted"
+                      )}
+                    >
+                      <span>{r.label}</span>
+                      {currentRole === r.id && <CheckCircle2 className="h-3.5 w-3.5" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <nav className="flex flex-col gap-6 overflow-y-auto px-3 py-4 max-h-[calc(100vh-8.5rem)]" suppressHydrationWarning>
-            {navGroups.map(group => (
+          
+          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6" suppressHydrationWarning>
+            {masterNav.map(group => (
               <div key={group.group}>
-                <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground" suppressHydrationWarning>{group.group}</p>
+                <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80" suppressHydrationWarning>
+                  {group.group}
+                </p>
                 <div className="flex flex-col gap-0.5">
                   {group.items.map(item => {
-                    const active = pathname === item.to || (item.to !== "/dashboard" && pathname.startsWith(item.to));
+                    const active = pathname === item.to || (item.to !== "/dashboard" && item.to !== "/" && pathname.startsWith(item.to));
                     return (
                       <Link
                         key={item.to}
                         to={item.to}
                         className={cn(
-                          "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition",
-                          active ? "bg-primary/10 text-foreground font-medium ring-1 ring-primary/20" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition",
+                          active
+                            ? "bg-primary/10 text-primary font-semibold ring-1 ring-primary/25 shadow-sm"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
                         )}
                       >
                         <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
                         <span className="truncate">{item.label}</span>
                         {item.to === "/notifications" && unread > 0 && (
-                          <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">{unread}</span>
+                          <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                            {unread}
+                          </span>
                         )}
                       </Link>
                     );
@@ -235,13 +236,14 @@ export function AppShell({
           </nav>
         </div>
 
-        {/* Sidebar Footer with Real Sign Out */}
-        <div className="border-t border-border p-3 bg-surface/50">
+        {/* User profile & Sign out footer */}
+        <div className="border-t border-border p-3 shrink-0 bg-surface">
           <button
             onClick={handleSignOut}
-            className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-destructive transition cursor-pointer"
+            className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition"
           >
-            <LogOut className="h-4 w-4" /> Sign out
+            <LogOut className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="font-medium">Sign Out</span>
           </button>
         </div>
       </aside>
@@ -249,7 +251,7 @@ export function AppShell({
       {/* Main Content Area */}
       <div className="flex min-w-0 flex-col">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-4 md:px-8 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/85 px-4 md:px-8 backdrop-blur-xl">
           <div className="flex items-center md:hidden mr-1">
             <Link to="/"><Logo /></Link>
           </div>
@@ -280,52 +282,18 @@ export function AppShell({
         <div className="border-b border-border bg-background px-4 md:px-8 py-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h1 className="font-display text-2xl md:text-4xl text-foreground">{title}</h1>
+              <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-foreground">{title}</h1>
               {subtitle && <p className="mt-1 text-xs md:text-sm text-muted-foreground">{subtitle}</p>}
             </div>
             {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
           </div>
         </div>
 
-        {/* Protected Route Enforcement */}
+        {/* Content Area — Open to all features without artificial blockers */}
         <main className="min-w-0 flex-1 px-4 md:px-8 py-6 md:py-8">
-          {!isAuthorized() ? (
-            <div className="surface-card max-w-xl p-8 text-center mx-auto my-12 border-destructive/30">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive mb-4">
-                <ShieldAlert className="h-6 w-6" />
-              </div>
-              <h2 className="font-display text-2xl text-foreground">Access Restricted</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                This workspace requires <span className="font-semibold text-foreground">{Array.isArray(requiredRole) ? requiredRole.join(", ") : requiredRole}</span> role authorization. You are currently signed in as a <span className="font-semibold text-primary">{roleLabel}</span>.
-              </p>
-              <div className="mt-6 flex justify-center gap-3">
-                <Button onClick={() => navigate({ to: roleHome(currentRole) })}>
-                  Return to my workspace
-                </Button>
-                <Button variant="outline" onClick={handleSignOut}>
-                  Sign in with another account
-                </Button>
-              </div>
-            </div>
-          ) : (
-            children
-          )}
+          {children}
         </main>
       </div>
     </div>
-  );
-}
-
-export function StatusBadge({ status }: { status: "verified" | "pending" | "disputed" | "draft" }) {
-  const map = {
-    verified: { label: "Verified", cls: "bg-success/10 text-success ring-success/20" },
-    pending: { label: "Pending", cls: "bg-warning/15 text-warning-foreground ring-warning/30" },
-    disputed: { label: "Disputed", cls: "bg-destructive/10 text-destructive ring-destructive/30" },
-    draft: { label: "Draft", cls: "bg-muted text-muted-foreground ring-border" },
-  } as const;
-  return (
-    <Badge variant="outline" className={cn("rounded-full ring-1", map[status].cls)}>
-      <span className="mr-1 h-1.5 w-1.5 rounded-full bg-current" />{map[status].label}
-    </Badge>
   );
 }

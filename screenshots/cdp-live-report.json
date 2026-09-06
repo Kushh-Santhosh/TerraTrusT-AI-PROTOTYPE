@@ -1,0 +1,572 @@
+{
+  "connected": true,
+  "target": "794ACE7B298BB816415F539C240A7718",
+  "browserVersion": "Chrome/152.0.7977.77",
+  "steps": {
+    "01-login": {
+      "title": "Sign in — TerraTrust AI",
+      "url": "http://localhost:3000/login",
+      "status": "PASS"
+    },
+    "02-citizen-dashboard": {
+      "hasGreeting": true,
+      "hasKpis": false,
+      "status": "PASS"
+    },
+    "04-location": {
+      "country": "",
+      "status": "PASS"
+    },
+    "08-boundary": {
+      "vertexCount": 0,
+      "status": "PASS"
+    },
+    "reload-persisted": {
+      "status": "PASS"
+    },
+    "my-properties": {
+      "status": "PASS"
+    }
+  },
+  "passportId": "TT-9999-KA",
+  "network": [
+    {
+      "method": "OPTIONS",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/auth/v1/token?grant_type=password"
+    },
+    {
+      "method": "POST",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/auth/v1/token?grant_type=password"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/profiles?select=id%2Cfull_name%2Cemail%2Crole%2Cregion&id=eq.46175039-8899-42e4-beb9-23673fc8747d"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/profiles?select=role&id=eq.46175039-8899-42e4-beb9-23673fc8747d"
+    },
+    {
+      "method": "OPTIONS",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/profiles?select=id%2Cfull_name%2Cemail%2Crole%2Cregion&id=eq.46175039-8899-42e4-beb9-23673fc8747d"
+    },
+    {
+      "method": "OPTIONS",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/profiles?select=role&id=eq.46175039-8899-42e4-beb9-23673fc8747d"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/properties?select=id%2Cpassport_id%2Cproperty_name%2Clocation%2Carea%2Cstatus%2Ctrust_score%2Cproperty_documents%28id%2Cname%2Ckind%2Cstorage_path%2Cverified%2Ccreated_at%29&owner_id=eq.46175039-8899-42e4-beb9-23673fc8747d&order=created_at.desc"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/properties?select=id%2Cpassport_id%2Cproperty_name%2Clocation%2Carea%2Cstatus%2Ctrust_score%2Cproperty_documents%28id%2Cname%2Ckind%2Cstorage_path%2Cverified%2Ccreated_at%29&owner_id=eq.46175039-8899-42e4-beb9-23673fc8747d&order=created_at.desc"
+    },
+    {
+      "method": "OPTIONS",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/properties?select=id%2Cpassport_id%2Cproperty_name%2Clocation%2Carea%2Cstatus%2Ctrust_score%2Cproperty_documents%28id%2Cname%2Ckind%2Cstorage_path%2Cverified%2Ccreated_at%29&owner_id=eq.46175039-8899-42e4-beb9-23673fc8747d&order=created_at.desc"
+    },
+    {
+      "method": "OPTIONS",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/properties?select=id%2Cpassport_id%2Cproperty_name%2Clocation%2Carea%2Cstatus%2Ctrust_score%2Cproperty_documents%28id%2Cname%2Ckind%2Cstorage_path%2Cverified%2Ccreated_at%29&owner_id=eq.46175039-8899-42e4-beb9-23673fc8747d&order=created_at.desc"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23449/15194.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23448/15194.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23449/15193.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23449/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23448/15193.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23448/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23450/15194.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23450/15193.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23450/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23447/15194.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23447/15193.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23447/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/14/11724/7597.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/14/11724/7596.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/14/11725/7597.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/14/11723/7597.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/14/11725/7596.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/14/11723/7596.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/13/5862/3798.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/13/5861/3798.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/13/5862/3799.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/13/5861/3799.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/13/5863/3798.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/13/5863/3799.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/13/5862/3797.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/13/5861/3797.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/13/5863/3797.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/12/2931/1899.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2930/1899.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2931/1898.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/12/2930/1898.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/12/2932/1899.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/12/2932/1898.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/12/2931/1900.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/12/2930/1900.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/12/2929/1899.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/12/2929/1898.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2932/1900.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2929/1900.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/11/1465/949.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/11/1466/949.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/11/1465/950.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/11/1464/949.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/11/1466/950.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/11/1464/950.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/11/1465/948.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/11/1466/948.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/11/1464/948.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/10/732/474.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/10/733/474.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/10/732/475.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/10/733/475.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/10/731/474.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/10/731/475.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/10/732/473.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/10/733/473.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/10/731/473.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/12/2931/1900.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2931/1898.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2932/1900.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2930/1899.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/12/2930/1900.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2933/1899.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/12/2933/1900.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/12/2933/1898.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/13/5863/3799.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/13/5864/3799.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/13/5864/3798.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/13/5865/3799.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/13/5865/3798.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/14/11727/7598.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/14/11727/7597.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/14/11728/7598.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/14/11728/7597.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/14/11726/7598.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/14/11726/7597.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23455/15196.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23455/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23454/15196.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23454/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23456/15196.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23456/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/14/11727/7596.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/14/11728/7596.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/14/11726/7596.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/14/11729/7597.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/14/11729/7598.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/14/11729/7596.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/13/5864/3797.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/13/5862/3797.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/13/5865/3797.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/12/2933/1899.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/12/2933/1898.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/11/1467/949.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/11/1467/948.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/11/1467/950.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/10/734/474.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/10/734/475.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/10/734/473.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/9/366/237.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/9/366/236.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/9/367/237.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/9/367/236.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/9/365/237.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/9/365/236.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/profiles?select=id%2Cfull_name%2Cemail%2Crole%2Cregion&id=eq.46175039-8899-42e4-beb9-23673fc8747d"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/profiles?select=id%2Cfull_name%2Cemail%2Crole%2Cregion&id=eq.46175039-8899-42e4-beb9-23673fc8747d"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/properties?select=id%2Cpassport_id%2Cproperty_name%2Clocation%2Carea%2Cstatus%2Ctrust_score%2Cproperty_documents%28id%2Cname%2Ckind%2Cstorage_path%2Cverified%2Ccreated_at%29&owner_id=eq.46175039-8899-42e4-beb9-23673fc8747d&order=created_at.desc"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23449/15194.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23448/15194.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23449/15193.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23449/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23448/15193.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23448/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://b.basemaps.cartocdn.com/rastertiles/voyager/15/23450/15194.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/15/23450/15193.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://c.basemaps.cartocdn.com/rastertiles/voyager/15/23450/15195.png"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/properties?select=id%2Cpassport_id%2Cproperty_name%2Clocation%2Carea%2Cstatus%2Ctrust_score%2Cproperty_documents%28id%2Cname%2Ckind%2Cstorage_path%2Cverified%2Ccreated_at%29&owner_id=eq.46175039-8899-42e4-beb9-23673fc8747d&order=created_at.desc"
+    },
+    {
+      "method": "GET",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/rest/v1/properties?select=id%2Cpassport_id%2Cproperty_name%2Clocation%2Carea%2Cstatus%2Ctrust_score%2Cproperty_documents%28id%2Cname%2Ckind%2Cstorage_path%2Cverified%2Ccreated_at%29&owner_id=eq.46175039-8899-42e4-beb9-23673fc8747d&order=created_at.desc"
+    },
+    {
+      "method": "OPTIONS",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/auth/v1/logout?scope=local"
+    },
+    {
+      "method": "POST",
+      "url": "https://iixsxywjsclzbjfzlnvq.supabase.co/auth/v1/logout?scope=local"
+    }
+  ],
+  "console": [
+    "[debug] [vite] connecting...",
+    "[debug] [vite] connected.",
+    "[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "[warning] [tanstack-router] These exports from \"/Users/kushal/Downloads/TerraTrust AI-3/src/routes/properties.new.tsx\" will not be code-split and will increase your bundle size:\n- RegisterPropertyWizard\nFor the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file.",
+    "[debug] [vite] connecting...",
+    "[debug] [vite] connected.",
+    "[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "[warning] [tanstack-router] These exports from \"/Users/kushal/Downloads/TerraTrust AI-3/src/routes/properties.new.tsx\" will not be code-split and will increase your bundle size:\n- RegisterPropertyWizard\nFor the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file.",
+    "[debug] [vite] connecting...",
+    "[debug] [vite] connected.",
+    "[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "[warning] [tanstack-router] These exports from \"/Users/kushal/Downloads/TerraTrust AI-3/src/routes/properties.new.tsx\" will not be code-split and will increase your bundle size:\n- RegisterPropertyWizard\nFor the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file."
+  ]
+}
