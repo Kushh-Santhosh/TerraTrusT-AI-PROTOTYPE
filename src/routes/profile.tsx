@@ -14,7 +14,7 @@ export const Route = createFileRoute("/profile")({
     <AppShell title="Profile" subtitle="Your identity, verification status, and contact info.">
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
         <div className="surface-card flex flex-col items-center p-6 text-center">
-          <Avatar className="h-24 w-24"><AvatarFallback className="bg-gradient-to-br from-primary to-accent text-2xl text-primary-foreground">AO</AvatarFallback></Avatar>
+          <Avatar className="h-24 w-24"><AvatarFallback className="bg-gradient-to-br from-primary to-accent text-2xl text-primary-foreground">AS</AvatarFallback></Avatar>
           <p className="mt-4 font-display text-2xl">{currentUser.name}</p>
           <p className="text-sm text-muted-foreground capitalize">{currentUser.role} · {currentUser.region}</p>
           <div className="mt-4 inline-flex items-center gap-1 rounded-full bg-success/10 px-3 py-1 text-xs text-success"><ShieldCheck className="h-3 w-3" /> Identity verified</div>
@@ -22,13 +22,13 @@ export const Route = createFileRoute("/profile")({
         </div>
         <div className="surface-card p-6">
           <p className="font-medium">Account information</p>
-          <form className="mt-5 grid gap-4 md:grid-cols-2">
+          <form className="mt-5 grid gap-4 md:grid-cols-2" onSubmit={(e) => { e.preventDefault(); alert("Profile updated successfully"); }}>
             <div className="grid gap-2"><Label>Full name</Label><Input defaultValue={currentUser.name} /></div>
             <div className="grid gap-2"><Label>Email</Label><Input defaultValue={currentUser.email} /></div>
-            <div className="grid gap-2"><Label>Phone</Label><Input defaultValue="+234 803 555 0102" /></div>
+            <div className="grid gap-2"><Label>Phone</Label><Input defaultValue="+91 98450 12345" /></div>
             <div className="grid gap-2"><Label>Region</Label><Input defaultValue={currentUser.region} /></div>
-            <div className="grid gap-2 md:col-span-2"><Label>Bio</Label><Textarea rows={3} defaultValue="Owner of family properties in Lagos and Oyo. Active in community verification." /></div>
-            <div className="md:col-span-2"><Button>Save changes</Button></div>
+            <div className="grid gap-2 md:col-span-2"><Label>Bio</Label><Textarea rows={3} defaultValue="Owner of family residential and agricultural parcels in Bengaluru and Mysuru. Active in community verification." /></div>
+            <div className="md:col-span-2"><Button type="submit">Save changes</Button></div>
           </form>
         </div>
       </div>

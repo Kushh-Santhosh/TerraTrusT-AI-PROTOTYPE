@@ -97,10 +97,10 @@ function Hero() {
             <div className="grid gap-6 p-6 sm:grid-cols-[1fr_auto]">
               <div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">Owner of record</p>
-                <p className="mt-1 font-display text-2xl">Amara Okonkwo</p>
-                <p className="text-sm text-muted-foreground">12 Admiralty Way, Lekki Phase 1 · Lagos</p>
+                <p className="mt-1 font-display text-2xl">Ananya Sharma</p>
+                <p className="text-sm text-muted-foreground">12, 4th Cross, Ramamurthy Nagar · Bengaluru</p>
                 <div className="mt-5 grid grid-cols-2 gap-4 text-sm">
-                  <KV k="AI valuation" v="$285,000" tone="primary" />
+                  <KV k="AI valuation" v="₹2.40 Cr" tone="primary" />
                   <KV k="Plot area" v="540 m²" />
                   <KV k="Type" v="Residential" />
                   <KV k="Owned since" v="Jun 2019" />
@@ -171,7 +171,7 @@ function Chip({ icon: Icon, label }: { icon: any; label: string }) {
 
 /* ----------------------------- TRUSTBAR ----------------------------- */
 function Trustbar() {
-  const labels = ["Lagos Land Bureau", "FCT Abuja Registry", "Oyo State", "Kano GIS", "African Dev Bank", "UN-Habitat"];
+  const labels = ["Karnataka Bhoomi", "Survey of India", "BBMP Revenue", "Maharashtra Land Records", "State Bank of India", "NIUA"];
   return (
     <section className="border-y border-border bg-surface-elevated/50 py-8">
       <div className="mx-auto max-w-7xl px-6">
@@ -365,9 +365,9 @@ function Impact() {
 /* ----------------------------- TESTIMONIALS ----------------------------- */
 function Testimonials() {
   const items = [
-    { q: "We resolved 612 disputed parcels in our first quarter on TerraTrust. The conflict-detection alone has paid for the rollout.", a: "Director, Lagos Land Bureau" },
-    { q: "For the first time, our farmers can prove what they own without a lawyer. The Property Passport just works.", a: "Community organizer, Kaduna" },
-    { q: "The valuation model is more rigorous than what our internal team produces. We've started lending against TerraTrust passports.", a: "Head of Mortgage, Tier-1 Bank" },
+    { q: "We resolved 612 disputed parcels in our first quarter on TerraTrust. The conflict-detection alone has paid for the rollout.", a: "Director, Karnataka Bhoomi Land Governance" },
+    { q: "For the first time, our farmers can prove what they own without years in court. The Property Passport just works.", a: "Community Organizer, Mysuru District" },
+    { q: "The valuation model is more rigorous than what our internal team produces. We've started lending against TerraTrust passports.", a: "Head of Mortgages, State Bank of India" },
   ];
   return (
     <section className="mx-auto max-w-7xl px-6 py-24">
@@ -398,7 +398,7 @@ function Partners() {
       <div className="mx-auto max-w-7xl px-6 text-center">
         <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Pilot partners and ecosystem</p>
         <div className="mt-6 grid grid-cols-2 gap-6 text-sm font-medium text-muted-foreground md:grid-cols-6">
-          {["Lagos Land Bureau","Oyo State","Kano GIS","FCT Abuja","African Dev Bank","UN-Habitat"].map(p => (
+          {["Karnataka Bhoomi","Survey of India","BBMP Revenue","Maharashtra Land Records","State Bank of India","NIUA"].map(p => (
             <div key={p} className="opacity-70">{p}</div>
           ))}
         </div>

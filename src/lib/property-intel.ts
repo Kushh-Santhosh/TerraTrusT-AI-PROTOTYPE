@@ -63,20 +63,20 @@ export function getEncumbrances(p: Property): Encumbrance[] {
       filedAt: "2017-02-18", note: "Underground service corridor along southern boundary (1.2m)." });
   }
   if (p.type === "agricultural" && p.status !== "verified") {
-    list.push({ id: "e4", kind: "tax-arrears", status: "active", party: "Kaduna IRS",
-      amount: Math.round(p.area * 0.12), filedAt: "2024-01-10",
-      note: "Land use charge unpaid for FY2024 — settle to lift encumbrance." });
+    list.push({ id: "e4", kind: "tax-arrears", status: "active", party: "BBMP Revenue Dept",
+      amount: Math.round(p.area * 120), filedAt: "2024-01-10",
+      note: "Property tax / betterment charge unpaid for FY2024 — settle to lift encumbrance." });
   }
   return list;
 }
 
 const POOLS: Record<NearbyInfra["category"], string[]> = {
-  school:   ["Greenwood International School", "Children's Aid College", "St. Saviour's Primary", "Lekki British"],
-  hospital: ["Reddington Hospital", "Lagoon Specialist Centre", "Federal Medical Centre"],
-  transit:  ["BRT Lekki Phase 1 Station", "Ikoyi Ferry Terminal", "Lagos Light Rail – Blue Line"],
-  road:     ["Lekki–Epe Expressway", "Admiralty Way", "Ahmadu Bello Way"],
-  market:   ["Lekki Market", "Wuse Market", "Bodija Market"],
-  utility:  ["IKEDC 33kV substation", "Lagos Water Corp pump station"],
+  school:   ["Greenwood High International", "Delhi Public School Bengaluru", "National Public School Indiranagar", "Kendriya Vidyalaya"],
+  hospital: ["Manipal Hospital HAL", "Apollo Clinic Indiranagar", "Narayana Health City", "Fortis Hospital"],
+  transit:  ["Namma Metro Purple Line", "Baiyappanahalli Terminal", "KSR Bengaluru Railway", "BMTC Transit Hub"],
+  road:     ["Outer Ring Road (ORR)", "100 Feet Road Indiranagar", "Old Airport Road Expressway", "Hosur Road"],
+  market:   ["Indiranagar BDA Complex", "HAL Market", "Russell Market Shivajinagar"],
+  utility:  ["BESCOM 66/11kV Substation", "BWSSB Water Distribution Station"],
 };
 
 export function getNearbyInfra(p: Property): NearbyInfra[] {

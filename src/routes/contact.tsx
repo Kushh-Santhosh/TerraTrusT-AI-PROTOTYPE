@@ -24,8 +24,8 @@ function Page() {
             <p className="mt-3 text-muted-foreground">Whether you have one parcel or a national registry, we want to talk.</p>
             <div className="mt-8 space-y-3 text-sm">
               <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-primary" /> hello@terratrust.ai</p>
-              <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> +234 1 700 0044</p>
-              <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Lagos, Nairobi, Cape Town</p>
+              <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> +91 80 4123 4567</p>
+              <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Bengaluru, New Delhi, Mumbai</p>
             </div>
           </div>
           <form className="surface-card grid gap-3 p-6">

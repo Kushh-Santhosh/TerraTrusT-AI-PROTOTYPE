@@ -13,7 +13,7 @@ export const Route = createFileRoute("/ai")({
 
 const modules = [
   { to: "/ai-passport", icon: FileBadge2, title: "AI Property Passport", desc: "Composite, explainable identity for every parcel.", stat: "96 / 100", tag: "Trusted" },
-  { to: "/ai-valuation", icon: Sparkles, title: "AI Valuation Engine", desc: "Defensible land values with comp & macro signals.", stat: "₦312M", tag: "+8.4% YoY" },
+  { to: "/ai-valuation", icon: Sparkles, title: "AI Valuation Engine", desc: "Defensible land values with comp & macro signals.", stat: "₹2.45 Cr", tag: "+8.4% YoY" },
   { to: "/ai-ocr", icon: ScanLine, title: "Document OCR", desc: "Extract & verify fields from any title document.", stat: "8 fields", tag: "94% conf." },
   { to: "/ai-fraud", icon: ShieldAlert, title: "Fraud Detection", desc: "Duplicate boundaries, forged stamps, signature clusters.", stat: "3 flags", tag: "Live" },
   { to: "/ai-timeline", icon: ListChecks, title: "Ownership Timeline", desc: "Reconstructed chain of custody from 1998.", stat: "4 events", tag: "Verified" },
@@ -34,7 +34,7 @@ function AIOverview() {
     <AppShell title="AI Intelligence" subtitle="Every signal on your land, modeled and explained." actions={<AIBadge tone="accent">Live · 14 models</AIBadge>}>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AIInsightCard icon={<Brain className="h-3 w-3 text-primary" />} title="Composite Trust" value="92" delta={{ value: 4, label: "vs last week" }} hint="Across 12 properties" tone="primary" />
-        <AIInsightCard icon={<Sparkles className="h-3 w-3 text-primary" />} title="Portfolio AV" value="₦1.84B" delta={{ value: 6, label: "QoQ" }} hint="AI-modeled valuation" tone="accent" />
+        <AIInsightCard icon={<Sparkles className="h-3 w-3 text-primary" />} title="Portfolio AV" value="₹18.4 Cr" delta={{ value: 6, label: "QoQ" }} hint="AI-modeled valuation" tone="accent" />
         <AIInsightCard icon={<ShieldAlert className="h-3 w-3 text-warning-foreground" />} title="Open fraud signals" value="3" hint="2 medium · 1 low" tone="warning" />
         <AIInsightCard icon={<Activity className="h-3 w-3 text-success" />} title="Land health avg." value="78" delta={{ value: 2, label: "MoM" }} hint="NDVI + moisture composite" tone="success" />
       </div>

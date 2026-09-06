@@ -8,14 +8,14 @@ export const Route = createFileRoute("/partners")({
 });
 
 const partners = [
-  { kind: "Government", name: "Lagos State Lands Bureau", since: "2024" },
-  { kind: "Government", name: "FCT Land Registry", since: "2024" },
-  { kind: "Bank", name: "Access Bank — Mortgage", since: "2024" },
-  { kind: "Bank", name: "GTBank", since: "2024" },
-  { kind: "NGO", name: "Habitat for Humanity (West Africa)", since: "2023" },
-  { kind: "Tech", name: "Esri ArcGIS", since: "2024" },
-  { kind: "Tech", name: "Planet Labs", since: "2024" },
-  { kind: "Education", name: "University of Lagos · Geomatics", since: "2023" },
+  { kind: "Government", name: "Karnataka Revenue Dept (Bhoomi)", since: "2024" },
+  { kind: "Government", name: "Survey of India · Cadastral", since: "2024" },
+  { kind: "Bank", name: "State Bank of India — Mortgage", since: "2024" },
+  { kind: "Bank", name: "HDFC Bank Home Loans", since: "2024" },
+  { kind: "Policy", name: "National Institute of Urban Affairs", since: "2023" },
+  { kind: "Tech", name: "Esri India GIS", since: "2024" },
+  { kind: "Tech", name: "Planet Labs Satellite Imaging", since: "2024" },
+  { kind: "Education", name: "IIT Bombay · Geoinformatics", since: "2023" },
 ];
 
 function Page() {

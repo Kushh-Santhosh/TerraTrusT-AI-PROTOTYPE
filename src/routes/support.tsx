@@ -13,7 +13,7 @@ const rows = [
   { id: "TKT-8821", subject: "Cannot upload Survey Plan PDF over 12MB", category: "Documents", at: "2024-09-23", status: "Open", priority: "Medium" },
   { id: "TKT-8814", subject: "Trust score didn't update after attestations", category: "Trust score", at: "2024-09-20", status: "Resolved", priority: "Low" },
   { id: "TKT-8802", subject: "How do I transfer to a verified buyer?", category: "Transfer", at: "2024-09-18", status: "Closed", priority: "Low" },
-  { id: "TKT-8791", subject: "Boundary on Kaduna farm differs from registry", category: "GIS", at: "2024-09-15", status: "Awaiting you", priority: "High" },
+  { id: "TKT-8791", subject: "Boundary on Mysuru farm parcel differs from Bhoomi registry", category: "GIS", at: "2024-09-15", status: "Awaiting you", priority: "High" },
 ];
 
 function Page() {

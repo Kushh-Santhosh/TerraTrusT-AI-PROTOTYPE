@@ -1,0 +1,472 @@
+{
+  "startedAt": "2026-09-06T07:15:06.130Z",
+  "browser": "Google Chrome Desktop (macOS arm64)",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "navigationTests": [
+    {
+      "label": "Dashboard",
+      "expectedUrl": "/dashboard",
+      "actualUrl": "http://localhost:3000/dashboard",
+      "pageTitle": "Welcome back, Citizen",
+      "status": "PASS"
+    },
+    {
+      "label": "Properties",
+      "expectedUrl": "/properties",
+      "actualUrl": "http://localhost:3000/properties",
+      "pageTitle": "Properties",
+      "status": "PASS"
+    },
+    {
+      "label": "Register Property",
+      "expectedUrl": "/properties/new",
+      "actualUrl": "http://localhost:3000/properties/new",
+      "pageTitle": "Register a new property",
+      "status": "PASS"
+    },
+    {
+      "label": "GIS Map",
+      "expectedUrl": "/map",
+      "actualUrl": "http://localhost:3000/map",
+      "pageTitle": "GIS Map",
+      "status": "PASS"
+    },
+    {
+      "label": "AI Valuation",
+      "expectedUrl": "/valuation",
+      "actualUrl": "http://localhost:3000/valuation",
+      "pageTitle": "AI Property Valuation",
+      "status": "PASS"
+    },
+    {
+      "label": "AI Assistant",
+      "expectedUrl": "/assistant",
+      "actualUrl": "http://localhost:3000/assistant",
+      "pageTitle": "AI Assistant",
+      "status": "PASS"
+    },
+    {
+      "label": "Search",
+      "expectedUrl": "/search",
+      "actualUrl": "http://localhost:3000/search",
+      "pageTitle": "Smart Search",
+      "status": "PASS"
+    },
+    {
+      "label": "AI Overview",
+      "expectedUrl": "/ai",
+      "actualUrl": "http://localhost:3000/ai",
+      "pageTitle": "AI Intelligence",
+      "status": "PASS"
+    },
+    {
+      "label": "AI Passport",
+      "expectedUrl": "/ai-passport",
+      "actualUrl": "http://localhost:3000/ai-passport",
+      "pageTitle": "AI Property Passport",
+      "status": "PASS"
+    },
+    {
+      "label": "Valuation engine",
+      "expectedUrl": "/ai-valuation",
+      "actualUrl": "http://localhost:3000/ai-valuation",
+      "pageTitle": "AI Valuation Engine",
+      "status": "PASS"
+    },
+    {
+      "label": "Document OCR",
+      "expectedUrl": "/ai-ocr",
+      "actualUrl": "http://localhost:3000/ai-ocr",
+      "pageTitle": "Document OCR & Forensic Extraction",
+      "status": "PASS"
+    },
+    {
+      "label": "Fraud detection",
+      "expectedUrl": "/ai-fraud",
+      "actualUrl": "http://localhost:3000/ai-fraud",
+      "pageTitle": "AI Fraud Detection",
+      "status": "PASS"
+    },
+    {
+      "label": "Risk analysis",
+      "expectedUrl": "/ai-risk",
+      "actualUrl": "http://localhost:3000/ai-risk",
+      "pageTitle": "AI Risk Analysis",
+      "status": "PASS"
+    },
+    {
+      "label": "Confidence score",
+      "expectedUrl": "/ai-confidence",
+      "actualUrl": "http://localhost:3000/ai-confidence",
+      "pageTitle": "AI Confidence Score",
+      "status": "PASS"
+    },
+    {
+      "label": "Boundary detection",
+      "expectedUrl": "/ai-boundary",
+      "actualUrl": "http://localhost:3000/ai-boundary",
+      "pageTitle": "AI Boundary Detection",
+      "status": "PASS"
+    },
+    {
+      "label": "Satellite compare",
+      "expectedUrl": "/ai-satellite",
+      "actualUrl": "http://localhost:3000/ai-satellite",
+      "pageTitle": "Satellite Comparison",
+      "status": "PASS"
+    },
+    {
+      "label": "Land health",
+      "expectedUrl": "/ai-land-health",
+      "actualUrl": "http://localhost:3000/ai-land-health",
+      "pageTitle": "AI Land Health Score",
+      "status": "PASS"
+    },
+    {
+      "label": "Ownership timeline",
+      "expectedUrl": "/ai-timeline",
+      "actualUrl": "http://localhost:3000/ai-timeline",
+      "pageTitle": "AI Ownership Timeline",
+      "status": "PASS"
+    },
+    {
+      "label": "Recommendations",
+      "expectedUrl": "/ai-recommendations",
+      "actualUrl": "http://localhost:3000/ai-recommendations",
+      "pageTitle": "AI Recommendations",
+      "status": "PASS"
+    },
+    {
+      "label": "Document summary",
+      "expectedUrl": "/ai-summary",
+      "actualUrl": "http://localhost:3000/ai-summary",
+      "pageTitle": "AI Document Summary",
+      "status": "PASS"
+    },
+    {
+      "label": "Verification AI",
+      "expectedUrl": "/ai-suggestions",
+      "actualUrl": "http://localhost:3000/ai-suggestions",
+      "pageTitle": "AI Verification Suggestions",
+      "status": "PASS"
+    },
+    {
+      "label": "Verification",
+      "expectedUrl": "/verification",
+      "actualUrl": "http://localhost:3000/verification",
+      "pageTitle": "Community Verification",
+      "status": "PASS"
+    },
+    {
+      "label": "Community",
+      "expectedUrl": "/community",
+      "actualUrl": "http://localhost:3000/community",
+      "pageTitle": "Community verification",
+      "status": "PASS"
+    },
+    {
+      "label": "Disputes",
+      "expectedUrl": "/disputes",
+      "actualUrl": "http://localhost:3000/disputes",
+      "pageTitle": "Disputes",
+      "status": "PASS"
+    },
+    {
+      "label": "Reports",
+      "expectedUrl": "/reports",
+      "actualUrl": "http://localhost:3000/reports",
+      "pageTitle": "Audit & Intelligence Reports",
+      "status": "PASS"
+    },
+    {
+      "label": "Surveyor Workspace",
+      "expectedUrl": "/surveyor",
+      "actualUrl": "http://localhost:3000/surveyor",
+      "pageTitle": "Surveyor Workspace",
+      "status": "PASS"
+    },
+    {
+      "label": "Government Registry",
+      "expectedUrl": "/government",
+      "actualUrl": "http://localhost:3000/government",
+      "pageTitle": "Government Registry Workbench",
+      "status": "PASS"
+    },
+    {
+      "label": "Bank Portal",
+      "expectedUrl": "/bank",
+      "actualUrl": "http://localhost:3000/bank",
+      "pageTitle": "Bank origination & underwriting",
+      "status": "PASS"
+    },
+    {
+      "label": "Platform Analytics",
+      "expectedUrl": "/analytics",
+      "actualUrl": "http://localhost:3000/analytics",
+      "pageTitle": "Analytics",
+      "status": "PASS"
+    },
+    {
+      "label": "Impact Dashboard",
+      "expectedUrl": "/impact",
+      "actualUrl": "http://localhost:3000/impact",
+      "pageTitle": "From 52 days of paperworkto 5 days of certainty.",
+      "status": "PASS"
+    },
+    {
+      "label": "Admin Operations",
+      "expectedUrl": "/admin",
+      "actualUrl": "http://localhost:3000/admin",
+      "pageTitle": "Platform Administrator",
+      "status": "PASS"
+    },
+    {
+      "label": "Profile",
+      "expectedUrl": "/profile",
+      "actualUrl": "http://localhost:3000/profile",
+      "pageTitle": "Profile",
+      "status": "PASS"
+    },
+    {
+      "label": "Notifications",
+      "expectedUrl": "/notifications",
+      "actualUrl": "http://localhost:3000/notifications",
+      "pageTitle": "Notifications",
+      "status": "PASS"
+    },
+    {
+      "label": "Settings",
+      "expectedUrl": "/settings",
+      "actualUrl": "http://localhost:3000/settings",
+      "pageTitle": "Settings",
+      "status": "PASS"
+    },
+    {
+      "label": "Support",
+      "expectedUrl": "/support",
+      "actualUrl": "http://localhost:3000/support",
+      "pageTitle": "Support",
+      "status": "PASS"
+    },
+    {
+      "label": "Help Center",
+      "expectedUrl": "/help",
+      "actualUrl": "http://localhost:3000/help",
+      "pageTitle": "Help center",
+      "status": "PASS"
+    }
+  ],
+  "rolesTested": [
+    {
+      "role": "citizen",
+      "url": "http://localhost:3000/dashboard",
+      "headerText": "Welcome back, Citizen",
+      "roleBadge": "Citizen",
+      "ctasFound": 7,
+      "status": "PASS"
+    },
+    {
+      "role": "surveyor",
+      "url": "http://localhost:3000/surveyor",
+      "headerText": "Surveyor Workspace",
+      "roleBadge": "Citizen",
+      "ctasFound": 7,
+      "status": "PASS"
+    },
+    {
+      "role": "government",
+      "url": "http://localhost:3000/government",
+      "headerText": "Government Registry Workbench",
+      "roleBadge": "Citizen",
+      "ctasFound": 11,
+      "status": "PASS"
+    },
+    {
+      "role": "community",
+      "url": "http://localhost:3000/community",
+      "headerText": "Community verification",
+      "roleBadge": "Citizen",
+      "ctasFound": 10,
+      "status": "PASS"
+    },
+    {
+      "role": "bank",
+      "url": "http://localhost:3000/bank",
+      "headerText": "Bank origination & underwriting",
+      "roleBadge": "Citizen",
+      "ctasFound": 2,
+      "status": "PASS"
+    },
+    {
+      "role": "admin",
+      "url": "http://localhost:3000/admin",
+      "headerText": "Platform Administrator",
+      "roleBadge": "Citizen",
+      "ctasFound": 3,
+      "status": "PASS"
+    }
+  ],
+  "propertyWorkflow": {
+    "status": "LOCAL_CACHE",
+    "createdProperty": "Koramangala Tech Residency",
+    "dbError": null
+  },
+  "n8nLiveTest": {
+    "status": "PASS",
+    "webhookUrl": "https://kushhhsanthosh.app.n8n.cloud/webhook/terratrust/verify",
+    "executionSummary": {
+      "meter": "Live verification",
+      "statusBadge": "Properties"
+    }
+  },
+  "n8nFailureTest": {
+    "status": "PASS",
+    "description": "Controlled malformed payload handled gracefully without crashing frontend",
+    "handled": true
+  },
+  "gisTest": {
+    "status": "PASS",
+    "canvasFound": true,
+    "attribution": "TerraTrust AI GIS · Map context | © OpenStreetMap contributors, © CARTO",
+    "markersCount": 8
+  },
+  "aiModules": [
+    {
+      "module": "AI Overview",
+      "path": "/ai",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Passport",
+      "path": "/ai-passport",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Valuation",
+      "path": "/ai-valuation",
+      "status": "PASS",
+      "interactiveButtons": [
+        "Bengaluru (Karnataka)",
+        "Residential",
+        "Run AI Valuation"
+      ]
+    },
+    {
+      "module": "AI OCR",
+      "path": "/ai-ocr",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Fraud",
+      "path": "/ai-fraud",
+      "status": "PASS",
+      "interactiveButtons": [
+        "Run full re-scan"
+      ]
+    },
+    {
+      "module": "AI Risk",
+      "path": "/ai-risk",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Confidence",
+      "path": "/ai-confidence",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Boundary",
+      "path": "/ai-boundary",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Satellite",
+      "path": "/ai-satellite",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Land Health",
+      "path": "/ai-land-health",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Timeline",
+      "path": "/ai-timeline",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Recommendations",
+      "path": "/ai-recommendations",
+      "status": "PASS",
+      "interactiveButtons": [
+        "Upload now",
+        "Open survey request",
+        "Refresh imagery",
+        "Invite attestor"
+      ]
+    },
+    {
+      "module": "AI Summary",
+      "path": "/ai-summary",
+      "status": "PASS",
+      "interactiveButtons": []
+    },
+    {
+      "module": "AI Suggestions",
+      "path": "/ai-suggestions",
+      "status": "PASS",
+      "interactiveButtons": [
+        "Start",
+        "Start"
+      ]
+    },
+    {
+      "module": "AI Assistant",
+      "path": "/assistant",
+      "status": "PASS",
+      "interactiveButtons": [
+        "What's the trust score on my Bengaluru property?",
+        "Any fraud signals on my portfolio?",
+        "What documents am I missing for Mysuru farm?",
+        "Estimate the value of my Bengaluru residence"
+      ]
+    }
+  ],
+  "indiaAudit": [],
+  "buttonsTested": [],
+  "consoleErrors": [],
+  "failedRequests": [
+    {
+      "url": "http://localhost:3000/node_modules/.vite/deps/maplibre-gl-worker.mjs",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:3000/node_modules/.vite/deps/maplibre-gl-worker.mjs",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:3000/node_modules/.vite/deps/maplibre-gl-worker.mjs",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:3000/node_modules/.vite/deps/maplibre-gl-worker.mjs",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:3000/node_modules/.vite/deps/maplibre-gl-worker.mjs",
+      "status": 404
+    }
+  ]
+}

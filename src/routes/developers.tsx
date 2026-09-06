@@ -20,17 +20,17 @@ const webhookRequest = `{
   "propertyId": "p_001",
   "passportId": "TT-8421-LG",
   "property": {
-    "title": "Lekki Phase 1 Residence",
-    "address": "...", "region": "Lagos", "country": "Nigeria",
-    "type": "residential", "area": 640, "owner": "Amara Okonkwo",
-    "status": "verified", "boundaryVertices": 6
+    "title": "Ramamurthy Nagar Residence",
+    "address": "12, 4th Cross, Ramamurthy Nagar", "region": "Bengaluru", "country": "India",
+    "type": "residential", "area": 540, "owner": "Ananya Sharma",
+    "status": "verified", "boundaryVertices": 4
   },
   "documents": [
-    { "id": "d1", "name": "Certificate of Occupancy.pdf",
+    { "id": "d1", "name": "Registered Sale Deed.pdf",
       "kind": "deed", "verified": true }
   ],
   "existingScores": {
-    "trustScore": 96, "aiConfidence": 92, "valuation": 285000
+    "trustScore": 96, "aiConfidence": 92, "valuation": 24000000
   }
 }`;
 

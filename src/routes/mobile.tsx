@@ -17,14 +17,14 @@ function Page() {
             <div className="flex items-center justify-between px-6 pt-3 text-[10px]"><span>9:41</span><span className="flex items-center gap-1"><Wifi className="h-3 w-3" /><BatteryFull className="h-3 w-3" /></span></div>
             <div className="p-4">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Welcome back</p>
-              <p className="font-display text-2xl">Amara</p>
+              <p className="font-display text-2xl">Ananya</p>
               <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-                <div className="rounded-lg bg-muted p-2"><p className="text-muted-foreground">Trust</p><p className="font-display text-xl">74</p></div>
-                <div className="rounded-lg bg-muted p-2"><p className="text-muted-foreground">Value</p><p className="font-display text-xl">$1.08M</p></div>
+                <div className="rounded-lg bg-muted p-2"><p className="text-muted-foreground">Trust</p><p className="font-display text-xl">87</p></div>
+                <div className="rounded-lg bg-muted p-2"><p className="text-muted-foreground">Value</p><p className="font-display text-xl">₹8.4 Cr</p></div>
               </div>
               <p className="mt-4 text-xs font-medium">Your passports</p>
               <div className="mt-2 space-y-2">
-                {["Lekki Phase 1","Kaduna Farmland","Abuja Plot","Ibadan Compound"].map((n, i) => (
+                {["Ramamurthy Nagar","Mysuru Farmland","Gurugram Plot","Pune Commercial"].map((n, i) => (
                   <div key={n} className="flex items-center justify-between rounded-lg bg-surface px-3 py-2 text-xs ring-1 ring-border">
                     <span>{n}</span><Pill tone={i === 0 || i === 3 ? "success" : i === 2 ? "danger" : "warning"}>{i === 0 || i === 3 ? "Verified" : i === 2 ? "Disputed" : "Pending"}</Pill>
                   </div>
