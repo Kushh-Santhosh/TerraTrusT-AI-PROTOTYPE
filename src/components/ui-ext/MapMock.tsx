@@ -1,9 +1,46 @@
+import { useEffect, useRef } from "react";
 import type { Property } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import {
+  Map,
+  Marker,
+  NavigationControl,
+  LngLatBounds,
+  AttributionControl,
+  type StyleSpecification,
+  type GeoJSONSource,
+} from "maplibre-gl";
+
+// Standard OpenStreetMap / CARTO raster tile styles requiring no private key
+const OSM_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    "carto-voyager": {
+      type: "raster",
+      tiles: [
+        "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+        "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+        "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+      ],
+      tileSize: 256,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
+    },
+  },
+  layers: [
+    {
+      id: "carto-voyager-layer",
+      type: "raster",
+      source: "carto-voyager",
+      minzoom: 0,
+      maxzoom: 20,
+    },
+  ],
+};
 
 /**
- * Stylized SVG mock map. Not an actual map widget — used to express GIS UI
- * before Mapbox wiring. Renders a parchment-like canvas with parcel polygons.
+ * Real interactive GIS map powered by MapLibre GL JS and OpenStreetMap/CARTO tiles.
+ * Renders real geographic context, property markers, and persisted boundary polygons.
  */
 export function MapMock({
   properties,
@@ -18,77 +55,179 @@ export function MapMock({
   className?: string;
   height?: number;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<Map | null>(null);
+  const markersRef = useRef<Marker[]>([]);
+
+  const activeProp = properties.find((p) => p.id === highlightId) || properties[0];
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const initialCenter =
+      activeProp?.coords && activeProp.coords.lat !== 0
+        ? activeProp.coords
+        : { lat: 12.9716, lng: 77.5946 };
+
+    const map = new Map({
+      container: containerRef.current,
+      style: OSM_STYLE,
+      center: [initialCenter.lng, initialCenter.lat],
+      zoom: 14,
+      attributionControl: false,
+    });
+
+    map.addControl(new NavigationControl({ showCompass: true, showZoom: true }), "top-right");
+    map.addControl(
+      new AttributionControl({
+        compact: true,
+        customAttribution: "TerraTrust AI GIS · Map context",
+      }),
+      "bottom-right"
+    );
+
+    map.on("load", () => {
+      mapRef.current = map;
+
+      // Add boundary layer for active property
+      map.addSource("active-property-boundary", {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[]],
+          },
+          properties: {},
+        },
+      });
+
+      map.addLayer({
+        id: "active-property-boundary-fill",
+        type: "fill",
+        source: "active-property-boundary",
+        paint: {
+          "fill-color": "#14b8a6",
+          "fill-opacity": 0.3,
+        },
+      });
+
+      map.addLayer({
+        id: "active-property-boundary-stroke",
+        type: "line",
+        source: "active-property-boundary",
+        paint: {
+          "line-color": "#0d9488",
+          "line-width": 2.5,
+        },
+      });
+
+      updateMapFeatures(map, properties, highlightId, onSelect);
+    });
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  // Update markers and boundary whenever properties or highlightId change
+  useEffect(() => {
+    if (!mapRef.current) return;
+    updateMapFeatures(mapRef.current, properties, highlightId, onSelect);
+  }, [properties, highlightId, onSelect]);
+
+  function updateMapFeatures(
+    map: Map,
+    propsList: Property[],
+    hId?: string,
+    selectFn?: (p: Property) => void
+  ) {
+    // Clear old markers
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    const bounds = new LngLatBounds();
+    let hasCoords = false;
+
+    propsList.forEach((p) => {
+      if (!p.coords || (p.coords.lat === 0 && p.coords.lng === 0)) return;
+      hasCoords = true;
+      bounds.extend([p.coords.lng, p.coords.lat]);
+
+      const isSelected = p.id === hId;
+      const el = document.createElement("div");
+      el.className = "cursor-pointer group flex flex-col items-center";
+      el.innerHTML = `
+        <div class="px-2 py-0.5 rounded-full text-[10px] font-semibold shadow-md border ${
+          isSelected
+            ? "bg-primary text-primary-foreground border-white scale-110"
+            : "bg-surface text-foreground border-border"
+        } transition-transform whitespace-nowrap">
+          ${p.title.slice(0, 20)}
+        </div>
+        <div class="w-3 h-3 rounded-full ${
+          isSelected ? "bg-primary" : "bg-emerald-600"
+        } border-2 border-white shadow-lg mt-0.5"></div>
+      `;
+
+      el.addEventListener("click", () => {
+        selectFn?.(p);
+      });
+
+      const marker = new Marker({ element: el })
+        .setLngLat([p.coords.lng, p.coords.lat])
+        .addTo(map);
+
+      markersRef.current.push(marker);
+    });
+
+    // Update active boundary polygon
+    const selected = propsList.find((p) => p.id === hId) || propsList[0];
+    const src = map.getSource("active-property-boundary") as GeoJSONSource | undefined;
+    if (src) {
+      if (selected && selected.boundary && selected.boundary.length >= 3) {
+        const ring = selected.boundary.map((pt) => [pt.lng, pt.lat]);
+        ring.push([...ring[0]]);
+        src.setData({
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [ring],
+          },
+          properties: {},
+        });
+        selected.boundary.forEach((pt) => bounds.extend([pt.lng, pt.lat]));
+      } else {
+        src.setData({
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[]],
+          },
+          properties: {},
+        });
+      }
+    }
+
+    if (hasCoords && !bounds.isEmpty()) {
+      if (propsList.length === 1 && selected?.coords) {
+        map.easeTo({ center: [selected.coords.lng, selected.coords.lat], zoom: 16 });
+      } else {
+        map.fitBounds(bounds, { padding: 50, maxZoom: 16, duration: 600 });
+      }
+    }
+  }
+
   return (
-    <div className={cn("surface-card relative overflow-hidden", className)} style={{ height }}>
-      {/* canvas */}
-      <svg viewBox="0 0 800 480" className="absolute inset-0 h-full w-full">
-        <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M40 0H0V40" fill="none" stroke="oklch(0.92 0.008 250)" strokeWidth="1" />
-          </pattern>
-          <radialGradient id="glow" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="oklch(0.88 0.06 195 / 0.5)" />
-            <stop offset="100%" stopColor="transparent" />
-          </radialGradient>
-          <linearGradient id="river" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.85 0.05 220)" />
-            <stop offset="100%" stopColor="oklch(0.78 0.07 200)" />
-          </linearGradient>
-        </defs>
-        <rect width="800" height="480" fill="url(#glow)" />
-        <rect width="800" height="480" fill="url(#grid)" />
-        {/* faux river */}
-        <path d="M-20 320 C 180 280, 320 360, 520 300 S 820 260, 860 300 L 860 480 L -20 480 Z"
-          fill="url(#river)" opacity="0.35" />
-        {/* faux roads */}
-        <path d="M0 240 H800" stroke="oklch(0.85 0.01 250)" strokeWidth="2" strokeDasharray="2 6" />
-        <path d="M380 0 V480" stroke="oklch(0.85 0.01 250)" strokeWidth="2" strokeDasharray="2 6" />
-
-        {/* parcels */}
-        {properties.map((p, i) => {
-          const x = 120 + (i % 4) * 160 + ((i * 13) % 40);
-          const y = 90 + Math.floor(i / 4) * 150 + ((i * 7) % 30);
-          const w = 90 + (i % 3) * 18;
-          const h = 70 + (i % 2) * 14;
-          const active = highlightId === p.id;
-          const fill =
-            p.status === "verified" ? "oklch(0.62 0.14 155 / 0.25)" :
-            p.status === "pending" ? "oklch(0.78 0.13 75 / 0.3)" :
-            p.status === "disputed" ? "oklch(0.6 0.22 27 / 0.25)" :
-            "oklch(0.7 0.01 250 / 0.2)";
-          const stroke =
-            p.status === "verified" ? "oklch(0.55 0.14 155)" :
-            p.status === "pending" ? "oklch(0.6 0.15 75)" :
-            p.status === "disputed" ? "oklch(0.55 0.22 27)" :
-            "oklch(0.55 0.01 250)";
-          return (
-            <g key={p.id} className="cursor-pointer" onClick={() => onSelect?.(p)}>
-              <rect
-                x={x} y={y} width={w} height={h} rx="6"
-                fill={fill} stroke={stroke} strokeWidth={active ? 2.5 : 1.4}
-                className={cn("transition-all", active && "drop-shadow-md")}
-              />
-              <circle cx={x + w / 2} cy={y + h / 2} r={active ? 5 : 3} fill={stroke} />
-              {active && <circle cx={x + w / 2} cy={y + h / 2} r="14" fill="none" stroke={stroke} className="animate-pulse-ring" />}
-              <text x={x + 6} y={y + 14} fontSize="9" fill="oklch(0.3 0.02 250)" className="font-medium">{p.passportId}</text>
-            </g>
-          );
-        })}
-      </svg>
-
-      {/* legend */}
-      <div className="glass-strong absolute bottom-3 left-3 flex items-center gap-3 rounded-lg px-3 py-2 text-[11px]">
-        <Dot c="oklch(0.55 0.14 155)" /> Verified
-        <Dot c="oklch(0.6 0.15 75)" /> Pending
-        <Dot c="oklch(0.55 0.22 27)" /> Disputed
-      </div>
-      <div className="glass-strong absolute right-3 top-3 rounded-lg px-3 py-1.5 text-[11px] text-muted-foreground">
-        GIS preview · {properties.length} parcels
-      </div>
+    <div
+      className={cn(
+        "surface-card relative overflow-hidden rounded-xl border border-border shadow-inner",
+        className
+      )}
+      style={{ height }}
+    >
+      <div ref={containerRef} className="w-full h-full" />
     </div>
   );
-}
-
-function Dot({ c }: { c: string }) {
-  return <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: c }} />;
 }

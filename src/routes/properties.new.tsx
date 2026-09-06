@@ -11,6 +11,7 @@ import { DocumentUploader, type QueuedDocument } from "@/components/ui-ext/Docum
 import {
   type LatLng,
   calculatePolygonArea,
+  coordsToGeoJson,
   INDIAN_STATES_AND_UTS,
   type IndianStateOrUT,
 } from "@/lib/gis-utils";
@@ -35,6 +36,7 @@ import {
   XCircle,
   ShieldCheck,
   IndianRupee,
+  Crosshair,
 } from "lucide-react";
 import type { Property, PropertyType } from "@/lib/types";
 
@@ -122,6 +124,46 @@ export function RegisterPropertyWizard() {
 
   // Validation Errors per Step
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLocatingStep2, setIsLocatingStep2] = useState(false);
+  const [locationStatusStep2, setLocationStatusStep2] = useState<string | null>(null);
+
+  const handleDetectStep2Location = () => {
+    setLocationStatusStep2(null);
+    if (!navigator.geolocation) {
+      setLocationStatusStep2("Geolocation is not supported by your browser.");
+      return;
+    }
+    setIsLocatingStep2(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsLocatingStep2(false);
+        const lat = Number(pos.coords.latitude.toFixed(6));
+        const lng = Number(pos.coords.longitude.toFixed(6));
+        setLatitude(lat);
+        setLongitude(lng);
+        setLocationStatusStep2(`Device GPS acquired: ${lat}, ${lng}`);
+        setTimeout(() => setLocationStatusStep2(null), 3500);
+      },
+      (err) => {
+        setIsLocatingStep2(false);
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            setLocationStatusStep2("Geolocation permission denied. Enter coordinates manually.");
+            break;
+          case err.POSITION_UNAVAILABLE:
+            setLocationStatusStep2("Position unavailable. Enter coordinates manually.");
+            break;
+          case err.TIMEOUT:
+            setLocationStatusStep2("Location request timed out.");
+            break;
+          default:
+            setLocationStatusStep2(`Error: ${err.message}`);
+            break;
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const formatInr = (num: number) => {
     return new Intl.NumberFormat("en-IN").format(num);
@@ -209,6 +251,7 @@ export function RegisterPropertyWizard() {
           latitude,
           longitude,
           boundary,
+          boundary_geojson: coordsToGeoJson(boundary),
         },
         area: areaSqm,
         status: "pending" as const,
@@ -618,6 +661,27 @@ export function RegisterPropertyWizard() {
                   />
                   {errors.longitude && <p className="text-[11px] text-destructive mt-1">{errors.longitude}</p>}
                 </Field>
+
+                <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border mt-1">
+                  <span className="text-xs text-muted-foreground">
+                    Or detect coordinates automatically:
+                  </span>
+                  <Button
+                    id="btn-step2-current-location"
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs gap-1.5"
+                    disabled={isLocatingStep2}
+                    onClick={handleDetectStep2Location}
+                  >
+                    <Crosshair className="h-3.5 w-3.5 text-primary" />
+                    {isLocatingStep2 ? "Detecting GPS…" : "Use my current location"}
+                  </Button>
+                  {locationStatusStep2 && (
+                    <p className="w-full text-xs text-primary font-medium">{locationStatusStep2}</p>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -647,6 +711,26 @@ export function RegisterPropertyWizard() {
                   setBoundary(newBoundary);
                   setAreaSqm(newArea);
                   if (errors.boundary) setErrors((prev) => ({ ...prev, boundary: "" }));
+                }}
+                onLocationChange={(newCenter) => {
+                  setLatitude(newCenter.lat);
+                  setLongitude(newCenter.lng);
+                  if (errors.latitude || errors.longitude) {
+                    setErrors((prev) => ({ ...prev, latitude: "", longitude: "" }));
+                  }
+                }}
+                onAddressSelect={(res) => {
+                  if (res.address) {
+                    if (res.address.city || res.address.town) {
+                      setCity(res.address.city || res.address.town || city);
+                    }
+                    if (res.address.state) {
+                      const matched = INDIAN_STATES_AND_UTS.find(
+                        (s) => s.toLowerCase() === res.address?.state?.toLowerCase()
+                      );
+                      if (matched) setState(matched);
+                    }
+                  }
                 }}
               />
             </div>
@@ -749,7 +833,9 @@ export function RegisterPropertyWizard() {
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Calculated Area:</span>
-                      <span className="font-medium text-primary font-mono">{areaSqm.toLocaleString()} m²</span>
+                      <span className="font-medium text-primary font-mono">
+                        {areaSqm.toLocaleString()} m² ({(areaSqm * 0.000247105).toFixed(3)} acres)
+                      </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground">
                       Conforms to RFC 7946 GeoJSON format. Ready for cross-check against cadastral registry.
