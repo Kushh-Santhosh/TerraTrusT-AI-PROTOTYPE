@@ -16,11 +16,16 @@ import {
   Loader2,
   Compass,
 } from "lucide-react";
-import { loadPropertyById } from "@/lib/property-repository";
-import { recordSurveyorDecision } from "@/lib/supabase-persistence";
+import { loadSurveyorAssignments } from "@/lib/property-repository";
+import {
+  recordSurveyorDecision,
+  savePropertyDocument,
+  uploadPropertyDocumentBinary,
+} from "@/lib/supabase-persistence";
 import { formatStateArea } from "@/lib/state-registry";
 import type { Property, PropertyBoundary } from "@/lib/types";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/surveyor/assignments/$id")({
   head: () => ({ meta: [{ title: "Surveyor Field Inspection — TerraTrust AI" }] }),
@@ -30,6 +35,7 @@ export const Route = createFileRoute("/surveyor/assignments/$id")({
 function SurveyorAssignmentDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,35 +44,76 @@ function SurveyorAssignmentDetail() {
   const [decision, setDecision] = useState<"verified" | "correction_required">("verified");
   const [submitting, setSubmitting] = useState(false);
   const [outcomeMessage, setOutcomeMessage] = useState<string | null>(null);
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
 
   useEffect(() => {
-    loadPropertyById(id).then((p) => {
+    if (!user?.id) return;
+    loadSurveyorAssignments(user.id).then((assigned) => {
+      const p =
+        assigned.find((item) => item.id === id || (item as any).assignmentId === id) ?? null;
       if (p) {
         setProperty(p);
         setSurveyorBoundary(p.surveyorBoundary || p.boundary || []);
         if (p.surveyorNotes) setFieldNotes(p.surveyorNotes);
-        if (p.surveyorDecision) setDecision(p.surveyorDecision === "correction_required" ? "correction_required" : "verified");
+        if (p.surveyorDecision)
+          setDecision(
+            p.surveyorDecision === "correction_required" ? "correction_required" : "verified",
+          );
       }
       setLoading(false);
     });
-  }, [id]);
+  }, [id, user?.id]);
 
   const handleSubmitDecision = async () => {
     if (!property) return;
     setSubmitting(true);
     setOutcomeMessage(null);
 
+    let evidencePath: string | undefined;
+    if (evidenceFile && user?.id) {
+      const upload = await uploadPropertyDocumentBinary({
+        userId: user.id,
+        propertyId: property.id,
+        file: evidenceFile,
+      });
+      if (upload.error || !upload.storagePath) {
+        setSubmitting(false);
+        setOutcomeMessage(
+          `Evidence upload failed: ${upload.error || "Storage path was not returned"}`,
+        );
+        return;
+      }
+      const metadata = await savePropertyDocument({
+        propertyId: property.id,
+        name: evidenceFile.name,
+        kind: "survey",
+        storagePath: upload.storagePath,
+      });
+      if (metadata.error) {
+        setSubmitting(false);
+        setOutcomeMessage(`Evidence metadata failed: ${metadata.error}`);
+        return;
+      }
+      evidencePath = upload.storagePath;
+    }
+
     const res = await recordSurveyorDecision({
       propertyId: property.id,
       surveyorBoundary,
       decision,
-      notes: fieldNotes.trim() || (decision === "verified" ? "Field verification completed. Boundary corners conform to cadastral physical beacons." : "Discrepancy detected between claimed polygon and physical boundary."),
-      fieldPhotos: ["/field-photo-beacon-1.jpg", "/field-photo-beacon-2.jpg"],
+      notes:
+        fieldNotes.trim() ||
+        (decision === "verified"
+          ? "Field verification completed. Boundary corners conform to cadastral physical beacons."
+          : "Discrepancy detected between claimed polygon and physical boundary."),
+      fieldPhotos: evidencePath ? [evidencePath] : [],
     });
 
     setSubmitting(false);
     if (res.persisted) {
-      setOutcomeMessage(`Survey decision recorded successfully: ${decision === "verified" ? "SURVEYOR VERIFIED" : "CORRECTION REQUIRED"}. Forwarded to Government review.`);
+      setOutcomeMessage(
+        `Survey decision recorded successfully: ${decision === "verified" ? "SURVEYOR VERIFIED" : "CORRECTION REQUIRED"}. Forwarded to Government review.`,
+      );
       setTimeout(() => {
         navigate({ to: "/surveyor" });
       }, 2000);
@@ -77,7 +124,10 @@ function SurveyorAssignmentDetail() {
 
   if (loading) {
     return (
-      <AppShell title="Loading Field Assignment…" requiredRole={["surveyor", "government", "admin"]}>
+      <AppShell
+        title="Loading Field Assignment…"
+        requiredRole={["surveyor", "government", "admin"]}
+      >
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -95,7 +145,9 @@ function SurveyorAssignmentDetail() {
             Could not find an assigned property matching ID: {id}.
           </p>
           <Link to="/surveyor" className="mt-4 inline-block">
-            <Button variant="outline" size="sm">Back to Surveyor Workspace</Button>
+            <Button variant="outline" size="sm">
+              Back to Surveyor Workspace
+            </Button>
           </Link>
         </div>
       </AppShell>
@@ -128,7 +180,9 @@ function SurveyorAssignmentDetail() {
       />
 
       {outcomeMessage && (
-        <div className={`mt-4 p-4 rounded-xl border text-xs font-medium flex items-center gap-2 ${outcomeMessage.includes("success") ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400" : "bg-destructive/10 border-destructive/30 text-destructive"}`}>
+        <div
+          className={`mt-4 p-4 rounded-xl border text-xs font-medium flex items-center gap-2 ${outcomeMessage.includes("success") ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400" : "bg-destructive/10 border-destructive/30 text-destructive"}`}
+        >
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>{outcomeMessage}</span>
         </div>
@@ -138,7 +192,10 @@ function SurveyorAssignmentDetail() {
       <div className="mt-4 rounded-xl border border-border bg-surface-elevated/70 p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 font-mono text-[11px]">
+            <Badge
+              variant="outline"
+              className="bg-primary/10 text-primary border-primary/30 font-mono text-[11px]"
+            >
               {property.passportId}
             </Badge>
             <span className="text-sm font-semibold text-foreground">{property.title}</span>
@@ -155,11 +212,34 @@ function SurveyorAssignmentDetail() {
           </div>
         </div>
 
+        <div className="border-t border-border/50 pt-2 text-xs text-muted-foreground">
+          <span>
+            Assignment ID:{" "}
+            <strong className="font-mono text-foreground">
+              {String((property as any).assignmentId || "Unavailable")}
+            </strong>
+          </span>
+          <span className="ml-4">
+            Status:{" "}
+            <strong className="text-foreground">
+              {String((property as any).assignmentStatus || "assigned")}
+            </strong>
+          </span>
+          <span className="ml-4">
+            Assigned: {String((property as any).assignmentCreatedAt || "Unavailable")}
+          </span>
+        </div>
+
         {property.cadastralIdentifiers && Object.keys(property.cadastralIdentifiers).length > 0 && (
           <div className="flex flex-wrap gap-3 pt-2 border-t border-border/50 text-xs">
             {Object.entries(property.cadastralIdentifiers).map(([k, v]) => (
-              <span key={k} className="bg-muted/50 px-2 py-0.5 rounded border border-border text-[11px]">
-                <strong className="text-muted-foreground capitalize">{k.replace(/([A-Z])/g, " $1")}:</strong>{" "}
+              <span
+                key={k}
+                className="bg-muted/50 px-2 py-0.5 rounded border border-border text-[11px]"
+              >
+                <strong className="text-muted-foreground capitalize">
+                  {k.replace(/([A-Z])/g, " $1")}:
+                </strong>{" "}
                 <span className="font-mono font-medium text-foreground">{String(v)}</span>
               </span>
             ))}
@@ -178,10 +258,14 @@ function SurveyorAssignmentDetail() {
                 <span>Field Boundary Inspection</span>
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Inspect the Citizen Claimed Boundary. Adjust vertices to match physical ground survey markers if discrepancies exist.
+                Inspect the Citizen Claimed Boundary. Adjust vertices to match physical ground
+                survey markers if discrepancies exist.
               </p>
             </div>
-            <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30 text-[10px] uppercase font-bold">
+            <Badge
+              variant="outline"
+              className="bg-amber-500/10 text-amber-600 border-amber-500/30 text-[10px] uppercase font-bold"
+            >
               Citizen Claimed: {property.boundary?.length || 0} pts
             </Badge>
           </div>
@@ -203,7 +287,8 @@ function SurveyorAssignmentDetail() {
               Surveyor Attestation
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Field evidence attestation by authorized surveyor. Your submission will be recorded in the property provenance chain.
+              Field evidence attestation by authorized surveyor. Your submission will be recorded in
+              the property provenance chain.
             </p>
           </div>
 
@@ -222,7 +307,9 @@ function SurveyorAssignmentDetail() {
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                   <span>VERIFIED</span>
                 </div>
-                <span className="text-[10px] font-normal opacity-90">Ground beacons match claimed polygon</span>
+                <span className="text-[10px] font-normal opacity-90">
+                  Ground beacons match claimed polygon
+                </span>
               </button>
 
               <button
@@ -234,7 +321,9 @@ function SurveyorAssignmentDetail() {
                   <AlertTriangle className="h-4 w-4 text-amber-500" />
                   <span>CORRECTION</span>
                 </div>
-                <span className="text-[10px] font-normal opacity-90">Discrepancy found, ground adjusted</span>
+                <span className="text-[10px] font-normal opacity-90">
+                  Discrepancy found, ground adjusted
+                </span>
               </button>
             </div>
           </div>
@@ -261,14 +350,16 @@ function SurveyorAssignmentDetail() {
               <span>Field Evidence Attached:</span>
             </span>
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/40 border border-border">
-                <span className="text-muted-foreground">Beacon Corner GPS Photo 1</span>
-                <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30">Attached</Badge>
-              </div>
-              <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/40 border border-border">
-                <span className="text-muted-foreground">Beacon Corner GPS Photo 2</span>
-                <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30">Attached</Badge>
-              </div>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(event) => setEvidenceFile(event.target.files?.[0] ?? null)}
+                className="block w-full text-xs text-muted-foreground"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Optional field evidence is uploaded to the assigned property’s Supabase Storage
+                folder.
+              </p>
             </div>
           </div>
 

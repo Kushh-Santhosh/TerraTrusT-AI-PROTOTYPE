@@ -135,7 +135,6 @@ export async function uploadPropertyDocumentBinary(input: {
   }
 }
 
-
 /**
  * Records community verification decision via RPC
  */
@@ -184,6 +183,26 @@ export async function recordSurveyEvidence(input: {
   }
 }
 
+export async function createSurveyorAssignment(input: {
+  propertyId: string;
+  surveyorId: string;
+  assignedBy: string;
+  notes?: string;
+}): Promise<PersistenceOutcome> {
+  if (!supabaseConfigured) return { error: "Supabase not configured", persisted: false };
+  const { data, error } = await supabase
+    .from("surveyor_assignments")
+    .insert({
+      property_id: input.propertyId,
+      surveyor_id: input.surveyorId,
+      assigned_by: input.assignedBy,
+      notes: input.notes ?? null,
+    })
+    .select("id, property_id, surveyor_id, status, created_at")
+    .single();
+  return { error: error?.message ?? null, persisted: !error, data };
+}
+
 /**
  * Resolves property review by government officer via RPC
  */
@@ -207,7 +226,9 @@ export async function resolvePropertyReview(input: {
   }
 }
 
-async function resolvePropertyId(idOrPassport: string): Promise<{ id: string | null; error: string | null }> {
+async function resolvePropertyId(
+  idOrPassport: string,
+): Promise<{ id: string | null; error: string | null }> {
   const query = supabase.from("properties").select("id");
   const { data, error } = isUuid(idOrPassport)
     ? await query.eq("id", idOrPassport).maybeSingle()
@@ -298,7 +319,10 @@ export async function persistVerificationOutcome(input: {
         .eq("id", actualPropertyId)
         .maybeSingle();
 
-      const existingLoc = currentProp?.location && typeof currentProp.location === "object" ? currentProp.location : {};
+      const existingLoc =
+        currentProp?.location && typeof currentProp.location === "object"
+          ? currentProp.location
+          : {};
       updatePayload.location = {
         ...existingLoc,
         estimatedValueInr: input.result.valuation,
@@ -346,14 +370,18 @@ export async function recordSurveyorDecision(input: {
     const currentLoc = prop?.location && typeof prop.location === "object" ? prop.location : {};
     const updatedLocation = {
       ...currentLoc,
-      surveyorBoundary: input.surveyorBoundary ?? currentLoc.surveyorBoundary ?? currentLoc.boundary,
+      surveyorBoundary:
+        input.surveyorBoundary ?? currentLoc.surveyorBoundary ?? currentLoc.boundary,
       surveyorDecision: input.decision,
       surveyorNotes: input.notes ?? "Field survey boundary validated",
       surveyorFieldPhotos: input.fieldPhotos ?? [],
       surveyorSubmittedAt: new Date().toISOString(),
     };
 
-    const newScore = input.decision === "verified" ? Math.max(prop?.trust_score ?? 60, 85) : Math.min(prop?.trust_score ?? 60, 50);
+    const newScore =
+      input.decision === "verified"
+        ? Math.max(prop?.trust_score ?? 60, 85)
+        : Math.min(prop?.trust_score ?? 60, 50);
 
     const { error: updateErr } = await supabase
       .from("properties")
@@ -366,14 +394,22 @@ export async function recordSurveyorDecision(input: {
 
     if (updateErr) return { error: updateErr.message, persisted: false };
 
-    // Also insert an audit row in review_cases if correction required
-    if (input.decision === "correction_required") {
-      await supabase.from("review_cases").insert({
-        property_id: target.id,
-        status: "open",
-        reason: `Surveyor flagged boundary discrepancy: ${input.notes || "Correction required"}`,
-      });
-    }
+    const { error: assignmentErr } = await supabase
+      .from("surveyor_assignments")
+      .update({ status: "submitted", updated_at: new Date().toISOString() })
+      .eq("property_id", target.id)
+      .in("status", ["assigned", "in_progress"]);
+    if (assignmentErr) return { error: assignmentErr.message, persisted: false };
+
+    const { error: caseErr } = await supabase.from("review_cases").insert({
+      property_id: target.id,
+      status: "open",
+      reason:
+        input.decision === "correction_required"
+          ? `Surveyor flagged boundary discrepancy: ${input.notes || "Correction required"}`
+          : `Surveyor submitted field evidence: ${input.notes || "Field verification completed"}`,
+    });
+    if (caseErr) return { error: caseErr.message, persisted: false };
 
     return { error: null, persisted: true };
   } catch (err) {
@@ -481,7 +517,9 @@ export async function recordBankLoanApplication(input: {
       .single();
 
     const currentLoc = prop?.location && typeof prop.location === "object" ? prop.location : {};
-    const existingLoans = Array.isArray(currentLoc.loanApplications) ? currentLoc.loanApplications : [];
+    const existingLoans = Array.isArray(currentLoc.loanApplications)
+      ? currentLoc.loanApplications
+      : [];
 
     const newLoan = {
       id: `loan_${Date.now().toString(36)}`,
@@ -523,45 +561,35 @@ export async function recordBankLoanApplication(input: {
 export async function loadAdminPlatformData() {
   if (!supabaseConfigured) {
     return {
-      totalUsers: 5,
+      totalUsers: 0,
       totalProperties: 0,
       totalVerifications: 0,
-      systemStatus: "Configured (Offline)",
-      usersList: [
-        { name: "Kushal Santhosh", email: "citizen@terratrust.ai", role: "Citizen", status: "active", region: "Karnataka" },
-        { name: "Arjun Mehta", email: "surveyor@terratrust.ai", role: "Surveyor", status: "active", region: "Karnataka" },
-        { name: "Dr. Vandana Rao", email: "government@terratrust.ai", role: "Government", status: "active", region: "Karnataka" },
-        { name: "Sunita Sharma", email: "bank@terratrust.ai", role: "Bank", status: "active", region: "National" },
-        { name: "System Administrator", email: "admin@terratrust.ai", role: "Admin", status: "active", region: "National" },
-      ],
+      systemStatus: "Supabase unavailable",
+      usersList: [],
     };
   }
 
   try {
-    const [{ count: userCount, data: profilesData }, { count: propCount }, { count: verifCount }] = await Promise.all([
-      supabase.from("profiles").select("id, full_name, email, role, region", { count: "exact" }).limit(10),
-      supabase.from("properties").select("*", { count: "exact", head: true }),
-      supabase.from("verification_results").select("*", { count: "exact", head: true }),
-    ]);
+    const [{ count: userCount, data: profilesData }, { count: propCount }, { count: verifCount }] =
+      await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, full_name, email, role, region", { count: "exact" })
+          .limit(10),
+        supabase.from("properties").select("*", { count: "exact", head: true }),
+        supabase.from("verification_results").select("*", { count: "exact", head: true }),
+      ]);
 
-    const activeUsers = (profilesData && profilesData.length > 0)
-      ? profilesData.map((p: any) => ({
-          name: p.full_name || p.email?.split("@")[0] || "User",
-          email: p.email || "user@terratrust.ai",
-          role: p.role ? (p.role.charAt(0).toUpperCase() + p.role.slice(1)) : "Citizen",
-          status: "active",
-          region: p.region || "Karnataka",
-        }))
-      : [
-          { name: "Kushal Santhosh", email: "citizen@terratrust.ai", role: "Citizen", status: "active", region: "Karnataka" },
-          { name: "Arjun Mehta", email: "surveyor@terratrust.ai", role: "Surveyor", status: "active", region: "Karnataka" },
-          { name: "Dr. Vandana Rao", email: "government@terratrust.ai", role: "Government", status: "active", region: "Karnataka" },
-          { name: "Sunita Sharma", email: "bank@terratrust.ai", role: "Bank", status: "active", region: "National" },
-          { name: "System Administrator", email: "admin@terratrust.ai", role: "Admin", status: "active", region: "National" },
-        ];
+    const activeUsers = (profilesData ?? []).map((p: any) => ({
+      name: p.full_name || p.email?.split("@")[0] || "User",
+      email: p.email || "user@terratrust.ai",
+      role: p.role ? p.role.charAt(0).toUpperCase() + p.role.slice(1) : "Citizen",
+      status: "active",
+      region: p.region || "Karnataka",
+    }));
 
     return {
-      totalUsers: userCount || activeUsers.length,
+      totalUsers: userCount ?? activeUsers.length,
       totalProperties: propCount ?? 0,
       totalVerifications: verifCount ?? 0,
       systemStatus: "Operational (Online)",
@@ -569,17 +597,11 @@ export async function loadAdminPlatformData() {
     };
   } catch {
     return {
-      totalUsers: 5,
+      totalUsers: 0,
       totalProperties: 0,
       totalVerifications: 0,
-      systemStatus: "Operational",
-      usersList: [
-        { name: "Kushal Santhosh", email: "citizen@terratrust.ai", role: "Citizen", status: "active", region: "Karnataka" },
-        { name: "Arjun Mehta", email: "surveyor@terratrust.ai", role: "Surveyor", status: "active", region: "Karnataka" },
-        { name: "Dr. Vandana Rao", email: "government@terratrust.ai", role: "Government", status: "active", region: "Karnataka" },
-        { name: "Sunita Sharma", email: "bank@terratrust.ai", role: "Bank", status: "active", region: "National" },
-        { name: "System Administrator", email: "admin@terratrust.ai", role: "Admin", status: "active", region: "National" },
-      ],
+      systemStatus: "Supabase unavailable",
+      usersList: [],
     };
   }
 }

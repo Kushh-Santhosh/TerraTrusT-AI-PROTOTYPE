@@ -2,11 +2,42 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard, Map, FileBadge, Sparkles, Users2, Briefcase,
-  Building2, BarChart3, ShieldCheck, Bell, User, Settings, HelpCircle, LogOut,
-  Search, MessageSquare, FileText, Gavel, ShieldAlert, Banknote, LifeBuoy,
-  Brain, ScanLine, Activity, Leaf, Compass, Satellite, ListChecks, Lightbulb,
-  PlusCircle, FolderLock, Shield, CheckCircle2, ChevronDown, Menu, X
+  LayoutDashboard,
+  Map,
+  FileBadge,
+  Sparkles,
+  Users2,
+  Briefcase,
+  Building2,
+  BarChart3,
+  ShieldCheck,
+  Bell,
+  User,
+  Settings,
+  HelpCircle,
+  LogOut,
+  Search,
+  MessageSquare,
+  FileText,
+  Gavel,
+  ShieldAlert,
+  Banknote,
+  LifeBuoy,
+  Brain,
+  ScanLine,
+  Activity,
+  Leaf,
+  Compass,
+  Satellite,
+  ListChecks,
+  Lightbulb,
+  PlusCircle,
+  FolderLock,
+  Shield,
+  CheckCircle2,
+  ChevronDown,
+  Menu,
+  X,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState, useEffect } from "react";
@@ -127,17 +158,19 @@ export const surveyorNav: NavGroup[] = [
   {
     group: "Property Verification",
     items: [
-      { to: "/properties", label: "Assigned Properties", icon: FileBadge },
-      { to: "/map", label: "GIS Map", icon: Map },
+      { to: "/surveyor/assignments", label: "Assigned Properties", icon: FileBadge },
+      { to: "/map", label: "GIS / Boundary Inspection", icon: Map },
       { to: "/ai-satellite", label: "Satellite Compare", icon: Satellite },
-      { to: "/ai-ocr", label: "Document Review", icon: ScanLine },
-      { to: "/verification", label: "Verification Evidence", icon: ShieldCheck },
+      { to: "/surveyor/documents", label: "Document Review", icon: ScanLine },
+      { to: "/verification", label: "Verification / Evidence", icon: ShieldCheck },
     ],
   },
   {
     group: "Reporting & History",
     items: [
       { to: "/reports", label: "Survey Reports", icon: FileBadge },
+      { to: "/surveyor/assignments", label: "Verification History", icon: ListChecks },
+      { to: "/surveyor/cases", label: "Cases / Issues", icon: ShieldAlert },
     ],
   },
   {
@@ -269,7 +302,12 @@ export function StatusBadge({ status }: { status: string }) {
   };
   const s = map[status] || { label: status, tone: "bg-muted text-muted-foreground ring-border" };
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 capitalize", s.tone)}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 capitalize",
+        s.tone,
+      )}
+    >
       {s.label}
     </span>
   );
@@ -288,10 +326,10 @@ export function AppShell({
   actions?: ReactNode;
   requiredRole?: Role | Role[];
 }) {
-  const pathname = useRouterState({ select: s => s.location.pathname });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const { user, profile, signOut, setDemoRole } = useAuth();
-  const unread = notifications.filter(n => !n.read).length;
+  const { user, profile, loading, signOut } = useAuth();
+  const unread = notifications.filter((n) => !n.read).length;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
@@ -303,15 +341,25 @@ export function AppShell({
     if (authRole) {
       return normalizeRole(authRole);
     }
-    if (pathname.startsWith("/admin")) return "admin";
-    if (pathname.startsWith("/surveyor")) return "surveyor";
-    if (pathname.startsWith("/government")) return "government";
-    if (pathname.startsWith("/bank")) return "bank";
     return "citizen";
   };
 
   const currentRole: Role = getEffectiveRole();
-  const displayName = profile?.full_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : (currentRole === "admin" ? "System Administrator" : currentRole === "surveyor" ? "Arjun Mehta" : currentRole === "government" ? "Dr. Vandana Rao" : currentRole === "bank" ? "Sunita Sharma" : "Kushal Santhosh"));
+  const profileReady = !user || (!loading && profile?.id === user.id);
+  const displayName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    (user?.email
+      ? user.email.split("@")[0]
+      : currentRole === "admin"
+        ? "System Administrator"
+        : currentRole === "surveyor"
+          ? "Arjun Mehta"
+          : currentRole === "government"
+            ? "Dr. Vandana Rao"
+            : currentRole === "bank"
+              ? "Sunita Sharma"
+              : "Kushal Santhosh");
   const roleLabel = roleLabels[currentRole] || "Citizen";
 
   const getInitials = (name: string) => {
@@ -327,15 +375,20 @@ export function AppShell({
 
   const isAuthorized = () => {
     if (!requiredRole) return true;
+    if (!user || !profile) return false;
     const allowed = Array.isArray(requiredRole)
       ? requiredRole.map(normalizeRole)
       : [normalizeRole(requiredRole)];
     return allowed.includes(currentRole);
   };
 
-  const targetRequiredRole: Role | null = requiredRole
-    ? (Array.isArray(requiredRole) ? normalizeRole(requiredRole[0]) : normalizeRole(requiredRole))
-    : null;
+  if (!profileReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <p className="text-sm text-muted-foreground">Loading your authorized workspace...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col md:grid md:grid-cols-[280px_1fr] bg-background">
@@ -343,20 +396,25 @@ export function AppShell({
       <aside className="hidden md:flex sticky top-0 h-screen border-r border-border bg-surface-elevated flex-col justify-between">
         <div className="flex flex-col h-[calc(100vh-4.5rem)]">
           <div className="flex h-16 items-center justify-between px-5 border-b border-border/40 shrink-0">
-            <Link to={getWorkspaceForRole(currentRole)}><Logo /></Link>
+            <Link to={getWorkspaceForRole(currentRole)}>
+              <Logo />
+            </Link>
             <div className="rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
               <span>{roleLabel}</span>
             </div>
           </div>
-          
+
           <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6" suppressHydrationWarning>
-            {getNavForRole(currentRole).map(group => (
+            {getNavForRole(currentRole).map((group) => (
               <div key={group.group}>
-                <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80" suppressHydrationWarning>
+                <p
+                  className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80"
+                  suppressHydrationWarning
+                >
                   {group.group}
                 </p>
                 <div className="flex flex-col gap-0.5">
-                  {group.items.map(item => {
+                  {group.items.map((item) => {
                     const active =
                       pathname === item.to ||
                       (item.to !== "/" &&
@@ -378,10 +436,17 @@ export function AppShell({
                           "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition",
                           active
                             ? "bg-primary/10 text-primary font-semibold ring-1 ring-primary/25 shadow-sm"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
                       >
-                        <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+                        <item.icon
+                          className={cn(
+                            "h-4 w-4 shrink-0",
+                            active
+                              ? "text-primary"
+                              : "text-muted-foreground group-hover:text-foreground",
+                          )}
+                        />
                         <span className="truncate">{item.label}</span>
                         {item.to === "/notifications" && unread > 0 && (
                           <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
@@ -421,16 +486,26 @@ export function AppShell({
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Link to={getWorkspaceForRole(currentRole)}><Logo /></Link>
+            <Link to={getWorkspaceForRole(currentRole)}>
+              <Logo />
+            </Link>
           </div>
           <div className="relative w-full max-w-md">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="h-9 pl-9 text-xs" placeholder="Search parcels, passport IDs, surveys…" />
+            <Input
+              className="h-9 pl-9 text-xs"
+              placeholder="Search parcels, passport IDs, surveys…"
+            />
           </div>
           <div className="ml-auto flex items-center gap-3">
-            <Link to="/notifications" className="relative rounded-full p-2 hover:bg-muted text-muted-foreground hover:text-foreground">
+            <Link
+              to="/notifications"
+              className="relative rounded-full p-2 hover:bg-muted text-muted-foreground hover:text-foreground"
+            >
               <Bell className="h-4 w-4" />
-              {unread > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-destructive" />}
+              {unread > 0 && (
+                <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-destructive" />
+              )}
             </Link>
             <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-2 py-1 pr-3">
               <Avatar className="h-7 w-7">
@@ -439,8 +514,18 @@ export function AppShell({
                 </AvatarFallback>
               </Avatar>
               <div className="hidden text-left md:block">
-                <p className="text-xs font-medium leading-tight text-foreground truncate max-w-[140px]" suppressHydrationWarning>{displayName}</p>
-                <p className="text-[10px] capitalize text-muted-foreground" suppressHydrationWarning>{roleLabel}</p>
+                <p
+                  className="text-xs font-medium leading-tight text-foreground truncate max-w-[140px]"
+                  suppressHydrationWarning
+                >
+                  {displayName}
+                </p>
+                <p
+                  className="text-[10px] capitalize text-muted-foreground"
+                  suppressHydrationWarning
+                >
+                  {roleLabel}
+                </p>
               </div>
             </div>
           </div>
@@ -450,8 +535,12 @@ export function AppShell({
         <div className="border-b border-border bg-background px-4 md:px-8 py-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-              {subtitle && <p className="mt-1 text-xs md:text-sm text-muted-foreground">{subtitle}</p>}
+              <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                {title}
+              </h1>
+              {subtitle && (
+                <p className="mt-1 text-xs md:text-sm text-muted-foreground">{subtitle}</p>
+              )}
             </div>
             {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
           </div>
@@ -466,23 +555,17 @@ export function AppShell({
               </div>
               <h2 className="font-display text-2xl text-foreground">Access Restricted</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                This workspace requires <span className="font-semibold text-foreground">{Array.isArray(requiredRole) ? requiredRole.join(", ") : requiredRole}</span> role authorization. You are currently signed in as a <span className="font-semibold text-primary">{roleLabel}</span>.
+                This workspace requires{" "}
+                <span className="font-semibold text-foreground">
+                  {Array.isArray(requiredRole) ? requiredRole.join(", ") : requiredRole}
+                </span>{" "}
+                role authorization. You are currently signed in as a{" "}
+                <span className="font-semibold text-primary">{roleLabel}</span>.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Button onClick={() => navigate({ to: getWorkspaceForRole(currentRole) as any })}>
                   Return to my workspace
                 </Button>
-                {targetRequiredRole && setDemoRole && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setDemoRole(targetRequiredRole);
-                      toast.success(`Switched role to ${roleLabels[targetRequiredRole] || targetRequiredRole}`);
-                    }}
-                  >
-                    Authorize as {roleLabels[targetRequiredRole] || targetRequiredRole}
-                  </Button>
-                )}
               </div>
             </div>
           ) : (
@@ -551,13 +634,15 @@ export function AppShell({
                               "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition",
                               active
                                 ? "bg-primary/10 text-primary font-semibold ring-1 ring-primary/25 shadow-sm"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
                             )}
                           >
                             <item.icon
                               className={cn(
                                 "h-4 w-4 shrink-0",
-                                active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                                active
+                                  ? "text-primary"
+                                  : "text-muted-foreground group-hover:text-foreground",
                               )}
                             />
                             <span className="truncate">{item.label}</span>

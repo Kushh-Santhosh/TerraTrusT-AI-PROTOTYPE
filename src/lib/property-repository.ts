@@ -1,6 +1,5 @@
 import type { Property, PropertyDocument, PropertyBoundary, PropertyType } from "./types";
 import { supabase, supabaseConfigured } from "./supabase";
-import { properties as demoProperties } from "./mock-data";
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -25,6 +24,7 @@ export function mapDocumentRow(row: {
     kind,
     uploadedAt: row.created_at.slice(0, 10),
     verified: row.verified,
+    storagePath: row.storage_path,
   };
 }
 
@@ -78,8 +78,12 @@ export function mapPropertyRow(row: {
       lng: Number(loc.longitude ?? 0),
     },
     boundary: Array.isArray(loc.boundary) ? (loc.boundary as PropertyBoundary[]) : [],
-    surveyorBoundary: Array.isArray(loc.surveyorBoundary) ? (loc.surveyorBoundary as PropertyBoundary[]) : undefined,
-    governmentBoundary: Array.isArray(loc.governmentBoundary) ? (loc.governmentBoundary as PropertyBoundary[]) : undefined,
+    surveyorBoundary: Array.isArray(loc.surveyorBoundary)
+      ? (loc.surveyorBoundary as PropertyBoundary[])
+      : undefined,
+    governmentBoundary: Array.isArray(loc.governmentBoundary)
+      ? (loc.governmentBoundary as PropertyBoundary[])
+      : undefined,
     stateCode: loc.stateCode ?? (loc.region?.toLowerCase().includes("maharashtra") ? "MH" : "KA"),
     cadastralIdentifiers: loc.cadastralIdentifiers ?? {},
     sourceChecks: loc.sourceChecks ?? {},
@@ -107,17 +111,17 @@ export function getRegisteredLocalProperties(): Property[] {
 export function saveRegisteredLocalProperty(prop: Property): void {
   if (typeof window === "undefined") return;
   try {
-    const existing = getRegisteredLocalProperties().filter((p) => p.id !== prop.id && p.passportId !== prop.passportId);
+    const existing = getRegisteredLocalProperties().filter(
+      (p) => p.id !== prop.id && p.passportId !== prop.passportId,
+    );
     localStorage.setItem("terratrust_registered_properties", JSON.stringify([prop, ...existing]));
   } catch {}
 }
 
 /** Loads properties owned by a citizen user */
 export async function loadOwnedProperties(userId: string): Promise<Property[]> {
-  const localProps = getRegisteredLocalProperties();
-
   if (!supabaseConfigured || !userId || !isUuid(userId)) {
-    return localProps;
+    return [];
   }
 
   try {
@@ -129,16 +133,10 @@ export async function loadOwnedProperties(userId: string): Promise<Property[]> {
       .eq("owner_id", userId)
       .order("created_at", { ascending: false });
 
-    if (error || !data) {
-      return localProps;
-    }
-    const mapped = data.map((row) => mapPropertyRow({ ...row, documents: row.property_documents }));
-    // Deduplicate by ID so authoritative Supabase rows are not duplicated by local cache
-    const mappedIds = new Set(mapped.map((p) => p.id));
-    const nonDupeLocal = localProps.filter((p) => !mappedIds.has(p.id));
-    return [...mapped, ...nonDupeLocal];
+    if (error || !data) return [];
+    return data.map((row) => mapPropertyRow({ ...row, documents: row.property_documents }));
   } catch {
-    return localProps;
+    return [];
   }
 }
 
@@ -160,21 +158,17 @@ export async function loadPropertyById(idOrPassport: string): Promise<Property |
       if (data && !error) {
         return mapPropertyRow({ ...data, documents: data.property_documents });
       }
-    } catch {
-      // Fallback to local cache
-    }
+    } catch {}
   }
-
-  const local = getRegisteredLocalProperties().find((p) => p.id === idOrPassport || p.passportId === idOrPassport);
-  if (local) return local;
-
-  return demoProperties.find((p) => p.id === idOrPassport || p.passportId === idOrPassport) ?? null;
+  return null;
 }
 
 export const getPropertyById = loadPropertyById;
 
 /** Loads shared properties for institutional roles (Government, Surveyor, Bank, Admin) */
-export async function loadInstitutionalProperties(statusFilter?: Property["status"]): Promise<Property[]> {
+export async function loadInstitutionalProperties(
+  statusFilter?: Property["status"],
+): Promise<Property[]> {
   if (!supabaseConfigured) {
     return [];
   }
@@ -215,11 +209,25 @@ export async function loadGovernmentMetrics() {
   }
 
   try {
-    const { count: totalParcels } = await supabase.from("properties").select("*", { count: "exact", head: true });
-    const { count: verifiedCount } = await supabase.from("properties").select("*", { count: "exact", head: true }).eq("status", "verified");
-    const { count: pendingCount } = await supabase.from("properties").select("*", { count: "exact", head: true }).eq("status", "pending");
-    const { count: disputedCount } = await supabase.from("properties").select("*", { count: "exact", head: true }).eq("status", "disputed");
-    const { count: openReviewCount } = await supabase.from("review_cases").select("*", { count: "exact", head: true }).eq("status", "open");
+    const { count: totalParcels } = await supabase
+      .from("properties")
+      .select("*", { count: "exact", head: true });
+    const { count: verifiedCount } = await supabase
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "verified");
+    const { count: pendingCount } = await supabase
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending");
+    const { count: disputedCount } = await supabase
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "disputed");
+    const { count: openReviewCount } = await supabase
+      .from("review_cases")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "open");
 
     return {
       totalParcels: totalParcels ?? 0,
@@ -245,7 +253,9 @@ export async function loadGovernmentReviewQueue() {
   try {
     const { data: reviewCases } = await supabase
       .from("review_cases")
-      .select("id, status, reason, created_at, properties(id, passport_id, property_name, status, trust_score, location)")
+      .select(
+        "id, status, reason, created_at, properties(id, passport_id, property_name, status, trust_score, location)",
+      )
       .eq("status", "open")
       .order("created_at", { ascending: false });
 
@@ -301,9 +311,10 @@ export async function loadGovernmentReviewQueue() {
             status: p.status,
             trustScore: p.trust_score ?? 70,
             region: p.location?.region || "Karnataka",
-            reason: p.location?.surveyorDecision === "verified"
-              ? "Surveyor field verification complete. Awaiting government final decision."
-              : "Awaiting field survey & official registry review.",
+            reason:
+              p.location?.surveyorDecision === "verified"
+                ? "Surveyor field verification complete. Awaiting government final decision."
+                : "Awaiting field survey & official registry review.",
             createdAt: p.created_at || new Date().toISOString(),
           });
         }
@@ -322,8 +333,34 @@ export async function loadBankEligibleProperties(): Promise<Property[]> {
 }
 
 /** Loads properties assigned to surveyors for field work */
-export async function loadSurveyorAssignments(): Promise<Property[]> {
-  return loadInstitutionalProperties("pending");
+export async function loadSurveyorAssignments(userId?: string): Promise<Property[]> {
+  if (!supabaseConfigured || !userId) return [];
+  try {
+    const { data, error } = await supabase
+      .from("surveyor_assignments")
+      .select(
+        "id, status, notes, created_at, updated_at, assigned_by, properties(id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at))",
+      )
+      .eq("surveyor_id", userId)
+      .neq("status", "cancelled")
+      .order("created_at", { ascending: false });
+    if (error || !data) return [];
+    return (data as any[])
+      .filter((row) => row.properties)
+      .map(
+        (row) =>
+          ({
+            ...mapPropertyRow({ ...row.properties, documents: row.properties.property_documents }),
+            assignmentId: row.id,
+            assignmentStatus: row.status,
+            assignmentNotes: row.notes,
+            assignmentCreatedAt: row.created_at,
+            assignedBy: row.assigned_by,
+          }) as Property & Record<string, unknown>,
+      );
+  } catch {
+    return [];
+  }
 }
 
 /** Loads the latest verification result for a property */
@@ -362,6 +399,37 @@ export async function loadReviewCases(propertyId?: string) {
     }
 
     const { data, error } = await query;
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Loads Government-visible audit events from the authoritative audit log. */
+export async function loadGovernmentAuditLogs() {
+  if (!supabaseConfigured) return [];
+  try {
+    const { data, error } = await supabase
+      .from("audit_logs")
+      .select("id, actor_role, action, event, property_id, detail, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function loadGovernmentSurveyors() {
+  if (!supabaseConfigured) return [];
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, region")
+      .eq("role", "surveyor")
+      .order("full_name");
     if (error) return [];
     return data ?? [];
   } catch {

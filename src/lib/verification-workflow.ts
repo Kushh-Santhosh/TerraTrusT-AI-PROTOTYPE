@@ -104,8 +104,7 @@ export const STEP_NAMES = [
 /** Webhook URL is public config only — never a secret. */
 export function getWebhookUrl(): string {
   const raw = import.meta.env["VITE_N8N_WEBHOOK_URL"] as string | undefined;
-  const v = raw?.trim();
-  return v || "https://kushhhsanthosh.app.n8n.cloud/webhook/terratrust/verify";
+  return raw?.trim() ?? "";
 }
 
 export function activeProvider(): WorkflowProvider {
@@ -395,14 +394,17 @@ export interface RunOutcome {
   fallbackReason?: string;
 }
 
-/** Calls the n8n webhook when configured; otherwise runs the deterministic simulation. */
+/** Calls the live n8n webhook and reports configuration or transport failures explicitly. */
 export async function runVerification(
   p: Property,
   signal?: AbortSignal,
   extra?: { userId?: string; propertyUuid?: string }
 ): Promise<RunOutcome> {
   const url = getWebhookUrl();
-  if (!url) return { result: computeVerification(p, "demo") };
+  if (!url) {
+    const reason = "VITE_N8N_WEBHOOK_URL is not configured";
+    return { result: failedLiveResult(p, reason), fallbackReason: reason };
+  }
 
   try {
     const res = await fetch(url, {

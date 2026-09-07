@@ -48,7 +48,6 @@ import { Route as DevelopersRouteImport } from './routes/developers'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CompleteProfileRouteImport } from './routes/complete-profile'
-import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BillingRouteImport } from './routes/billing'
 import { Route as BankRouteImport } from './routes/bank'
@@ -83,6 +82,8 @@ import { Route as DisputesIndexRouteImport } from './routes/disputes.index'
 import { Route as BankIndexRouteImport } from './routes/bank.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as SurveyorToolsRouteImport } from './routes/surveyor.tools'
+import { Route as SurveyorDocumentsRouteImport } from './routes/surveyor.documents'
+import { Route as SurveyorCasesRouteImport } from './routes/surveyor.cases'
 import { Route as SurveyorAssignmentsRouteImport } from './routes/surveyor.assignments'
 import { Route as SupportNewRouteImport } from './routes/support.new'
 import { Route as SupportIdRouteImport } from './routes/support.$id'
@@ -314,11 +315,6 @@ const CompleteProfileRoute = CompleteProfileRouteImport.update({
   path: '/complete-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ChangelogRoute = ChangelogRouteImport.update({
   id: '/changelog',
   path: '/changelog',
@@ -487,6 +483,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const SurveyorToolsRoute = SurveyorToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
+  getParentRoute: () => SurveyorRoute,
+} as any)
+const SurveyorDocumentsRoute = SurveyorDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => SurveyorRoute,
+} as any)
+const SurveyorCasesRoute = SurveyorCasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
   getParentRoute: () => SurveyorRoute,
 } as any)
 const SurveyorAssignmentsRoute = SurveyorAssignmentsRouteImport.update({
@@ -691,7 +697,6 @@ export interface FileRoutesByFullPath {
   '/bank': typeof BankRouteWithChildren
   '/billing': typeof BillingRoute
   '/changelog': typeof ChangelogRoute
-  '/community': typeof CommunityRoute
   '/complete-profile': typeof CompleteProfileRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -753,6 +758,8 @@ export interface FileRoutesByFullPath {
   '/support/$id': typeof SupportIdRoute
   '/support/new': typeof SupportNewRoute
   '/surveyor/assignments': typeof SurveyorAssignmentsRouteWithChildren
+  '/surveyor/cases': typeof SurveyorCasesRoute
+  '/surveyor/documents': typeof SurveyorDocumentsRoute
   '/surveyor/tools': typeof SurveyorToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/bank/': typeof BankIndexRoute
@@ -800,7 +807,6 @@ export interface FileRoutesByTo {
   '/attestations': typeof AttestationsRoute
   '/billing': typeof BillingRoute
   '/changelog': typeof ChangelogRoute
-  '/community': typeof CommunityRoute
   '/complete-profile': typeof CompleteProfileRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -854,6 +860,8 @@ export interface FileRoutesByTo {
   '/reports/new': typeof ReportsNewRoute
   '/support/$id': typeof SupportIdRoute
   '/support/new': typeof SupportNewRoute
+  '/surveyor/cases': typeof SurveyorCasesRoute
+  '/surveyor/documents': typeof SurveyorDocumentsRoute
   '/surveyor/tools': typeof SurveyorToolsRoute
   '/admin': typeof AdminIndexRoute
   '/bank': typeof BankIndexRoute
@@ -904,7 +912,6 @@ export interface FileRoutesById {
   '/bank': typeof BankRouteWithChildren
   '/billing': typeof BillingRoute
   '/changelog': typeof ChangelogRoute
-  '/community': typeof CommunityRoute
   '/complete-profile': typeof CompleteProfileRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -966,6 +973,8 @@ export interface FileRoutesById {
   '/support/$id': typeof SupportIdRoute
   '/support/new': typeof SupportNewRoute
   '/surveyor/assignments': typeof SurveyorAssignmentsRouteWithChildren
+  '/surveyor/cases': typeof SurveyorCasesRoute
+  '/surveyor/documents': typeof SurveyorDocumentsRoute
   '/surveyor/tools': typeof SurveyorToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/bank/': typeof BankIndexRoute
@@ -1017,7 +1026,6 @@ export interface FileRouteTypes {
     | '/bank'
     | '/billing'
     | '/changelog'
-    | '/community'
     | '/complete-profile'
     | '/contact'
     | '/dashboard'
@@ -1079,6 +1087,8 @@ export interface FileRouteTypes {
     | '/support/$id'
     | '/support/new'
     | '/surveyor/assignments'
+    | '/surveyor/cases'
+    | '/surveyor/documents'
     | '/surveyor/tools'
     | '/admin/'
     | '/bank/'
@@ -1126,7 +1136,6 @@ export interface FileRouteTypes {
     | '/attestations'
     | '/billing'
     | '/changelog'
-    | '/community'
     | '/complete-profile'
     | '/contact'
     | '/dashboard'
@@ -1180,6 +1189,8 @@ export interface FileRouteTypes {
     | '/reports/new'
     | '/support/$id'
     | '/support/new'
+    | '/surveyor/cases'
+    | '/surveyor/documents'
     | '/surveyor/tools'
     | '/admin'
     | '/bank'
@@ -1229,7 +1240,6 @@ export interface FileRouteTypes {
     | '/bank'
     | '/billing'
     | '/changelog'
-    | '/community'
     | '/complete-profile'
     | '/contact'
     | '/dashboard'
@@ -1291,6 +1301,8 @@ export interface FileRouteTypes {
     | '/support/$id'
     | '/support/new'
     | '/surveyor/assignments'
+    | '/surveyor/cases'
+    | '/surveyor/documents'
     | '/surveyor/tools'
     | '/admin/'
     | '/bank/'
@@ -1341,7 +1353,6 @@ export interface RootRouteChildren {
   BankRoute: typeof BankRouteWithChildren
   BillingRoute: typeof BillingRoute
   ChangelogRoute: typeof ChangelogRoute
-  CommunityRoute: typeof CommunityRoute
   CompleteProfileRoute: typeof CompleteProfileRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
@@ -1658,13 +1669,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompleteProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/changelog': {
       id: '/changelog'
       path: '/changelog'
@@ -1901,6 +1905,20 @@ declare module '@tanstack/react-router' {
       path: '/tools'
       fullPath: '/surveyor/tools'
       preLoaderRoute: typeof SurveyorToolsRouteImport
+      parentRoute: typeof SurveyorRoute
+    }
+    '/surveyor/documents': {
+      id: '/surveyor/documents'
+      path: '/documents'
+      fullPath: '/surveyor/documents'
+      preLoaderRoute: typeof SurveyorDocumentsRouteImport
+      parentRoute: typeof SurveyorRoute
+    }
+    '/surveyor/cases': {
+      id: '/surveyor/cases'
+      path: '/cases'
+      fullPath: '/surveyor/cases'
+      preLoaderRoute: typeof SurveyorCasesRouteImport
       parentRoute: typeof SurveyorRoute
     }
     '/surveyor/assignments': {
@@ -2328,12 +2346,16 @@ const SurveyorAssignmentsRouteWithChildren =
 
 interface SurveyorRouteChildren {
   SurveyorAssignmentsRoute: typeof SurveyorAssignmentsRouteWithChildren
+  SurveyorCasesRoute: typeof SurveyorCasesRoute
+  SurveyorDocumentsRoute: typeof SurveyorDocumentsRoute
   SurveyorToolsRoute: typeof SurveyorToolsRoute
   SurveyorIndexRoute: typeof SurveyorIndexRoute
 }
 
 const SurveyorRouteChildren: SurveyorRouteChildren = {
   SurveyorAssignmentsRoute: SurveyorAssignmentsRouteWithChildren,
+  SurveyorCasesRoute: SurveyorCasesRoute,
+  SurveyorDocumentsRoute: SurveyorDocumentsRoute,
   SurveyorToolsRoute: SurveyorToolsRoute,
   SurveyorIndexRoute: SurveyorIndexRoute,
 }
@@ -2367,7 +2389,6 @@ const rootRouteChildren: RootRouteChildren = {
   BankRoute: BankRouteWithChildren,
   BillingRoute: BillingRoute,
   ChangelogRoute: ChangelogRoute,
-  CommunityRoute: CommunityRoute,
   CompleteProfileRoute: CompleteProfileRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,

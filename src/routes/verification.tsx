@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { properties } from "@/lib/mock-data";
-import { CheckCircle2, XCircle, Users2, ShieldCheck } from "lucide-react";
+import { loadGovernmentReviewQueue } from "@/lib/property-repository";
+import { CheckCircle2, Users2, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/verification")({
   head: () => ({ meta: [{ title: "Verification — TerraTrust AI" }] }),
@@ -10,34 +12,77 @@ export const Route = createFileRoute("/verification")({
 });
 
 function VerificationPage() {
-  const queue = properties.filter(p => p.status !== "verified");
+  const { profile } = useAuth();
+  const [queue, setQueue] = useState<Awaited<ReturnType<typeof loadGovernmentReviewQueue>>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadGovernmentReviewQueue().then((data) => {
+      setQueue(data);
+      setLoading(false);
+    });
+  }, []);
+
   return (
-    <AppShell title="Verification Status & Pipeline" subtitle="Cadastral registry validation, n8n verification runs, and automated compliance tracking.">
+    <AppShell
+      title={
+        profile?.role === "government"
+          ? "Government Verification Queue"
+          : "Surveyor Verification Evidence"
+      }
+      subtitle={
+        profile?.role === "government"
+          ? "Persisted manual-review cases and n8n verification outcomes for Government action."
+          : "Persisted manual-review cases and n8n verification outcomes for field action."
+      }
+      requiredRole={["surveyor", "government"]}
+    >
       <div className="grid gap-4 md:grid-cols-3">
-        <Tile icon={ShieldCheck} v="18" l="Total Parcels Evaluated" />
-        <Tile icon={CheckCircle2} v="94%" l="Cadastral Compliance Rate" />
-        <Tile icon={Users2} v="15" l="Active In-Review Queue" />
+        <Tile icon={ShieldCheck} v={`${queue.length}`} l="Open review cases" />
+        <Tile
+          icon={CheckCircle2}
+          v={`${queue.filter((item) => item.status === "verified").length}`}
+          l="Verified queue records"
+        />
+        <Tile
+          icon={Users2}
+          v={`${queue.filter((item) => item.status === "pending").length}`}
+          l="Pending Government review"
+        />
       </div>
 
       <p className="mt-8 mb-3 text-sm font-medium text-foreground">Registry Verification Queue</p>
-      <div className="grid gap-4">
-        {queue.map(p => (
-          <div key={p.id} className="surface-card flex flex-wrap items-center gap-4 p-5">
-            <div className="flex-1 min-w-64">
-              <div className="flex items-center gap-2"><p className="font-medium">{p.title}</p><StatusBadge status={p.status} /></div>
-              <p className="text-xs text-muted-foreground font-mono mt-0.5">{p.passportId} · {p.address}</p>
-              <p className="mt-1 text-sm text-muted-foreground">Automated multi-layer verification via n8n orchestrator and cadastral GIS validation.</p>
-            </div>
-            <div className="flex gap-2">
+      {loading ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">
+          Loading persisted verification cases…
+        </p>
+      ) : queue.length === 0 ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">
+          No persisted Government review cases are available.
+        </p>
+      ) : (
+        <div className="grid gap-4">
+          {queue.map((item) => (
+            <div key={item.caseId} className="surface-card flex flex-wrap items-center gap-4 p-5">
+              <div className="flex-1 min-w-64">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">{item.title}</p>
+                  <StatusBadge status={item.status} />
+                </div>
+                <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                  {item.passportId} · {item.region}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{item.reason}</p>
+              </div>
               <Button asChild variant="outline" className="rounded-full">
-                <a href={`/properties/${p.id}/verify`}>
-                  <ShieldCheck className="h-4 w-4 mr-1 text-primary" /> Inspect Verification
+                <a href={`/properties/${item.propertyId}/verify`}>
+                  <ShieldCheck className="h-4 w-4 mr-1 text-primary" /> Inspect verification
                 </a>
               </Button>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </AppShell>
   );
 }
@@ -45,7 +90,9 @@ function VerificationPage() {
 function Tile({ icon: Icon, v, l }: { icon: any; v: string; l: string }) {
   return (
     <div className="surface-card flex items-center gap-4 p-5">
-      <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div>
+      <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+        <Icon className="h-5 w-5" />
+      </div>
       <div>
         <p className="font-display text-3xl">{v}</p>
         <p className="text-xs text-muted-foreground">{l}</p>

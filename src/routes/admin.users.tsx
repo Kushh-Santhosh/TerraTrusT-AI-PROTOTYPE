@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin/users")({
 
 function Page() {
   const [data, setData] = useState({
-    totalUsers: 5,
+    totalUsers: 0,
     usersList: [] as Array<{
       name: string;
       email: string;
@@ -24,6 +24,7 @@ function Page() {
       region?: string;
     }>,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadAdminPlatformData().then((res) => {
@@ -31,7 +32,7 @@ function Page() {
         totalUsers: res.totalUsers,
         usersList: res.usersList,
       });
-    });
+    }).finally(() => setLoading(false));
   }, []);
 
   const rows = data.usersList.map((u) => ({
@@ -70,7 +71,7 @@ function Page() {
         ]}
       />
       <div className="mt-6">
-        <DataTable
+        {loading ? <p className="surface-card p-10 text-center text-sm text-muted-foreground">Loading user directory...</p> : rows.length === 0 ? <div className="surface-card p-10 text-center"><p className="font-medium text-foreground">No user records available</p><p className="mt-1 text-sm text-muted-foreground">The authenticated profile directory returned no records.</p></div> : <DataTable
           rows={rows}
           columns={[
             {
@@ -105,7 +106,7 @@ function Page() {
               ),
             },
           ]}
-        />
+        />}
       </div>
     </AppShell>
   );

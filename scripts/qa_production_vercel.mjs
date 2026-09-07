@@ -1,9 +1,10 @@
 import puppeteer from 'puppeteer-core';
 import { createClient } from '@supabase/supabase-js';
 
-const PROD_URL = 'https://terratrust-ai.vercel.app';
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://iixsxywjsclzbjfzlnvq.supabase.co';
-const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_Vp893beApMLxMug7adBoag_OM-MpDdV';
+const PROD_URL = process.env.PROD_URL;
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+if (!PROD_URL || !SUPABASE_URL || !SUPABASE_KEY) throw new Error('PROD_URL, VITE_SUPABASE_URL, and VITE_SUPABASE_PUBLISHABLE_KEY are required');
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CREDENTIALS = {

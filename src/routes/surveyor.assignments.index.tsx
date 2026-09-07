@@ -5,6 +5,7 @@ import { loadSurveyorAssignments } from "@/lib/property-repository";
 import type { Property } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Briefcase, Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/surveyor/assignments/")({
   head: () => ({ meta: [{ title: "Surveyor Field Assignments — TerraTrust AI" }] }),
@@ -14,13 +15,15 @@ export const Route = createFileRoute("/surveyor/assignments/")({
 function SurveyorAssignmentsPage() {
   const [assignments, setAssignments] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    loadSurveyorAssignments().then((props) => {
+    if (!user?.id) return;
+    loadSurveyorAssignments(user.id).then((props) => {
       setAssignments(props);
       setLoading(false);
     });
-  }, []);
+  }, [user?.id]);
 
   return (
     <AppShell
@@ -31,9 +34,18 @@ function SurveyorAssignmentsPage() {
       <KpiRow
         items={[
           { label: "Active assignments", value: `${assignments.length}` },
-          { label: "Due this week", value: `${Math.min(assignments.length, 3)}` },
-          { label: "Avg. turnaround", value: "2.4d" },
-          { label: "Survey quality rating", value: "4.95 / 5" },
+          {
+            label: "Submitted",
+            value: `${assignments.filter((p) => (p as any).assignmentStatus === "submitted").length}`,
+          },
+          {
+            label: "Boundary reviews",
+            value: `${assignments.filter((p) => p.boundary.length > 0).length}`,
+          },
+          {
+            label: "Open issues",
+            value: `${assignments.filter((p) => p.surveyorDecision === "correction_required").length}`,
+          },
         ]}
       />
       <div className="mt-6">
@@ -46,7 +58,8 @@ function SurveyorAssignmentsPage() {
             <Briefcase className="mx-auto h-10 w-10 text-muted-foreground/40 mb-3" />
             <h3 className="font-semibold text-foreground">No Active Assignments</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              All submitted properties have been reviewed. New citizen submissions requiring field survey will appear here.
+              All submitted properties have been reviewed. New citizen submissions requiring field
+              survey will appear here.
             </p>
           </div>
         ) : (
@@ -66,19 +79,45 @@ function SurveyorAssignmentsPage() {
                   </Link>
                 ),
               },
-              { key: "title", label: "Property Title", render: (r: Property) => <span className="font-medium">{r.title}</span> },
-              { key: "region", label: "Location", render: (r: Property) => <span className="text-muted-foreground text-xs">{r.address}, {r.region}</span> },
+              {
+                key: "title",
+                label: "Property Title",
+                render: (r: Property) => <span className="font-medium">{r.title}</span>,
+              },
+              {
+                key: "region",
+                label: "Location",
+                render: (r: Property) => (
+                  <span className="text-muted-foreground text-xs">
+                    {r.address}, {r.region}
+                  </span>
+                ),
+              },
               {
                 key: "area",
                 label: "Claimed Area",
-                render: (r: Property) => <span className="font-mono text-xs">{r.area?.toLocaleString()} m²</span>,
+                render: (r: Property) => (
+                  <span className="font-mono text-xs">{r.area?.toLocaleString()} m²</span>
+                ),
               },
               {
                 key: "status",
                 label: "Survey Status",
                 render: (r: Property) => (
-                  <Pill tone={r.surveyorDecision === "verified" ? "success" : r.surveyorDecision === "correction_required" ? "warning" : "info"}>
-                    {r.surveyorDecision === "verified" ? "Surveyor Verified" : r.surveyorDecision === "correction_required" ? "Correction Required" : "Awaiting Survey"}
+                  <Pill
+                    tone={
+                      r.surveyorDecision === "verified"
+                        ? "success"
+                        : r.surveyorDecision === "correction_required"
+                          ? "warning"
+                          : "info"
+                    }
+                  >
+                    {r.surveyorDecision === "verified"
+                      ? "Surveyor Verified"
+                      : r.surveyorDecision === "correction_required"
+                        ? "Correction Required"
+                        : "Awaiting Survey"}
                   </Pill>
                 ),
               },

@@ -8,18 +8,32 @@ import { useAuth, roleHome } from "@/lib/auth";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
+const localTestAccounts = import.meta.env.DEV
+  ? [
+      [
+        "Citizen",
+        import.meta.env.VITE_TEST_CITIZEN_EMAIL,
+        import.meta.env.VITE_TEST_CITIZEN_PASSWORD,
+      ],
+      [
+        "Government",
+        import.meta.env.VITE_TEST_GOVERNMENT_EMAIL,
+        import.meta.env.VITE_TEST_GOVERNMENT_PASSWORD,
+      ],
+      [
+        "Surveyor",
+        import.meta.env.VITE_TEST_SURVEYOR_EMAIL,
+        import.meta.env.VITE_TEST_SURVEYOR_PASSWORD,
+      ],
+      ["Bank", import.meta.env.VITE_TEST_BANK_EMAIL, import.meta.env.VITE_TEST_BANK_PASSWORD],
+      ["Admin", import.meta.env.VITE_TEST_ADMIN_EMAIL, import.meta.env.VITE_TEST_ADMIN_PASSWORD],
+    ].filter((account): account is [string, string, string] => Boolean(account[1] && account[2]))
+  : [];
+
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — TerraTrust AI" }] }),
   component: LoginPage,
 });
-
-const demoAccounts = [
-  { role: "Citizen", email: "citizen@terratrust.ai", pass: "Terra@2026", to: "/dashboard" as const },
-  { role: "Surveyor", email: "surveyor@terratrust.ai", pass: "Survey@2026", to: "/surveyor" as const },
-  { role: "Government officer", email: "government@terratrust.ai", pass: "Gov@2026", to: "/government" as const },
-  { role: "Bank Underwriter", email: "bank@terratrust.ai", pass: "Bank@2026", to: "/bank" as const },
-  { role: "Administrator", email: "admin@terratrust.ai", pass: "Admin@2026", to: "/admin" as const },
-];
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -53,11 +67,33 @@ function LoginPage() {
     navigate({ to: destination });
   };
 
+  const handleLocalTestSignIn = async (role: string, testEmail: string, testPassword: string) => {
+    setSubmitting(true);
+    setErrorMsg(null);
+    const result = await signIn(testEmail, testPassword);
+    setSubmitting(false);
+    if (result.error) {
+      setErrorMsg(result.error);
+      toast.error(result.error);
+      return;
+    }
+    const destination = roleHome(result.role || "citizen");
+    toast.success(`Signed in as ${role} via Supabase Auth`);
+    navigate({ to: destination });
+  };
+
   return (
     <AuthLayout
       title="Welcome back"
       subtitle="Sign in to manage your Property Passports and verifications."
-      footer={<>Don't have an account? <Link to="/register" className="font-medium text-primary">Create one</Link></>}
+      footer={
+        <>
+          Don't have an account?{" "}
+          <Link to="/register" className="font-medium text-primary">
+            Create one
+          </Link>
+        </>
+      }
     >
       {configError && (
         <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-400">
@@ -72,7 +108,14 @@ function LoginPage() {
       )}
 
       <form onSubmit={handleSubmit} className="grid gap-4">
-        <Button type="button" variant="outline" className="h-11" onClick={() => toast.info("Google OAuth will be enabled upon provider setup in Supabase.")}>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11"
+          onClick={() =>
+            toast.info("Google OAuth will be enabled upon provider setup in Supabase.")
+          }
+        >
           <GoogleIcon /> Continue with Google
         </Button>
         <div className="relative my-1 text-center text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -90,13 +133,15 @@ function LoginPage() {
             placeholder="you@email.com"
             className="h-11"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="login-password">Password</Label>
-            <Link to="/forgot-password" className="text-xs text-primary">Forgot?</Link>
+            <Link to="/forgot-password" className="text-xs text-primary">
+              Forgot?
+            </Link>
           </div>
           <Input
             id="login-password"
@@ -107,73 +152,50 @@ function LoginPage() {
             placeholder="••••••••"
             className="h-11"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
         <Button type="submit" className="h-11" disabled={submitting}>
-          {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...</> : "Sign in"}
+          {submitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...
+            </>
+          ) : (
+            "Sign in"
+          )}
         </Button>
       </form>
 
-      <details open className="mt-8 rounded-xl border border-dashed border-border/80 bg-muted/20 p-3.5 text-xs text-muted-foreground group">
-        <summary className="cursor-pointer font-mono font-medium text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground select-none list-none flex items-center justify-between">
-          <span>Role Testing &amp; Autofill Access</span>
-          <span className="text-[10px] font-sans px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">Click to Autofill</span>
-        </summary>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Select any role below to automatically populate credentials and sign into Supabase:
-        </p>
-        <div className="mt-3 grid gap-2">
-          {demoAccounts.map(a => (
-            <div key={a.email} className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-background/80 px-3 py-2">
-              <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-foreground">{a.role}</p>
-                <p className="truncate text-[11px] font-mono text-muted-foreground">{a.email}</p>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="rounded-full text-xs h-7 px-3"
-                  onClick={() => {
-                    setEmail(a.email);
-                    setPassword(a.pass);
-                    setErrorMsg(null);
-                    toast.info(`Autofilled ${a.role}: ${a.email}`);
-                  }}
-                >
-                  Autofill
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="rounded-full text-xs h-7 px-3"
-                  disabled={submitting}
-                  onClick={async () => {
-                    setEmail(a.email);
-                    setPassword(a.pass);
-                    setErrorMsg(null);
-                    setSubmitting(true);
-                    const { error, role } = await signIn(a.email, a.pass);
-                    setSubmitting(false);
-                    if (error) {
-                      setErrorMsg(error);
-                      toast.error(error);
-                      return;
-                    }
-                    const destination = roleHome(role || "citizen");
-                    toast.success(`Signed in as ${a.role}`);
-                    navigate({ to: destination });
-                  }}
-                >
-                  Sign In
-                </Button>
-              </div>
-            </div>
-          ))}
+      {localTestAccounts.length > 0 && (
+        <div className="mt-6 rounded-lg border border-dashed border-primary/40 bg-muted/30 p-4 text-xs">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-semibold text-foreground tracking-wide uppercase text-[11px]">
+              Demo / Test Access
+            </span>
+            <span className="text-[10px] text-muted-foreground">Real Supabase Auth</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground mb-3">
+            Click any stakeholder below to perform real Supabase authentication and route to the
+            corresponding workspace:
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {localTestAccounts.map(([role, testEmail, testPassword]) => (
+              <Button
+                key={role}
+                id={`test-login-${role.toLowerCase()}`}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="font-medium text-xs h-8 border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors"
+                disabled={submitting}
+                onClick={() => handleLocalTestSignIn(role, testEmail, testPassword)}
+              >
+                Continue as {role}
+              </Button>
+            ))}
+          </div>
         </div>
-      </details>
+      )}
     </AuthLayout>
   );
 }
@@ -181,10 +203,22 @@ function LoginPage() {
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="mr-2 h-4 w-4">
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.99.66-2.25 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
-      <path fill="#FBBC05" d="M5.84 14.11A6.6 6.6 0 0 1 5.5 12c0-.73.13-1.45.34-2.11V7.05H2.18A11 11 0 0 0 1 12c0 1.78.43 3.46 1.18 4.95l3.66-2.84z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.07.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.99.66-2.25 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.11A6.6 6.6 0 0 1 5.5 12c0-.73.13-1.45.34-2.11V7.05H2.18A11 11 0 0 0 1 12c0 1.78.43 3.46 1.18 4.95l3.66-2.84z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.07.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"
+      />
     </svg>
   );
 }

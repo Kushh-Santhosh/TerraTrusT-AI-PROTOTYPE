@@ -1,8 +1,9 @@
 import puppeteer from 'puppeteer-core';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://iixsxywjsclzbjfzlnvq.supabase.co';
-const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_Vp893beApMLxMug7adBoag_OM-MpDdV';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are required');
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function runQATest() {

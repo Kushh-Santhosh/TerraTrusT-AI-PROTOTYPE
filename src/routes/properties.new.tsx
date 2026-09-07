@@ -23,7 +23,6 @@ import {
   savePropertyDocument,
   persistVerificationOutcome,
 } from "@/lib/supabase-persistence";
-import { saveRegisteredLocalProperty } from "@/lib/property-repository";
 import { runVerification, type VerificationResult } from "@/lib/verification-workflow";
 import {
   Building2,
@@ -47,13 +46,7 @@ export const Route = createFileRoute("/properties/new")({
   component: RegisterPropertyWizard,
 });
 
-const STEPS = [
-  "Property Details",
-  "Location",
-  "Boundary & GIS",
-  "Documents",
-  "Review & Submit",
-];
+const STEPS = ["Property Details", "Location", "Boundary & GIS", "Documents", "Review & Submit"];
 
 const PROPERTY_TYPES: { label: string; value: PropertyType }[] = [
   { label: "Residential", value: "residential" },
@@ -65,16 +58,17 @@ const PROPERTY_TYPES: { label: string; value: PropertyType }[] = [
 ];
 
 function generatePassportId(state: string): string {
-  const stateCode = state
-    .replace(/[^a-zA-Z]/g, "")
-    .slice(0, 2)
-    .toUpperCase() || "KA";
+  const stateCode =
+    state
+      .replace(/[^a-zA-Z]/g, "")
+      .slice(0, 2)
+      .toUpperCase() || "KA";
   const yearMonth = new Date().toISOString().slice(2, 7).replace("-", "");
   const randHex = Math.random().toString(36).slice(2, 7).toUpperCase();
   return `TT-${stateCode}-${yearMonth}-${randHex}`;
 }
 
-export function RegisterPropertyWizard() {
+function RegisterPropertyWizard() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
@@ -133,8 +127,8 @@ export function RegisterPropertyWizard() {
         igrDocRef: "HAV-4-12401-2023",
       });
       setBoundary([
-        { lat: 18.5910, lng: 73.7385 },
-        { lat: 18.5920, lng: 73.7388 },
+        { lat: 18.591, lng: 73.7385 },
+        { lat: 18.592, lng: 73.7388 },
         { lat: 18.5918, lng: 73.7398 },
         { lat: 18.5909, lng: 73.7395 },
       ]);
@@ -177,14 +171,14 @@ export function RegisterPropertyWizard() {
 
   // Form State - Step 3: Boundary & GIS
   const [boundary, setBoundary] = useState<LatLng[]>([
-    { lat: 12.9275, lng: 77.6830 },
+    { lat: 12.9275, lng: 77.683 },
     { lat: 12.9284, lng: 77.6832 },
     { lat: 12.9283, lng: 77.6841 },
     { lat: 12.9274, lng: 77.6839 },
   ]);
   const [areaSqm, setAreaSqm] = useState<number>(() =>
     calculatePolygonArea([
-      { lat: 12.9275, lng: 77.6830 },
+      { lat: 12.9275, lng: 77.683 },
       { lat: 12.9284, lng: 77.6832 },
       { lat: 12.9283, lng: 77.6841 },
       { lat: 12.9274, lng: 77.6839 },
@@ -244,7 +238,7 @@ export function RegisterPropertyWizard() {
             break;
         }
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   };
 
@@ -307,7 +301,9 @@ export function RegisterPropertyWizard() {
   // Final Submission to Supabase & Live n8n Verification
   const handleSubmit = async () => {
     if (!validateStep(0) || !validateStep(1) || !validateStep(2)) {
-      setSubmissionError("Please review the wizard: some required fields are incomplete or invalid.");
+      setSubmissionError(
+        "Please review the wizard: some required fields are incomplete or invalid.",
+      );
       return;
     }
 
@@ -315,7 +311,12 @@ export function RegisterPropertyWizard() {
     setSubmissionError(null);
     setSubmissionProgress("Creating property record in Supabase…");
 
-    const ownerId = user?.id || "00000000-0000-0000-0000-000000000001";
+    if (!user?.id) {
+      setSubmissionError("Your authenticated user session is unavailable. Sign in again before registering a property.");
+      return;
+    }
+
+    const ownerId = user.id;
     const passportId = generatePassportId(state);
 
     try {
@@ -327,7 +328,12 @@ export function RegisterPropertyWizard() {
           recordType: "RTC / Pahani",
           reference: `${cadastralValues.district || "Bengaluru Urban"}/${cadastralValues.taluk || "Bengaluru East"}/${cadastralValues.village || "Bellandur"}/${cadastralValues.surveyNumber || "14/2"}/${cadastralValues.hissa || "2A"}`,
           status: "DOCUMENT_EVIDENCE",
-          evidenceAttached: documents.some(d => d.name.toLowerCase().includes("rtc") || d.name.toLowerCase().includes("pahani") || d.kind === "survey"),
+          evidenceAttached: documents.some(
+            (d) =>
+              d.name.toLowerCase().includes("rtc") ||
+              d.name.toLowerCase().includes("pahani") ||
+              d.kind === "survey",
+          ),
           checkedAt: new Date().toISOString(),
           notes: "RTC evidence cross-referenced against Bhoomi revenue database",
         };
@@ -336,7 +342,12 @@ export function RegisterPropertyWizard() {
           recordType: "Registered Sale Deed & EC",
           reference: cadastralValues.kaveriRegRef || "KVR-BNG-2024-DOC-9821",
           status: "DOCUMENT_EVIDENCE",
-          evidenceAttached: documents.some(d => d.name.toLowerCase().includes("deed") || d.name.toLowerCase().includes("sale") || d.kind === "deed"),
+          evidenceAttached: documents.some(
+            (d) =>
+              d.name.toLowerCase().includes("deed") ||
+              d.name.toLowerCase().includes("sale") ||
+              d.kind === "deed",
+          ),
           checkedAt: new Date().toISOString(),
           notes: "Sale deed and Form 15 Non-Encumbrance verified",
         };
@@ -345,7 +356,9 @@ export function RegisterPropertyWizard() {
           recordType: "ePID Municipal Extract",
           reference: cadastralValues.epidOrSas || "1502001002003004",
           status: cadastralValues.epidOrSas ? "DOCUMENT_EVIDENCE" : "MANUAL_REVIEW",
-          evidenceAttached: documents.some(d => d.name.toLowerCase().includes("khata") || d.kind === "tax"),
+          evidenceAttached: documents.some(
+            (d) => d.name.toLowerCase().includes("khata") || d.kind === "tax",
+          ),
           checkedAt: new Date().toISOString(),
           notes: "ePID municipal property tax assessment matched",
         };
@@ -354,7 +367,7 @@ export function RegisterPropertyWizard() {
           recordType: "BDA Layout Allotment",
           reference: cadastralValues.bdaAllotmentRef || "BDA/ALLOT/HRBR/2021/41",
           status: cadastralValues.bdaAllotmentRef ? "DOCUMENT_EVIDENCE" : "NOT_CHECKED",
-          evidenceAttached: documents.some(d => d.name.toLowerCase().includes("bda")),
+          evidenceAttached: documents.some((d) => d.name.toLowerCase().includes("bda")),
           checkedAt: new Date().toISOString(),
           notes: "BDA layout allotment letter attached",
         };
@@ -364,7 +377,12 @@ export function RegisterPropertyWizard() {
           recordType: "7/12 Extract (Saat Baara)",
           reference: `${cadastralValues.district || "Pune"}/${cadastralValues.taluka || "Haveli"}/${cadastralValues.village || "Hinjawadi"}/${cadastralValues.gatOrSurveyNo || "Gat 241"}/${cadastralValues.hissaNo || "1A"}`,
           status: "DOCUMENT_EVIDENCE",
-          evidenceAttached: documents.some(d => d.name.toLowerCase().includes("712") || d.name.toLowerCase().includes("saat") || d.kind === "survey"),
+          evidenceAttached: documents.some(
+            (d) =>
+              d.name.toLowerCase().includes("712") ||
+              d.name.toLowerCase().includes("saat") ||
+              d.kind === "survey",
+          ),
           checkedAt: new Date().toISOString(),
           notes: "7/12 Extract verified against Mahabhumi revenue records",
         };
@@ -373,7 +391,9 @@ export function RegisterPropertyWizard() {
           recordType: "Index II & Registered Deed",
           reference: cadastralValues.igrDocRef || "HAV-4-12401-2023",
           status: "DOCUMENT_EVIDENCE",
-          evidenceAttached: documents.some(d => d.name.toLowerCase().includes("deed") || d.kind === "deed"),
+          evidenceAttached: documents.some(
+            (d) => d.name.toLowerCase().includes("deed") || d.kind === "deed",
+          ),
           checkedAt: new Date().toISOString(),
           notes: "Index II certified copy verified",
         };
@@ -382,7 +402,9 @@ export function RegisterPropertyWizard() {
           recordType: "Property Card (Milkat Patra)",
           reference: cadastralValues.ctsNumber || "CTS-1042-B",
           status: cadastralValues.ctsNumber ? "DOCUMENT_EVIDENCE" : "NOT_CHECKED",
-          evidenceAttached: documents.some(d => d.name.toLowerCase().includes("card") || d.kind === "tax"),
+          evidenceAttached: documents.some(
+            (d) => d.name.toLowerCase().includes("card") || d.kind === "tax",
+          ),
           checkedAt: new Date().toISOString(),
           notes: "CTS Number verified on urban survey map",
         };
@@ -417,8 +439,11 @@ export function RegisterPropertyWizard() {
       // 1. Attempt creating property record in Supabase
       const propRes = await createProperty(propertyPayload);
       const createdRow = propRes.data;
-      const actualPropertyId = createdRow?.id || `p_${Date.now()}`;
-      const actualPassportId = createdRow?.passport_id || passportId;
+      if (!propRes.persisted || !createdRow?.id || !createdRow?.passport_id) {
+        throw new Error(propRes.error || "Supabase did not return a persisted property record.");
+      }
+      const actualPropertyId = createdRow.id;
+      const actualPassportId = createdRow.passport_id;
 
       const newProperty: Property = {
         id: actualPropertyId,
@@ -458,8 +483,6 @@ export function RegisterPropertyWizard() {
           },
         ],
       };
-
-      saveRegisteredLocalProperty(newProperty);
 
       // 2. Upload documents to Supabase Storage and persist metadata
       let docUploadFailures = 0;
@@ -543,7 +566,6 @@ export function RegisterPropertyWizard() {
 
         newProperty.status = finalStatus;
         newProperty.trustScore = verificationOutcome.result.confidenceScore || 75;
-        saveRegisteredLocalProperty(newProperty);
 
         setSubmissionSuccess({
           propertyId: actualPropertyId,
@@ -554,7 +576,9 @@ export function RegisterPropertyWizard() {
       }
     } catch (err) {
       setSubmissionError(
-        err instanceof Error ? err.message : "An unexpected error occurred during property registration.",
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred during property registration.",
       );
     } finally {
       setIsSubmitting(false);
@@ -568,10 +592,7 @@ export function RegisterPropertyWizard() {
       subtitle="Register an Indian land parcel, establish GIS boundary, upload legal evidence, and trigger live n8n verification."
     >
       <Crumbs
-        items={[
-          { label: "Properties", to: "/properties" },
-          { label: "Register New Property" },
-        ]}
+        items={[{ label: "Properties", to: "/properties" }, { label: "Register New Property" }]}
       />
 
       {/* Visible Progress Stepper */}
@@ -627,24 +648,19 @@ export function RegisterPropertyWizard() {
                 <span>LIVE N8N VERIFICATION FAILED</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                The external n8n orchestrator could not be reached or returned an error. No fake simulation fallback was used.
+                The external n8n orchestrator could not be reached or returned an error. No fake
+                simulation fallback was used.
               </p>
             </div>
           )}
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-            <Link
-              to="/properties/$id/verify"
-              params={{ id: submissionSuccess.propertyId }}
-            >
+            <Link to="/properties/$id/verify" params={{ id: submissionSuccess.propertyId }}>
               <Button variant="outline" className="rounded-full">
                 View Verification Timeline
               </Button>
             </Link>
-            <Link
-              to="/properties/$id"
-              params={{ id: submissionSuccess.propertyId }}
-            >
+            <Link to="/properties/$id" params={{ id: submissionSuccess.propertyId }}>
               <Button id="btn-open-property-passport" className="rounded-full gap-1.5">
                 Open Property Passport <ArrowRight className="h-4 w-4" />
               </Button>
@@ -678,7 +694,8 @@ export function RegisterPropertyWizard() {
                   Step 1: Basic Property Information
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Specify the property title, cadastral land use category, and estimated valuation in Indian Rupees (₹).
+                  Specify the property title, cadastral land use category, and estimated valuation
+                  in Indian Rupees (₹).
                 </p>
               </div>
 
@@ -691,7 +708,9 @@ export function RegisterPropertyWizard() {
                     placeholder="Enter formal property title"
                     className={errors.title ? "border-destructive" : ""}
                   />
-                  {errors.title && <p className="text-[11px] text-destructive mt-1">{errors.title}</p>}
+                  {errors.title && (
+                    <p className="text-[11px] text-destructive mt-1">{errors.title}</p>
+                  )}
                 </Field>
 
                 <Field label="Property Type" hint="Land use category">
@@ -707,10 +726,15 @@ export function RegisterPropertyWizard() {
                       </option>
                     ))}
                   </select>
-                  {errors.propertyType && <p className="text-[11px] text-destructive mt-1">{errors.propertyType}</p>}
+                  {errors.propertyType && (
+                    <p className="text-[11px] text-destructive mt-1">{errors.propertyType}</p>
+                  )}
                 </Field>
 
-                <Field label="Estimated Valuation (INR)" hint="Official guidance value or market estimate in ₹">
+                <Field
+                  label="Estimated Valuation (INR)"
+                  hint="Official guidance value or market estimate in ₹"
+                >
                   <div className="relative">
                     <IndianRupee className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -756,7 +780,12 @@ export function RegisterPropertyWizard() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Country">
-                  <Input id="property-country-input" value={country} disabled className="bg-muted/50 cursor-not-allowed font-medium" />
+                  <Input
+                    id="property-country-input"
+                    value={country}
+                    disabled
+                    className="bg-muted/50 cursor-not-allowed font-medium"
+                  />
                 </Field>
 
                 <Field label="State / Union Territory" hint="Select from all Indian states/UTs">
@@ -772,7 +801,9 @@ export function RegisterPropertyWizard() {
                       </option>
                     ))}
                   </select>
-                  {errors.state && <p className="text-[11px] text-destructive mt-1">{errors.state}</p>}
+                  {errors.state && (
+                    <p className="text-[11px] text-destructive mt-1">{errors.state}</p>
+                  )}
                 </Field>
 
                 <Field label="City / Taluk / District">
@@ -783,7 +814,9 @@ export function RegisterPropertyWizard() {
                     placeholder="E.g. Bengaluru, Mysuru, Hyderabad, Pune"
                     className={errors.city ? "border-destructive" : ""}
                   />
-                  {errors.city && <p className="text-[11px] text-destructive mt-1">{errors.city}</p>}
+                  {errors.city && (
+                    <p className="text-[11px] text-destructive mt-1">{errors.city}</p>
+                  )}
                 </Field>
 
                 <Field label="Street Address" hint="Door no., street, survey no., locality">
@@ -794,7 +827,9 @@ export function RegisterPropertyWizard() {
                     placeholder="E.g., 14/2, Outer Ring Road, Bellandur"
                     className={errors.address ? "border-destructive" : ""}
                   />
-                  {errors.address && <p className="text-[11px] text-destructive mt-1">{errors.address}</p>}
+                  {errors.address && (
+                    <p className="text-[11px] text-destructive mt-1">{errors.address}</p>
+                  )}
                 </Field>
 
                 <Field label="Latitude (Decimal Degrees)" hint="Range: -90.0 to 90.0">
@@ -806,7 +841,9 @@ export function RegisterPropertyWizard() {
                     onChange={(e) => setLatitude(parseFloat(e.target.value) || 0)}
                     className={`font-mono ${errors.latitude ? "border-destructive" : ""}`}
                   />
-                  {errors.latitude && <p className="text-[11px] text-destructive mt-1">{errors.latitude}</p>}
+                  {errors.latitude && (
+                    <p className="text-[11px] text-destructive mt-1">{errors.latitude}</p>
+                  )}
                 </Field>
 
                 <Field label="Longitude (Decimal Degrees)" hint="Range: -180.0 to 180.0">
@@ -818,7 +855,9 @@ export function RegisterPropertyWizard() {
                     onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)}
                     className={`font-mono ${errors.longitude ? "border-destructive" : ""}`}
                   />
-                  {errors.longitude && <p className="text-[11px] text-destructive mt-1">{errors.longitude}</p>}
+                  {errors.longitude && (
+                    <p className="text-[11px] text-destructive mt-1">{errors.longitude}</p>
+                  )}
                 </Field>
 
                 <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border mt-1">
@@ -847,13 +886,20 @@ export function RegisterPropertyWizard() {
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-primary/20 pb-2">
                     <div>
                       <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
-                        <span>{currentProfile.stateName} Cadastral & Land Registry Identifiers</span>
-                        <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+                        <span>
+                          {currentProfile.stateName} Cadastral & Land Registry Identifiers
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] font-mono border-primary/30 text-primary"
+                        >
                           {currentProfile.stateCode} PROFILE
                         </Badge>
                       </h4>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Official {currentProfile.localTerminology.recordOfRightsName} & {currentProfile.localTerminology.deedRegistrationSystemName} cadastral references.
+                        Official {currentProfile.localTerminology.recordOfRightsName} &{" "}
+                        {currentProfile.localTerminology.deedRegistrationSystemName} cadastral
+                        references.
                       </p>
                     </div>
                     <span className="text-[10px] font-medium text-primary">
@@ -863,7 +909,11 @@ export function RegisterPropertyWizard() {
 
                   <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                     {currentProfile.cadastralFields.map((field) => (
-                      <Field key={field.key} label={field.label} hint={field.hint || (field.required ? "Required" : "Optional")}>
+                      <Field
+                        key={field.key}
+                        label={field.label}
+                        hint={field.hint || (field.required ? "Required" : "Optional")}
+                      >
                         <Input
                           id={`cadastral-${field.key}`}
                           value={cadastralValues[field.key] || ""}
@@ -889,7 +939,8 @@ export function RegisterPropertyWizard() {
                   Step 3: Real GIS Parcel Boundary
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Interact with real OpenStreetMap tiles. Drag vertices, double-click to add points, or upload GeoJSON / KML survey files.
+                  Interact with real OpenStreetMap tiles. Drag vertices, double-click to add points,
+                  or upload GeoJSON / KML survey files.
                 </p>
               </div>
 
@@ -922,7 +973,7 @@ export function RegisterPropertyWizard() {
                     }
                     if (res.address.state) {
                       const matched = INDIAN_STATES_AND_UTS.find(
-                        (s) => s.toLowerCase() === res.address?.state?.toLowerCase()
+                        (s) => s.toLowerCase() === res.address?.state?.toLowerCase(),
                       );
                       if (matched) handleStateChange(matched);
                     }
@@ -940,7 +991,8 @@ export function RegisterPropertyWizard() {
                   Step 4: Title Documents & Evidence
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Upload legal title deeds, survey maps, tax receipts, and identity documents into private Supabase Storage.
+                  Upload legal title deeds, survey maps, tax receipts, and identity documents into
+                  private Supabase Storage.
                 </p>
               </div>
 
@@ -951,7 +1003,8 @@ export function RegisterPropertyWizard() {
                   <span>Recommended Official Evidence for {currentProfile.stateName}</span>
                 </div>
                 <p className="text-muted-foreground text-[11px]">
-                  Official sources in this jurisdiction: {currentProfile.officialSystems.map((s) => s.name).join(" · ")}
+                  Official sources in this jurisdiction:{" "}
+                  {currentProfile.officialSystems.map((s) => s.name).join(" · ")}
                 </p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {currentProfile.recommendedDocuments.map((doc, idx) => (
@@ -987,7 +1040,8 @@ export function RegisterPropertyWizard() {
                   Step 5: Review & Submit Property
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Review all details before persisting to Supabase and dispatching to the live n8n verification engine.
+                  Review all details before persisting to Supabase and dispatching to the live n8n
+                  verification engine.
                 </p>
               </div>
 
@@ -1008,11 +1062,15 @@ export function RegisterPropertyWizard() {
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Valuation:</span>
-                      <span className="font-medium text-foreground font-mono">₹{formatInr(estimatedValue)}</span>
+                      <span className="font-medium text-foreground font-mono">
+                        ₹{formatInr(estimatedValue)}
+                      </span>
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Parcel Area:</span>
-                      <span className="font-medium text-foreground font-mono">{formatStateArea(areaSqm, currentProfile.stateCode).displayText}</span>
+                      <span className="font-medium text-foreground font-mono">
+                        {formatStateArea(areaSqm, currentProfile.stateCode).displayText}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1024,11 +1082,15 @@ export function RegisterPropertyWizard() {
                   <div className="text-xs space-y-1.5 divide-y divide-border/60">
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">State Profile:</span>
-                      <span className="font-medium text-foreground">{currentProfile.stateName} ({currentProfile.stateCode})</span>
+                      <span className="font-medium text-foreground">
+                        {currentProfile.stateName} ({currentProfile.stateCode})
+                      </span>
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Local RoR:</span>
-                      <span className="font-medium text-foreground">{currentProfile.localTerminology.recordOfRightsName}</span>
+                      <span className="font-medium text-foreground">
+                        {currentProfile.localTerminology.recordOfRightsName}
+                      </span>
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Survey Reference:</span>
@@ -1045,7 +1107,9 @@ export function RegisterPropertyWizard() {
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Registration / Deed Ref:</span>
                       <span className="font-medium text-foreground font-mono">
-                        {cadastralValues.kaveriRegRef || cadastralValues.igrDocRef || "Attached via documents"}
+                        {cadastralValues.kaveriRegRef ||
+                          cadastralValues.igrDocRef ||
+                          "Attached via documents"}
                       </span>
                     </div>
                   </div>
@@ -1066,7 +1130,10 @@ export function RegisterPropertyWizard() {
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Address:</span>
-                      <span className="font-medium text-foreground truncate max-w-[200px]" title={address}>
+                      <span
+                        className="font-medium text-foreground truncate max-w-[200px]"
+                        title={address}
+                      >
                         {address}
                       </span>
                     </div>
@@ -1086,7 +1153,9 @@ export function RegisterPropertyWizard() {
                   <div className="text-xs space-y-1.5">
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Vertices Count:</span>
-                      <span className="font-medium text-foreground font-mono">{boundary.length} coordinates</span>
+                      <span className="font-medium text-foreground font-mono">
+                        {boundary.length} coordinates
+                      </span>
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-muted-foreground">Calculated Area:</span>
@@ -1095,7 +1164,8 @@ export function RegisterPropertyWizard() {
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground">
-                      Conforms to RFC 7946 GeoJSON format. Ready for cross-check against cadastral registry.
+                      Conforms to RFC 7946 GeoJSON format. Ready for cross-check against cadastral
+                      registry.
                     </p>
                   </div>
                 </div>
@@ -1127,7 +1197,10 @@ export function RegisterPropertyWizard() {
               <div className="rounded-xl border border-border bg-muted/20 p-4 text-xs text-muted-foreground">
                 <p className="font-medium text-foreground">Notice of Evidence / Trust Layer:</p>
                 <p className="mt-1">
-                  Submitting this property initiates automated OCR, fraud detection, GIS boundary matching, and confidence evaluation. TerraTrust AI acts as an evidence and trust ledger. State land records authorities remain the final legal authority over title.
+                  Submitting this property initiates automated OCR, fraud detection, GIS boundary
+                  matching, and confidence evaluation. TerraTrust AI acts as an evidence and trust
+                  ledger. State land records authorities remain the final legal authority over
+                  title.
                 </p>
               </div>
             </div>
@@ -1158,7 +1231,12 @@ export function RegisterPropertyWizard() {
 
             <div className="flex items-center gap-3">
               {currentStep < STEPS.length - 1 ? (
-                <Button type="button" id="wizard-continue-btn" onClick={nextStep} className="gap-1.5">
+                <Button
+                  type="button"
+                  id="wizard-continue-btn"
+                  onClick={nextStep}
+                  className="gap-1.5"
+                >
                   Continue <ArrowRight className="h-4 w-4" />
                 </Button>
               ) : (

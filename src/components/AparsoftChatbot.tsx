@@ -42,6 +42,8 @@ export default function AparsoftChatbot() {
       widgetSubtitle: "Powered by Aparsoft AI",
       welcomeMessage: "Hello! How can I assist you with TerraTrust land records and property verification today?",
     };
+    const encodedApiKey = encodeURIComponent(loaderConfig.apiKey);
+    loaderConfig.configEndpoint = `https://www.aparsoft.com/api/v1/chatbot/public/widget/${encodedApiKey}/config/`;
 
     const applyLoaderDataset = (script: HTMLScriptElement, runtimeConfig: LoaderConfig) => {
       script.dataset.aparsoftChatbot = "true";

@@ -34,7 +34,12 @@ import {
 } from "lucide-react";
 import { loadPropertyById } from "@/lib/property-repository";
 import { PropertySubNav } from "@/components/property/PropertySubNav";
-import { persistVerificationOutcome, recordGovernmentDecision } from "@/lib/supabase-persistence";
+import {
+  createSurveyorAssignment,
+  persistVerificationOutcome,
+  recordGovernmentDecision,
+} from "@/lib/supabase-persistence";
+import { loadGovernmentSurveyors } from "@/lib/property-repository";
 import { useAuth } from "@/lib/auth";
 import { getStateProfile, formatStateArea } from "@/lib/state-registry";
 import { RealMap } from "@/components/ui-ext/RealMap";
@@ -63,8 +68,8 @@ export const Route = createFileRoute("/properties/$id/verify")({
 
 function Page() {
   const { property } = Route.useLoaderData();
-  const { user } = useAuth();
-  const isGovOrAdmin = user?.role === "government" || user?.role === "admin";
+  const { user, profile } = useAuth();
+  const isGovOrAdmin = profile?.role === "government" || profile?.role === "admin";
 
   const provider = activeProvider();
   const [running, setRunning] = useState(false);
@@ -77,18 +82,45 @@ function Page() {
   const stateProfile = getStateProfile(property.stateCode || property.region);
 
   // Government Decision state
-  const [govDecision, setGovDecision] = useState<"approved" | "rejected" | "clarification_requested" | null>(
+  const [govDecision, setGovDecision] = useState<
+    "approved" | "rejected" | "clarification_requested" | null
+  >(
     property.governmentDecision && property.governmentDecision !== "pending"
       ? property.governmentDecision
-      : null
+      : null,
   );
-  const [officerNotes, setOfficerNotes] = useState(
-    property.governmentOfficerNotes || ""
-  );
+  const [officerNotes, setOfficerNotes] = useState(property.governmentOfficerNotes || "");
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [propertyStatus, setPropertyStatus] = useState(property.status);
+  const [surveyors, setSurveyors] = useState<Awaited<ReturnType<typeof loadGovernmentSurveyors>>>(
+    [],
+  );
+  const [selectedSurveyor, setSelectedSurveyor] = useState("");
+  const [assignmentMessage, setAssignmentMessage] = useState<string | null>(null);
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+  useEffect(() => {
+    if (isGovOrAdmin) loadGovernmentSurveyors().then(setSurveyors);
+  }, [isGovOrAdmin]);
+
+  const assignSurveyor = async () => {
+    if (!user?.id || !selectedSurveyor) return;
+    setAssigning(true);
+    const outcome = await createSurveyorAssignment({
+      propertyId: property.id,
+      surveyorId: selectedSurveyor,
+      assignedBy: user.id,
+      notes: "Government requested field boundary and evidence review.",
+    });
+    setAssigning(false);
+    setAssignmentMessage(
+      outcome.persisted
+        ? "Surveyor assignment persisted and sent to the field queue."
+        : outcome.error || "Assignment could not be persisted.",
+    );
+  };
 
   const run = useCallback(async () => {
     timers.current.forEach(clearTimeout);
@@ -112,39 +144,46 @@ function Page() {
 
     outcome.result.steps.forEach((step, i) => {
       timers.current.push(
-        setTimeout(() => {
-          setVisible((prev) => [...prev, step]);
-          if (i === outcome.result.steps.length - 1) {
-            setResult(outcome.result);
-            setRunning(false);
-          }
-        }, 420 * (i + 1))
+        setTimeout(
+          () => {
+            setVisible((prev) => [...prev, step]);
+            if (i === outcome.result.steps.length - 1) {
+              setResult(outcome.result);
+              setRunning(false);
+            }
+          },
+          420 * (i + 1),
+        ),
       );
     });
   }, [property]);
 
   const handleGovernmentDecisionSubmit = async (
-    decision: "approved" | "rejected" | "clarification_requested"
+    decision: "approved" | "rejected" | "clarification_requested",
   ) => {
     setIsSubmittingDecision(true);
     try {
       const res = await recordGovernmentDecision({
         propertyId: property.id,
         resolution: decision,
-        officerNotes: officerNotes || `Official government determination: ${decision.toUpperCase()} by ${user?.email || "Authorized Revenue Officer"}.`,
+        officerNotes:
+          officerNotes ||
+          `Official government determination: ${decision.toUpperCase()} by ${user?.email || "Authorized Revenue Officer"}.`,
       });
 
       if (res.error) {
         toast.error(`Decision error: ${res.error}`);
       } else {
         setGovDecision(decision);
-        setPropertyStatus(decision === "approved" ? "verified" : decision === "rejected" ? "disputed" : "pending");
+        setPropertyStatus(
+          decision === "approved" ? "verified" : decision === "rejected" ? "disputed" : "pending",
+        );
         toast.success(
           decision === "approved"
             ? `Government order recorded. Property Passport for ${property.passportId} officially APPROVED.`
             : decision === "rejected"
-            ? `Property ${property.passportId} REJECTED due to identified defects.`
-            : `Clarification requested from surveyor and property owner.`
+              ? `Property ${property.passportId} REJECTED due to identified defects.`
+              : `Clarification requested from surveyor and property owner.`,
         );
       }
     } catch (err) {
@@ -157,18 +196,19 @@ function Page() {
   const shown = result ? result.steps : visible;
 
   // Boundary comparison metrics
-  const citizenAreaSqm = property.boundary && property.boundary.length >= 3
-    ? calculatePolygonArea(property.boundary)
-    : property.area;
-  const surveyorAreaSqm = property.surveyorBoundary && property.surveyorBoundary.length >= 3
-    ? calculatePolygonArea(property.surveyorBoundary)
-    : null;
-  const areaDiscrepancyDelta = surveyorAreaSqm
-    ? Math.abs(surveyorAreaSqm - citizenAreaSqm)
-    : 0;
-  const areaDiscrepancyPct = surveyorAreaSqm && citizenAreaSqm > 0
-    ? ((areaDiscrepancyDelta / citizenAreaSqm) * 100).toFixed(1)
-    : null;
+  const citizenAreaSqm =
+    property.boundary && property.boundary.length >= 3
+      ? calculatePolygonArea(property.boundary)
+      : property.area;
+  const surveyorAreaSqm =
+    property.surveyorBoundary && property.surveyorBoundary.length >= 3
+      ? calculatePolygonArea(property.surveyorBoundary)
+      : null;
+  const areaDiscrepancyDelta = surveyorAreaSqm ? Math.abs(surveyorAreaSqm - citizenAreaSqm) : 0;
+  const areaDiscrepancyPct =
+    surveyorAreaSqm && citizenAreaSqm > 0
+      ? ((areaDiscrepancyDelta / citizenAreaSqm) * 100).toFixed(1)
+      : null;
 
   return (
     <AppShell
@@ -203,18 +243,28 @@ function Page() {
                 {stateProfile.stateName} State Land Profile ({stateProfile.stateCode})
               </span>
               <span className="text-xs text-muted-foreground">
-                Primary Unit: <strong>{stateProfile.unitConversion.primaryLocalUnit}</strong> ({stateProfile.unitConversion.label})
+                Primary Unit: <strong>{stateProfile.unitConversion.primaryLocalUnit}</strong> (
+                {stateProfile.unitConversion.label})
               </span>
             </div>
             <p className="mt-1.5 text-sm text-foreground">
-              Official checks configured for <strong>{stateProfile.localTerminology.recordOfRightsName}</strong>,{" "}
+              Official checks configured for{" "}
+              <strong>{stateProfile.localTerminology.recordOfRightsName}</strong>,{" "}
               <strong>{stateProfile.localTerminology.deedRegistrationSystemName}</strong>, and{" "}
               <strong>{stateProfile.localTerminology.urbanPropertyCardLabel}</strong>.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Status:</span>
-            <Pill tone={propertyStatus === "verified" ? "success" : propertyStatus === "disputed" ? "danger" : "warning"}>
+            <Pill
+              tone={
+                propertyStatus === "verified"
+                  ? "success"
+                  : propertyStatus === "disputed"
+                    ? "danger"
+                    : "warning"
+              }
+            >
               {propertyStatus.toUpperCase()}
             </Pill>
           </div>
@@ -251,7 +301,9 @@ function Page() {
               {property.cadastralIdentifiers?.surveyNumber ||
                 property.cadastralIdentifiers?.gatNumber ||
                 "Survey Ref Attached"}
-              {property.cadastralIdentifiers?.hissa ? ` / Hissa ${property.cadastralIdentifiers.hissa}` : ""}
+              {property.cadastralIdentifiers?.hissa
+                ? ` / Hissa ${property.cadastralIdentifiers.hissa}`
+                : ""}
             </p>
           </div>
 
@@ -286,10 +338,12 @@ function Page() {
         <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">
           <div>
             <h3 className="text-sm font-semibold flex items-center gap-2 text-foreground">
-              <ShieldCheck className="h-4 w-4 text-primary" /> Researched Official Systems & Evidence
+              <ShieldCheck className="h-4 w-4 text-primary" /> Researched Official Systems &
+              Evidence
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Verified integration status for {stateProfile.stateName} revenue, registration, and municipal systems.
+              Verified integration status for {stateProfile.stateName} revenue, registration, and
+              municipal systems.
             </p>
           </div>
           <span className="text-[11px] text-muted-foreground">
@@ -310,27 +364,23 @@ function Page() {
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-xs text-foreground">
-                      {sys.name}
-                    </span>
+                    <span className="font-semibold text-xs text-foreground">{sys.name}</span>
                     <Badge
                       variant="outline"
                       className={`text-[10px] font-mono shrink-0 ${
                         sys.adapterStatus === "DOCUMENT_EVIDENCE"
                           ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
                           : sys.adapterStatus === "AUTHORIZED_CONNECTOR"
-                          ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
-                          : sys.adapterStatus === "MANUAL_REVIEW"
-                          ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
-                          : "bg-muted text-muted-foreground"
+                            ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
+                            : sys.adapterStatus === "MANUAL_REVIEW"
+                              ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+                              : "bg-muted text-muted-foreground"
                       }`}
                     >
                       {sys.adapterStatus.replace("_", " ")}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    {sys.department}
-                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1">{sys.department}</p>
                   <p className="text-[11px] text-foreground/80 mt-2 line-clamp-2 leading-relaxed">
                     {sys.description}
                   </p>
@@ -425,6 +475,46 @@ function Page() {
       </div>
 
       {/* Government Legal Authority Decision Panel */}
+      {isGovOrAdmin && (
+        <div className="mt-6 surface-card p-5 border border-amber-500/30">
+          <h3 className="text-sm font-semibold text-foreground">Field survey assignment</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Assign this persisted property to a licensed surveyor before making a final decision.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <select
+              value={selectedSurveyor}
+              onChange={(event) => setSelectedSurveyor(event.target.value)}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground"
+            >
+              <option value="">Select a surveyor</option>
+              {surveyors.map((surveyor) => (
+                <option key={surveyor.id} value={surveyor.id}>
+                  {surveyor.full_name || surveyor.email}
+                </option>
+              ))}
+            </select>
+            <Button
+              onClick={assignSurveyor}
+              disabled={assigning || !selectedSurveyor}
+              variant="outline"
+              className="text-xs"
+            >
+              {assigning ? "Assigning…" : "Assign surveyor"}
+            </Button>
+          </div>
+          {surveyors.length === 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              No persisted surveyor profiles are available in this jurisdiction.
+            </p>
+          )}
+          {assignmentMessage && (
+            <p className="mt-2 text-xs text-muted-foreground">{assignmentMessage}</p>
+          )}
+        </div>
+      )}
+
+      {/* Government Legal Authority Decision Panel */}
       <div className="mt-6 surface-card p-5 border-2 border-primary/20">
         <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">
           <div>
@@ -432,7 +522,8 @@ function Page() {
               <Scale className="h-4 w-4 text-primary" /> Government Legal Authority Determination
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Under Section 102 of the Land Revenue Code, only authorized revenue officers make final title determinations.
+              Under Section 102 of the Land Revenue Code, only authorized revenue officers make
+              final title determinations.
             </p>
           </div>
           {govDecision && (
@@ -442,8 +533,8 @@ function Page() {
                 govDecision === "approved"
                   ? "bg-emerald-500/15 text-emerald-600 border-emerald-500/30"
                   : govDecision === "rejected"
-                  ? "bg-red-500/15 text-red-600 border-red-500/30"
-                  : "bg-amber-500/15 text-amber-600 border-amber-500/30"
+                    ? "bg-red-500/15 text-red-600 border-red-500/30"
+                    : "bg-amber-500/15 text-amber-600 border-amber-500/30"
               }`}
             >
               ORDER: {govDecision.toUpperCase()}
@@ -473,7 +564,9 @@ function Page() {
                 className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs gap-1.5"
               >
                 <CheckCircle2 className="h-4 w-4" />
-                {isSubmittingDecision && govDecision === "approved" ? "Recording…" : "APPROVE (Issue Property Passport)"}
+                {isSubmittingDecision && govDecision === "approved"
+                  ? "Recording…"
+                  : "APPROVE (Issue Property Passport)"}
               </Button>
 
               <Button
@@ -484,7 +577,9 @@ function Page() {
                 className="border-amber-500/40 text-amber-600 hover:bg-amber-500/10 rounded-full text-xs gap-1.5"
               >
                 <AlertTriangle className="h-4 w-4" />
-                {isSubmittingDecision && govDecision === "clarification_requested" ? "Recording…" : "REQUEST CLARIFICATION"}
+                {isSubmittingDecision && govDecision === "clarification_requested"
+                  ? "Recording…"
+                  : "REQUEST CLARIFICATION"}
               </Button>
 
               <Button
@@ -495,7 +590,9 @@ function Page() {
                 className="border-red-500/40 text-red-600 hover:bg-red-500/10 rounded-full text-xs gap-1.5"
               >
                 <XCircle className="h-4 w-4" />
-                {isSubmittingDecision && govDecision === "rejected" ? "Recording…" : "REJECT (Record Defect Notice)"}
+                {isSubmittingDecision && govDecision === "rejected"
+                  ? "Recording…"
+                  : "REJECT (Record Defect Notice)"}
               </Button>
             </div>
           </div>
@@ -506,7 +603,7 @@ function Page() {
                 ? `Authoritative revenue officer determination recorded: ${govDecision.toUpperCase()}.`
                 : "Awaiting final decision from jurisdiction revenue officer."}
             </span>
-            <span className="font-mono text-[11px]">Role: {user?.role || "citizen"}</span>
+            <span className="font-mono text-[11px]">Role: {profile?.role || "citizen"}</span>
           </div>
         )}
       </div>
@@ -531,7 +628,8 @@ function Page() {
             description="The workflow calls the existing TerraTrust engines in sequence and returns a signed, auditable decision."
           />
           <p className="text-sm text-muted-foreground">
-            Orchestrates OCR, fraud score, boundary verification, and state registry matching via live n8n webhook.
+            Orchestrates OCR, fraud score, boundary verification, and state registry matching via
+            live n8n webhook.
           </p>
         </div>
       )}

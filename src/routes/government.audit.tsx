@@ -1,21 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { DataTable, KpiRow } from "@/components/ui-ext/Scaffold";
+import { loadGovernmentAuditLogs } from "@/lib/property-repository";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/government/audit")({
   head: () => ({ meta: [{ title: "Audit Trail — TerraTrust AI" }] }),
   component: Page,
 });
 
-const rows = [
-  { at: "2024-09-25 14:21", actor: "Officer V. Rao", action: "Approved Khata mutation permit PMT-44021", target: "KA-BLR-0412", ip: "103.21.x.x" },
-  { at: "2024-09-25 13:08", actor: "TerraTrust AI Engine", action: "Flagged duplicate encumbrance deed", target: "DL-GUR-0518", ip: "system" },
-  { at: "2024-09-25 11:42", actor: "Tehsildar P. Joshi", action: "Reassigned boundary dispute to land surveyor", target: "D-3318", ip: "103.21.x.x" },
-  { at: "2024-09-24 16:30", actor: "Officer S. Patil", action: "Bulk sync 1,402 Bhoomi survey entries", target: "Karnataka State", ip: "103.21.x.x" },
-  { at: "2024-09-24 09:15", actor: "Admin Operator", action: "Granted licensed surveyor credential", target: "u_8821", ip: "103.21.x.x" },
-];
-
 function Page() {
+  const [rows, setRows] = useState<Awaited<ReturnType<typeof loadGovernmentAuditLogs>>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadGovernmentAuditLogs().then((data) => {
+      setRows(data);
+      setLoading(false);
+    });
+  }, []);
+
   return (
     <AppShell
       title="Audit trail"
@@ -24,23 +28,63 @@ function Page() {
     >
       <KpiRow
         items={[
-          { label: "Ledger entries today", value: "1,284" },
-          { label: "Officers active", value: "62" },
-          { label: "AI validation events", value: "9,184" },
-          { label: "Integrity anomalies", value: "0" },
+          { label: "Visible ledger entries", value: `${rows.length}` },
+          {
+            label: "Officer events",
+            value: `${rows.filter((row) => row.actor_role === "government").length}`,
+          },
+          {
+            label: "AI/system events",
+            value: `${rows.filter((row) => row.actor_role === "system").length}`,
+          },
+          { label: "Integrity anomalies", value: "Not configured" },
         ]}
       />
       <div className="mt-6">
-        <DataTable
-          rows={rows}
-          columns={[
-            { key: "at", label: "Timestamp (IST)", render: r => <span className="font-mono text-xs">{r.at}</span> },
-            { key: "actor", label: "Actor", render: r => <span className="font-medium">{r.actor}</span> },
-            { key: "action", label: "Action Logged", render: r => r.action },
-            { key: "target", label: "Target Entity", render: r => <span className="font-mono text-xs">{r.target}</span> },
-            { key: "ip", label: "IP / Source", render: r => <span className="text-muted-foreground">{r.ip}</span> },
-          ]}
-        />
+        {loading ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">Loading audit events…</p>
+        ) : rows.length === 0 ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            No Government-visible audit events are persisted.
+          </p>
+        ) : (
+          <DataTable
+            rows={rows}
+            columns={[
+              {
+                key: "at",
+                label: "Timestamp (IST)",
+                render: (r) => (
+                  <span className="font-mono text-xs">
+                    {new Date(r.created_at).toLocaleString("en-IN")}
+                  </span>
+                ),
+              },
+              {
+                key: "actor",
+                label: "Actor",
+                render: (r) => <span className="font-medium">{r.actor_role || "system"}</span>,
+              },
+              {
+                key: "action",
+                label: "Action Logged",
+                render: (r) => r.action || r.event || r.detail || "Recorded event",
+              },
+              {
+                key: "target",
+                label: "Target Entity",
+                render: (r) => (
+                  <span className="font-mono text-xs">{r.property_id || "platform"}</span>
+                ),
+              },
+              {
+                key: "ip",
+                label: "Source",
+                render: (r) => <span className="text-muted-foreground">Audit log</span>,
+              },
+            ]}
+          />
+        )}
       </div>
     </AppShell>
   );

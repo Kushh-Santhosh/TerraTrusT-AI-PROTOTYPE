@@ -1,9 +1,25 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
-import { Calculator, Ruler, FileText, Compass, Layers, ScanLine, ArrowRight, CheckCircle2, Copy } from "lucide-react";
+import {
+  Calculator,
+  Ruler,
+  FileText,
+  Compass,
+  Layers,
+  ScanLine,
+  ArrowRight,
+  CheckCircle2,
+  Copy,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -13,7 +29,7 @@ export const Route = createFileRoute("/surveyor/tools")({
   component: SurveyorToolsPage,
 });
 
-export function SurveyorToolsPage() {
+function SurveyorToolsPage() {
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<"converter" | "validator" | null>(null);
 
@@ -23,7 +39,9 @@ export function SurveyorToolsPage() {
   const [utmZone, setUtmZone] = useState("43N");
 
   // GeoJSON validator state
-  const [geoJsonInput, setGeoJsonInput] = useState('{"type":"Polygon","coordinates":[[[77.594,12.971],[77.596,12.971],[77.596,12.973],[77.594,12.973],[77.594,12.971]]]}');
+  const [geoJsonInput, setGeoJsonInput] = useState(
+    '{"type":"Polygon","coordinates":[[[77.594,12.971],[77.596,12.971],[77.596,12.973],[77.594,12.973],[77.594,12.971]]]}',
+  );
   const [validationResult, setValidationResult] = useState<string | null>(null);
 
   const handleConvert = () => {
@@ -33,7 +51,9 @@ export function SurveyorToolsPage() {
       toast.error("Invalid coordinates entered");
       return;
     }
-    toast.success(`Converted ${latNum.toFixed(4)}°N, ${lngNum.toFixed(4)}°E to UTM ${utmZone} & Everest 1830 Datum`);
+    toast.success(
+      `Converted ${latNum.toFixed(4)}°N, ${lngNum.toFixed(4)}°E to UTM ${utmZone} & Everest 1830 Datum`,
+    );
   };
 
   const handleValidateGeoJson = () => {
@@ -42,7 +62,9 @@ export function SurveyorToolsPage() {
       if (!parsed.type || !["Polygon", "MultiPolygon", "Feature"].includes(parsed.type)) {
         throw new Error("GeoJSON must be a Polygon or Feature geometry");
       }
-      setValidationResult("Valid GeoJSON! Topology closed, correct WGS84 orientation, compliant with Bhoomi cadastral standard.");
+      setValidationResult(
+        "Valid GeoJSON! Topology closed, correct WGS84 orientation, compliant with Bhoomi cadastral standard.",
+      );
       toast.success("GeoJSON validated successfully");
     } catch (err: any) {
       setValidationResult(`Invalid GeoJSON: ${err.message}`);
@@ -135,7 +157,8 @@ export function SurveyorToolsPage() {
           <DialogHeader>
             <DialogTitle>Coordinate & Datum Converter</DialogTitle>
             <DialogDescription>
-              Convert WGS84 GPS coordinates to Indian Cadastral Grid (UTM 43N / Survey of India Everest 1830).
+              Convert WGS84 GPS coordinates to Indian Cadastral Grid (UTM 43N / Survey of India
+              Everest 1830).
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-3">
@@ -186,7 +209,9 @@ export function SurveyorToolsPage() {
               />
             </div>
             {validationResult && (
-              <div className={`p-3 rounded-lg text-xs flex items-start gap-2 ${validationResult.startsWith("Valid") ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-destructive/10 text-destructive border border-destructive/20"}`}>
+              <div
+                className={`p-3 rounded-lg text-xs flex items-start gap-2 ${validationResult.startsWith("Valid") ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-destructive/10 text-destructive border border-destructive/20"}`}
+              >
                 <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{validationResult}</span>
               </div>

@@ -39,7 +39,7 @@ function BankPage() {
     });
   }, []);
 
-  const totalValue = verifiedProps.reduce((sum, p) => sum + (p.valuation || 24000000), 0);
+  const totalValue = verifiedProps.reduce((sum, p) => sum + p.valuation, 0);
 
   // Generate pipeline tied directly to real verified properties in Supabase
   const pipeline = verifiedProps.map((p, idx) => ({
@@ -48,9 +48,9 @@ function BankPage() {
     parcel: p.passportId,
     title: p.title,
     borrower: p.owner || "Authenticated Property Owner",
-    amount: formatInr(p.valuation || 24000000),
+    amount: formatInr(p.valuation),
     ltv: "65%",
-    trust: p.trustScore || 93,
+    trust: p.trustScore,
     decision: p.trustScore >= 80 ? "Approved" : "Review",
   }));
 
@@ -68,7 +68,8 @@ function BankPage() {
       }
     >
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">INSTITUTIONAL LENDING:</strong> Underwriting queue powered by authoritative Supabase Property Passports and live n8n AI valuations.
+        <strong className="text-foreground">INSTITUTIONAL LENDING:</strong> Underwriting queue
+        powered by authoritative Supabase Property Passports and live n8n AI valuations.
       </div>
 
       <KpiRow
@@ -82,19 +83,27 @@ function BankPage() {
 
       <div className="mt-6 flex items-center justify-between">
         <h3 className="font-semibold text-foreground">Underwriting Pipeline</h3>
-        <Link to="/bank/loans" className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1">
+        <Link
+          to="/bank/loans"
+          className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
+        >
           View full loan portfolio <ArrowUpRight className="h-4 w-4" />
         </Link>
       </div>
 
       <div className="mt-3">
         {loading ? (
-          <p className="py-8 text-center text-xs text-muted-foreground">Loading eligible Property Passports…</p>
+          <p className="py-8 text-center text-xs text-muted-foreground">
+            Loading eligible Property Passports…
+          </p>
         ) : pipeline.length === 0 ? (
           <div className="surface-card p-8 text-center">
             <ShieldCheck className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
             <p className="font-medium text-foreground">No eligible verified properties found.</p>
-            <p className="text-xs text-muted-foreground mt-1">Properties must be fully verified and receive an authoritative valuation to appear in the bank underwriting book.</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Properties must be fully verified and receive an authoritative valuation to appear in
+              the bank underwriting book.
+            </p>
           </div>
         ) : (
           <DataTable
@@ -103,25 +112,43 @@ function BankPage() {
               {
                 key: "id",
                 label: "Application",
-                render: r => <span className="font-mono text-xs font-medium">{r.id}</span>,
+                render: (r) => <span className="font-mono text-xs font-medium">{r.id}</span>,
               },
               {
                 key: "p",
                 label: "Parcel Passport",
-                render: r => (
-                  <Link to="/properties/$id" params={{ id: r.propertyId }} className="font-mono text-xs text-primary hover:underline font-semibold">
+                render: (r) => (
+                  <Link
+                    to="/properties/$id"
+                    params={{ id: r.propertyId }}
+                    className="font-mono text-xs text-primary hover:underline font-semibold"
+                  >
                     {r.parcel}
                   </Link>
                 ),
               },
-              { key: "t", label: "Property Title", render: r => <span className="font-medium">{r.title}</span> },
-              { key: "b", label: "Borrower", render: r => <span className="text-muted-foreground text-xs">{r.borrower}</span> },
-              { key: "a", label: "Authoritative Valuation", render: r => <span className="font-mono font-medium text-primary">{r.amount}</span> },
-              { key: "ltv", label: "LTV", render: r => r.ltv },
+              {
+                key: "t",
+                label: "Property Title",
+                render: (r) => <span className="font-medium">{r.title}</span>,
+              },
+              {
+                key: "b",
+                label: "Borrower",
+                render: (r) => <span className="text-muted-foreground text-xs">{r.borrower}</span>,
+              },
+              {
+                key: "a",
+                label: "Authoritative Valuation",
+                render: (r) => (
+                  <span className="font-mono font-medium text-primary">{r.amount}</span>
+                ),
+              },
+              { key: "ltv", label: "LTV", render: (r) => r.ltv },
               {
                 key: "trust",
                 label: "Trust Score",
-                render: r => (
+                render: (r) => (
                   <Pill tone={r.trust > 85 ? "success" : r.trust > 65 ? "warning" : "danger"}>
                     {r.trust}/100
                   </Pill>
@@ -130,8 +157,16 @@ function BankPage() {
               {
                 key: "d",
                 label: "Decision",
-                render: r => (
-                  <Pill tone={r.decision === "Approved" ? "success" : r.decision === "Review" ? "warning" : "danger"}>
+                render: (r) => (
+                  <Pill
+                    tone={
+                      r.decision === "Approved"
+                        ? "success"
+                        : r.decision === "Review"
+                          ? "warning"
+                          : "danger"
+                    }
+                  >
                     {r.decision}
                   </Pill>
                 ),
@@ -153,7 +188,7 @@ function BankPage() {
                         const target = verifiedProps.find((p) => p.id === r.propertyId);
                         if (target) {
                           setSelectedPropForLoan(target);
-                          setLoanAmount(Math.round((target.valuation || 24000000) * 0.65));
+                          setLoanAmount(Math.round(target.valuation * 0.65));
                         }
                       }}
                     >
@@ -198,7 +233,8 @@ function BankPage() {
                 <div className="p-3 bg-muted/40 rounded-lg border border-border/60 space-y-1">
                   <p className="font-medium text-foreground">{selectedPropForLoan.title}</p>
                   <p className="text-muted-foreground font-mono">
-                    Owner: {selectedPropForLoan.owner} · Valuation: {formatInr(selectedPropForLoan.valuation || 24000000)}
+                    Owner: {selectedPropForLoan.owner} · Valuation:{" "}
+                    {formatInr(selectedPropForLoan.valuation)}
                   </p>
                 </div>
               </div>
@@ -276,7 +312,7 @@ function BankPage() {
                       toast.error(`Loan origination failed: ${res.error}`);
                     } else {
                       toast.success(
-                        `Loan of ${formatInr(loanAmount)} approved and recorded against ${selectedPropForLoan.passportId}.`
+                        `Loan of ${formatInr(loanAmount)} approved and recorded against ${selectedPropForLoan.passportId}.`,
                       );
                       setSelectedPropForLoan(null);
                     }
