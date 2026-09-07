@@ -90,17 +90,17 @@ export async function askTerraAssistant(
     clearTimeout(timeoutId);
 
     if (!res.ok) {
-      let errorMsg = `n8n webhook responded with HTTP ${res.status}`;
+      let errorMsg = `HTTP ${res.status}`;
       try {
         const errJson = await res.json();
-        if (errJson && errJson.error) {
-          errorMsg = errJson.error;
+        if (errJson && (errJson.message || errJson.hint || errJson.error)) {
+          errorMsg = errJson.hint || errJson.message || errJson.error;
         }
       } catch {}
       return {
         success: false,
         conversationId: req.conversationId || "",
-        answer: `TerraTrust AI is temporarily unavailable (${errorMsg}). Please check your connection and retry.`,
+        answer: `TerraTrust AI is temporarily unreachable (${errorMsg}). Please toggle 'Publish' / 'Active' on the n8n assistant canvas.`,
         error: errorMsg,
       };
     }
