@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { properties, valuationTrend } from "@/lib/mock-data";
 import { MapMock } from "@/components/ui-ext/MapMock";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
-import { Download, FileText, History, MapPinned, QrCode, Share2, ShieldCheck, Sparkles, Users2, CheckCircle2, AlertTriangle, Workflow } from "lucide-react";
+import { Download, FileText, History, MapPinned, MapPin, QrCode, Share2, ShieldCheck, Sparkles, Users2, CheckCircle2, AlertTriangle, Workflow } from "lucide-react";
 import { computeConfidence } from "@/lib/confidence-engine";
 import { getEncumbrances, getNearbyInfra, getRiskIndicators, getOwnershipHistory } from "@/lib/property-intel";
 import { getFraudReport } from "@/lib/fraud-engine";
@@ -109,6 +109,21 @@ function PassportPage() {
             </TabsList>
 
             <TabsContent value="overview" className="mt-4 grid gap-4">
+              <div className="surface-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <p className="font-medium">Cadastral Map & Boundary</p>
+                  </div>
+                  <span className="text-xs font-mono text-muted-foreground">
+                    ({p.coords?.lat?.toFixed(5) || "12.9716"}, {p.coords?.lng?.toFixed(5) || "77.5946"}) · {p.area.toLocaleString()} m²
+                  </span>
+                </div>
+                <div className="overflow-hidden rounded-xl border border-border">
+                  <MapMock properties={[p]} highlightId={p.id} height={340} />
+                </div>
+              </div>
+
               <div className="surface-card p-5">
                 <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><p className="font-medium">AI valuation history</p></div>
                 <div className="mt-3 h-56">
