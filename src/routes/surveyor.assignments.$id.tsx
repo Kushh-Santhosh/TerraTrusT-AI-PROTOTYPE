@@ -77,7 +77,7 @@ function SurveyorAssignmentDetail() {
 
   if (loading) {
     return (
-      <AppShell title="Loading Field Assignment…" requiredRole={["surveyor", "admin"]}>
+      <AppShell title="Loading Field Assignment…" requiredRole={["surveyor", "government", "admin"]}>
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -87,7 +87,7 @@ function SurveyorAssignmentDetail() {
 
   if (!property) {
     return (
-      <AppShell title="Assignment Not Found" requiredRole={["surveyor", "admin"]}>
+      <AppShell title="Assignment Not Found" requiredRole={["surveyor", "government", "admin"]}>
         <div className="surface-card p-8 text-center max-w-md mx-auto my-12">
           <AlertTriangle className="h-10 w-10 text-destructive mx-auto mb-3" />
           <h3 className="text-lg font-semibold">Parcel Not Found</h3>
@@ -108,7 +108,7 @@ function SurveyorAssignmentDetail() {
     <AppShell
       title={`Field Survey: ${property.title}`}
       subtitle={`Passport ID: ${property.passportId} · ${property.address}, ${property.region}`}
-      requiredRole={["surveyor", "admin"]}
+      requiredRole={["surveyor", "government", "admin"]}
       actions={
         <div className="flex items-center gap-2">
           <Link to="/surveyor">

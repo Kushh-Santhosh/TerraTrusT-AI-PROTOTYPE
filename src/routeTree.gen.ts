@@ -73,6 +73,15 @@ import { Route as AiRouteImport } from './routes/ai'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SurveyorIndexRouteImport } from './routes/surveyor.index'
+import { Route as SupportIndexRouteImport } from './routes/support.index'
+import { Route as ReportsIndexRouteImport } from './routes/reports.index'
+import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
+import { Route as GovernmentIndexRouteImport } from './routes/government.index'
+import { Route as FraudIndexRouteImport } from './routes/fraud.index'
+import { Route as DisputesIndexRouteImport } from './routes/disputes.index'
+import { Route as BankIndexRouteImport } from './routes/bank.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as SurveyorToolsRouteImport } from './routes/surveyor.tools'
 import { Route as SurveyorAssignmentsRouteImport } from './routes/surveyor.assignments'
 import { Route as SupportNewRouteImport } from './routes/support.new'
@@ -96,6 +105,7 @@ import { Route as AdminRegionsRouteImport } from './routes/admin.regions'
 import { Route as AdminFeedbackRouteImport } from './routes/admin.feedback'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminApiKeysRouteImport } from './routes/admin.api-keys'
+import { Route as SurveyorAssignmentsIndexRouteImport } from './routes/surveyor.assignments.index'
 import { Route as SurveyorAssignmentsIdRouteImport } from './routes/surveyor.assignments.$id'
 import { Route as PropertiesIdVerifyRouteImport } from './routes/properties.$id.verify'
 import { Route as PropertiesIdTransferRouteImport } from './routes/properties.$id.transfer'
@@ -429,6 +439,51 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SurveyorIndexRoute = SurveyorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SurveyorRoute,
+} as any)
+const SupportIndexRoute = SupportIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SupportRoute,
+} as any)
+const ReportsIndexRoute = ReportsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PropertiesRoute,
+} as any)
+const GovernmentIndexRoute = GovernmentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GovernmentRoute,
+} as any)
+const FraudIndexRoute = FraudIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FraudRoute,
+} as any)
+const DisputesIndexRoute = DisputesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DisputesRoute,
+} as any)
+const BankIndexRoute = BankIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BankRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const SurveyorToolsRoute = SurveyorToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
@@ -544,6 +599,12 @@ const AdminApiKeysRoute = AdminApiKeysRouteImport.update({
   path: '/api-keys',
   getParentRoute: () => AdminRoute,
 } as any)
+const SurveyorAssignmentsIndexRoute =
+  SurveyorAssignmentsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => SurveyorAssignmentsRoute,
+  } as any)
 const SurveyorAssignmentsIdRoute = SurveyorAssignmentsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -693,6 +754,15 @@ export interface FileRoutesByFullPath {
   '/support/new': typeof SupportNewRoute
   '/surveyor/assignments': typeof SurveyorAssignmentsRouteWithChildren
   '/surveyor/tools': typeof SurveyorToolsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/bank/': typeof BankIndexRoute
+  '/disputes/': typeof DisputesIndexRoute
+  '/fraud/': typeof FraudIndexRoute
+  '/government/': typeof GovernmentIndexRoute
+  '/properties/': typeof PropertiesIndexRoute
+  '/reports/': typeof ReportsIndexRoute
+  '/support/': typeof SupportIndexRoute
+  '/surveyor/': typeof SurveyorIndexRoute
   '/properties/$id/ai-analysis': typeof PropertiesIdAiAnalysisRoute
   '/properties/$id/boundary': typeof PropertiesIdBoundaryRoute
   '/properties/$id/documents': typeof PropertiesIdDocumentsRoute
@@ -705,11 +775,11 @@ export interface FileRoutesByFullPath {
   '/properties/$id/transfer': typeof PropertiesIdTransferRoute
   '/properties/$id/verify': typeof PropertiesIdVerifyRoute
   '/surveyor/assignments/$id': typeof SurveyorAssignmentsIdRoute
+  '/surveyor/assignments/': typeof SurveyorAssignmentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/ai': typeof AiRoute
   '/ai-boundary': typeof AiBoundaryRoute
   '/ai-confidence': typeof AiConfidenceRoute
@@ -728,7 +798,6 @@ export interface FileRoutesByTo {
   '/api-tokens': typeof ApiTokensRoute
   '/assistant': typeof AssistantRoute
   '/attestations': typeof AttestationsRoute
-  '/bank': typeof BankRouteWithChildren
   '/billing': typeof BillingRoute
   '/changelog': typeof ChangelogRoute
   '/community': typeof CommunityRoute
@@ -736,13 +805,10 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/developers': typeof DevelopersRoute
-  '/disputes': typeof DisputesRouteWithChildren
   '/empty': typeof EmptyRoute
   '/error': typeof ErrorRoute
   '/feedback': typeof FeedbackRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/fraud': typeof FraudRouteWithChildren
-  '/government': typeof GovernmentRouteWithChildren
   '/help': typeof HelpRoute
   '/impact': typeof ImpactRoute
   '/integrations': typeof IntegrationsRoute
@@ -756,9 +822,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
-  '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
-  '/reports': typeof ReportsRouteWithChildren
   '/roadmap': typeof RoadmapRoute
   '/role-select': typeof RoleSelectRoute
   '/search': typeof SearchRoute
@@ -766,8 +830,6 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/status': typeof StatusRoute
   '/success': typeof SuccessRoute
-  '/support': typeof SupportRouteWithChildren
-  '/surveyor': typeof SurveyorRouteWithChildren
   '/terms': typeof TermsRoute
   '/valuation': typeof ValuationRoute
   '/verification': typeof VerificationRoute
@@ -792,8 +854,16 @@ export interface FileRoutesByTo {
   '/reports/new': typeof ReportsNewRoute
   '/support/$id': typeof SupportIdRoute
   '/support/new': typeof SupportNewRoute
-  '/surveyor/assignments': typeof SurveyorAssignmentsRouteWithChildren
   '/surveyor/tools': typeof SurveyorToolsRoute
+  '/admin': typeof AdminIndexRoute
+  '/bank': typeof BankIndexRoute
+  '/disputes': typeof DisputesIndexRoute
+  '/fraud': typeof FraudIndexRoute
+  '/government': typeof GovernmentIndexRoute
+  '/properties': typeof PropertiesIndexRoute
+  '/reports': typeof ReportsIndexRoute
+  '/support': typeof SupportIndexRoute
+  '/surveyor': typeof SurveyorIndexRoute
   '/properties/$id/ai-analysis': typeof PropertiesIdAiAnalysisRoute
   '/properties/$id/boundary': typeof PropertiesIdBoundaryRoute
   '/properties/$id/documents': typeof PropertiesIdDocumentsRoute
@@ -806,6 +876,7 @@ export interface FileRoutesByTo {
   '/properties/$id/transfer': typeof PropertiesIdTransferRoute
   '/properties/$id/verify': typeof PropertiesIdVerifyRoute
   '/surveyor/assignments/$id': typeof SurveyorAssignmentsIdRoute
+  '/surveyor/assignments': typeof SurveyorAssignmentsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -896,6 +967,15 @@ export interface FileRoutesById {
   '/support/new': typeof SupportNewRoute
   '/surveyor/assignments': typeof SurveyorAssignmentsRouteWithChildren
   '/surveyor/tools': typeof SurveyorToolsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/bank/': typeof BankIndexRoute
+  '/disputes/': typeof DisputesIndexRoute
+  '/fraud/': typeof FraudIndexRoute
+  '/government/': typeof GovernmentIndexRoute
+  '/properties/': typeof PropertiesIndexRoute
+  '/reports/': typeof ReportsIndexRoute
+  '/support/': typeof SupportIndexRoute
+  '/surveyor/': typeof SurveyorIndexRoute
   '/properties/$id/ai-analysis': typeof PropertiesIdAiAnalysisRoute
   '/properties/$id/boundary': typeof PropertiesIdBoundaryRoute
   '/properties/$id/documents': typeof PropertiesIdDocumentsRoute
@@ -908,6 +988,7 @@ export interface FileRoutesById {
   '/properties/$id/transfer': typeof PropertiesIdTransferRoute
   '/properties/$id/verify': typeof PropertiesIdVerifyRoute
   '/surveyor/assignments/$id': typeof SurveyorAssignmentsIdRoute
+  '/surveyor/assignments/': typeof SurveyorAssignmentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -999,6 +1080,15 @@ export interface FileRouteTypes {
     | '/support/new'
     | '/surveyor/assignments'
     | '/surveyor/tools'
+    | '/admin/'
+    | '/bank/'
+    | '/disputes/'
+    | '/fraud/'
+    | '/government/'
+    | '/properties/'
+    | '/reports/'
+    | '/support/'
+    | '/surveyor/'
     | '/properties/$id/ai-analysis'
     | '/properties/$id/boundary'
     | '/properties/$id/documents'
@@ -1011,11 +1101,11 @@ export interface FileRouteTypes {
     | '/properties/$id/transfer'
     | '/properties/$id/verify'
     | '/surveyor/assignments/$id'
+    | '/surveyor/assignments/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/ai'
     | '/ai-boundary'
     | '/ai-confidence'
@@ -1034,7 +1124,6 @@ export interface FileRouteTypes {
     | '/api-tokens'
     | '/assistant'
     | '/attestations'
-    | '/bank'
     | '/billing'
     | '/changelog'
     | '/community'
@@ -1042,13 +1131,10 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/developers'
-    | '/disputes'
     | '/empty'
     | '/error'
     | '/feedback'
     | '/forgot-password'
-    | '/fraud'
-    | '/government'
     | '/help'
     | '/impact'
     | '/integrations'
@@ -1062,9 +1148,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profile'
-    | '/properties'
     | '/register'
-    | '/reports'
     | '/roadmap'
     | '/role-select'
     | '/search'
@@ -1072,8 +1156,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/status'
     | '/success'
-    | '/support'
-    | '/surveyor'
     | '/terms'
     | '/valuation'
     | '/verification'
@@ -1098,8 +1180,16 @@ export interface FileRouteTypes {
     | '/reports/new'
     | '/support/$id'
     | '/support/new'
-    | '/surveyor/assignments'
     | '/surveyor/tools'
+    | '/admin'
+    | '/bank'
+    | '/disputes'
+    | '/fraud'
+    | '/government'
+    | '/properties'
+    | '/reports'
+    | '/support'
+    | '/surveyor'
     | '/properties/$id/ai-analysis'
     | '/properties/$id/boundary'
     | '/properties/$id/documents'
@@ -1112,6 +1202,7 @@ export interface FileRouteTypes {
     | '/properties/$id/transfer'
     | '/properties/$id/verify'
     | '/surveyor/assignments/$id'
+    | '/surveyor/assignments'
   id:
     | '__root__'
     | '/'
@@ -1201,6 +1292,15 @@ export interface FileRouteTypes {
     | '/support/new'
     | '/surveyor/assignments'
     | '/surveyor/tools'
+    | '/admin/'
+    | '/bank/'
+    | '/disputes/'
+    | '/fraud/'
+    | '/government/'
+    | '/properties/'
+    | '/reports/'
+    | '/support/'
+    | '/surveyor/'
     | '/properties/$id/ai-analysis'
     | '/properties/$id/boundary'
     | '/properties/$id/documents'
@@ -1213,6 +1313,7 @@ export interface FileRouteTypes {
     | '/properties/$id/transfer'
     | '/properties/$id/verify'
     | '/surveyor/assignments/$id'
+    | '/surveyor/assignments/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1732,6 +1833,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/surveyor/': {
+      id: '/surveyor/'
+      path: '/'
+      fullPath: '/surveyor/'
+      preLoaderRoute: typeof SurveyorIndexRouteImport
+      parentRoute: typeof SurveyorRoute
+    }
+    '/support/': {
+      id: '/support/'
+      path: '/'
+      fullPath: '/support/'
+      preLoaderRoute: typeof SupportIndexRouteImport
+      parentRoute: typeof SupportRoute
+    }
+    '/reports/': {
+      id: '/reports/'
+      path: '/'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof ReportsIndexRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/properties/': {
+      id: '/properties/'
+      path: '/'
+      fullPath: '/properties/'
+      preLoaderRoute: typeof PropertiesIndexRouteImport
+      parentRoute: typeof PropertiesRoute
+    }
+    '/government/': {
+      id: '/government/'
+      path: '/'
+      fullPath: '/government/'
+      preLoaderRoute: typeof GovernmentIndexRouteImport
+      parentRoute: typeof GovernmentRoute
+    }
+    '/fraud/': {
+      id: '/fraud/'
+      path: '/'
+      fullPath: '/fraud/'
+      preLoaderRoute: typeof FraudIndexRouteImport
+      parentRoute: typeof FraudRoute
+    }
+    '/disputes/': {
+      id: '/disputes/'
+      path: '/'
+      fullPath: '/disputes/'
+      preLoaderRoute: typeof DisputesIndexRouteImport
+      parentRoute: typeof DisputesRoute
+    }
+    '/bank/': {
+      id: '/bank/'
+      path: '/'
+      fullPath: '/bank/'
+      preLoaderRoute: typeof BankIndexRouteImport
+      parentRoute: typeof BankRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/surveyor/tools': {
       id: '/surveyor/tools'
       path: '/tools'
@@ -1893,6 +2057,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApiKeysRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/surveyor/assignments/': {
+      id: '/surveyor/assignments/'
+      path: '/'
+      fullPath: '/surveyor/assignments/'
+      preLoaderRoute: typeof SurveyorAssignmentsIndexRouteImport
+      parentRoute: typeof SurveyorAssignmentsRoute
+    }
     '/surveyor/assignments/$id': {
       id: '/surveyor/assignments/$id'
       path: '/$id'
@@ -1988,6 +2159,7 @@ interface AdminRouteChildren {
   AdminRolesRoute: typeof AdminRolesRoute
   AdminSystemRoute: typeof AdminSystemRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1998,16 +2170,19 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRolesRoute: AdminRolesRoute,
   AdminSystemRoute: AdminSystemRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface BankRouteChildren {
   BankLoansRoute: typeof BankLoansRoute
+  BankIndexRoute: typeof BankIndexRoute
 }
 
 const BankRouteChildren: BankRouteChildren = {
   BankLoansRoute: BankLoansRoute,
+  BankIndexRoute: BankIndexRoute,
 }
 
 const BankRouteWithChildren = BankRoute._addFileChildren(BankRouteChildren)
@@ -2015,11 +2190,13 @@ const BankRouteWithChildren = BankRoute._addFileChildren(BankRouteChildren)
 interface DisputesRouteChildren {
   DisputesIdRoute: typeof DisputesIdRoute
   DisputesNewRoute: typeof DisputesNewRoute
+  DisputesIndexRoute: typeof DisputesIndexRoute
 }
 
 const DisputesRouteChildren: DisputesRouteChildren = {
   DisputesIdRoute: DisputesIdRoute,
   DisputesNewRoute: DisputesNewRoute,
+  DisputesIndexRoute: DisputesIndexRoute,
 }
 
 const DisputesRouteWithChildren = DisputesRoute._addFileChildren(
@@ -2028,10 +2205,12 @@ const DisputesRouteWithChildren = DisputesRoute._addFileChildren(
 
 interface FraudRouteChildren {
   FraudIdRoute: typeof FraudIdRoute
+  FraudIndexRoute: typeof FraudIndexRoute
 }
 
 const FraudRouteChildren: FraudRouteChildren = {
   FraudIdRoute: FraudIdRoute,
+  FraudIndexRoute: FraudIndexRoute,
 }
 
 const FraudRouteWithChildren = FraudRoute._addFileChildren(FraudRouteChildren)
@@ -2041,6 +2220,7 @@ interface GovernmentRouteChildren {
   GovernmentDisputesRoute: typeof GovernmentDisputesRoute
   GovernmentParcelsRoute: typeof GovernmentParcelsRoute
   GovernmentPermitsRoute: typeof GovernmentPermitsRoute
+  GovernmentIndexRoute: typeof GovernmentIndexRoute
 }
 
 const GovernmentRouteChildren: GovernmentRouteChildren = {
@@ -2048,6 +2228,7 @@ const GovernmentRouteChildren: GovernmentRouteChildren = {
   GovernmentDisputesRoute: GovernmentDisputesRoute,
   GovernmentParcelsRoute: GovernmentParcelsRoute,
   GovernmentPermitsRoute: GovernmentPermitsRoute,
+  GovernmentIndexRoute: GovernmentIndexRoute,
 }
 
 const GovernmentRouteWithChildren = GovernmentRoute._addFileChildren(
@@ -2089,11 +2270,13 @@ const PropertiesIdRouteWithChildren = PropertiesIdRoute._addFileChildren(
 interface PropertiesRouteChildren {
   PropertiesIdRoute: typeof PropertiesIdRouteWithChildren
   PropertiesNewRoute: typeof PropertiesNewRoute
+  PropertiesIndexRoute: typeof PropertiesIndexRoute
 }
 
 const PropertiesRouteChildren: PropertiesRouteChildren = {
   PropertiesIdRoute: PropertiesIdRouteWithChildren,
   PropertiesNewRoute: PropertiesNewRoute,
+  PropertiesIndexRoute: PropertiesIndexRoute,
 }
 
 const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
@@ -2103,11 +2286,13 @@ const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
 interface ReportsRouteChildren {
   ReportsIdRoute: typeof ReportsIdRoute
   ReportsNewRoute: typeof ReportsNewRoute
+  ReportsIndexRoute: typeof ReportsIndexRoute
 }
 
 const ReportsRouteChildren: ReportsRouteChildren = {
   ReportsIdRoute: ReportsIdRoute,
   ReportsNewRoute: ReportsNewRoute,
+  ReportsIndexRoute: ReportsIndexRoute,
 }
 
 const ReportsRouteWithChildren =
@@ -2116,11 +2301,13 @@ const ReportsRouteWithChildren =
 interface SupportRouteChildren {
   SupportIdRoute: typeof SupportIdRoute
   SupportNewRoute: typeof SupportNewRoute
+  SupportIndexRoute: typeof SupportIndexRoute
 }
 
 const SupportRouteChildren: SupportRouteChildren = {
   SupportIdRoute: SupportIdRoute,
   SupportNewRoute: SupportNewRoute,
+  SupportIndexRoute: SupportIndexRoute,
 }
 
 const SupportRouteWithChildren =
@@ -2128,10 +2315,12 @@ const SupportRouteWithChildren =
 
 interface SurveyorAssignmentsRouteChildren {
   SurveyorAssignmentsIdRoute: typeof SurveyorAssignmentsIdRoute
+  SurveyorAssignmentsIndexRoute: typeof SurveyorAssignmentsIndexRoute
 }
 
 const SurveyorAssignmentsRouteChildren: SurveyorAssignmentsRouteChildren = {
   SurveyorAssignmentsIdRoute: SurveyorAssignmentsIdRoute,
+  SurveyorAssignmentsIndexRoute: SurveyorAssignmentsIndexRoute,
 }
 
 const SurveyorAssignmentsRouteWithChildren =
@@ -2140,11 +2329,13 @@ const SurveyorAssignmentsRouteWithChildren =
 interface SurveyorRouteChildren {
   SurveyorAssignmentsRoute: typeof SurveyorAssignmentsRouteWithChildren
   SurveyorToolsRoute: typeof SurveyorToolsRoute
+  SurveyorIndexRoute: typeof SurveyorIndexRoute
 }
 
 const SurveyorRouteChildren: SurveyorRouteChildren = {
   SurveyorAssignmentsRoute: SurveyorAssignmentsRouteWithChildren,
   SurveyorToolsRoute: SurveyorToolsRoute,
+  SurveyorIndexRoute: SurveyorIndexRoute,
 }
 
 const SurveyorRouteWithChildren = SurveyorRoute._addFileChildren(

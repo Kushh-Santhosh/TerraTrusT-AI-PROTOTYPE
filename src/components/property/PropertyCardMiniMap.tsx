@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { Map, Marker, LngLatBounds } from "maplibre-gl";
-import { getBasemapStyle } from "@/lib/map-style";
+import { useMemo } from "react";
 import type { PropertyBoundary } from "@/lib/types";
-import { MapPin } from "lucide-react";
+import { MapPin, AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface PropertyCardMiniMapProps {
   coords?: { lat: number; lng: number };
@@ -17,148 +15,130 @@ export function PropertyCardMiniMap({
   title,
   className = "h-36 w-full",
 }: PropertyCardMiniMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<Map | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [mapError, setMapError] = useState(false);
-
-  // Compute centroid if boundary exists, else fallback to coords, else Bengaluru
   const validBoundary = Array.isArray(boundary) && boundary.length >= 3;
 
-  let centerLat = coords?.lat && coords.lat !== 0 ? coords.lat : 12.9716;
-  let centerLng = coords?.lng && coords.lng !== 0 ? coords.lng : 77.5946;
+  const centerLat = coords?.lat && coords.lat !== 0 ? coords.lat : (validBoundary ? boundary.reduce((acc, p) => acc + p.lat, 0) / boundary.length : 12.9716);
+  const centerLng = coords?.lng && coords.lng !== 0 ? coords.lng : (validBoundary ? boundary.reduce((acc, p) => acc + p.lng, 0) / boundary.length : 77.5946);
 
-  if (validBoundary) {
-    const sumLat = boundary.reduce((acc, p) => acc + p.lat, 0);
-    const sumLng = boundary.reduce((acc, p) => acc + p.lng, 0);
-    centerLat = sumLat / boundary.length;
-    centerLng = sumLng / boundary.length;
-  }
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    if (typeof Map.supported === "function" && !Map.supported()) {
-      setMapError(true);
-      return;
+  const { svgPoints, bounds, centroidSvg } = useMemo(() => {
+    if (!validBoundary) {
+      return { svgPoints: "", bounds: null, centroidSvg: { x: 150, y: 90 } };
     }
 
-    let map: Map;
-    try {
-      map = new Map({
-        container: containerRef.current,
-        style: getBasemapStyle(),
-        center: [centerLng, centerLat],
-        zoom: validBoundary ? 15 : 14,
-        interactive: false,
-        attributionControl: false,
-      });
-    } catch (err) {
-      console.warn("MapLibre mini-map initialization error:", err);
-      setMapError(true);
-      return;
-    }
+    const lats = boundary.map(p => p.lat);
+    const lngs = boundary.map(p => p.lng);
+    let minLat = Math.min(...lats);
+    let maxLat = Math.max(...lats);
+    let minLng = Math.min(...lngs);
+    let maxLng = Math.max(...lngs);
 
-    map.on("error", () => {
-      // Non-fatal, tile load failures etc.
+    // Padding margin
+    const latSpan = Math.max(maxLat - minLat, 0.0004);
+    const lngSpan = Math.max(maxLng - minLng, 0.0004);
+    const padLat = latSpan * 0.25;
+    const padLng = lngSpan * 0.25;
+
+    minLat -= padLat;
+    maxLat += padLat;
+    minLng -= padLng;
+    maxLng += padLng;
+
+    const width = 300;
+    const height = 180;
+
+    const pts = boundary.map(p => {
+      const x = ((p.lng - minLng) / (maxLng - minLng)) * width;
+      const y = height - ((p.lat - minLat) / (maxLat - minLat)) * height;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
 
-    map.on("load", () => {
-      mapRef.current = map;
-      setIsLoaded(true);
+    const cX = ((centerLng - minLng) / (maxLng - minLng)) * width;
+    const cY = height - ((centerLat - minLat) / (maxLat - minLat)) * height;
 
-      if (validBoundary) {
-        // Construct closed polygon ring [lng, lat]
-        const ring: [number, number][] = boundary.map((p) => [p.lng, p.lat]);
-        if (ring.length > 0 && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) {
-          ring.push([...ring[0]]);
-        }
-
-        const sourceId = "card-boundary-src";
-        map.addSource(sourceId, {
-          type: "geojson",
-          data: {
-            type: "Feature",
-            geometry: {
-              type: "Polygon",
-              coordinates: [ring],
-            },
-            properties: {},
-          },
-        });
-
-        map.addLayer({
-          id: "card-boundary-fill",
-          type: "fill",
-          source: sourceId,
-          paint: {
-            "fill-color": "#0284c7",
-            "fill-opacity": 0.35,
-          },
-        });
-
-        map.addLayer({
-          id: "card-boundary-line",
-          type: "line",
-          source: sourceId,
-          paint: {
-            "line-color": "#0369a1",
-            "line-width": 2,
-          },
-        });
-
-        // Fit map bounds to actual property boundary
-        try {
-          const bounds = new LngLatBounds();
-          ring.forEach((pt) => bounds.extend(pt));
-          map.fitBounds(bounds, { padding: 18, duration: 0 });
-        } catch {
-          // ignore fit bounds error
-        }
-      }
-
-      // Add small centroid marker
-      const el = document.createElement("div");
-      el.className = "terra-pin-marker";
-      el.innerHTML = `
-        <div style="width: 14px; height: 14px; background: #0284c7; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 8px rgba(2, 132, 199, 0.6);"></div>
-      `;
-      new Marker({ element: el }).setLngLat([centerLng, centerLat]).addTo(map);
-    });
-
-    return () => {
-      try {
-        map.remove();
-      } catch {
-        // ignore cleanup error
-      }
-      mapRef.current = null;
+    return {
+      svgPoints: pts.join(" "),
+      bounds: { minLat, maxLat, minLng, maxLng },
+      centroidSvg: { x: cX, y: cY },
     };
-  }, [centerLat, centerLng, validBoundary, JSON.stringify(boundary)]);
+  }, [boundary, validBoundary, centerLat, centerLng]);
 
   return (
-    <div className={`relative overflow-hidden bg-muted/40 ${className}`}>
-      {/* MapLibre Canvas Container */}
-      <div ref={containerRef} className="absolute inset-0 h-full w-full pointer-events-none" />
+    <div className={`relative overflow-hidden bg-slate-900 border-b border-border/40 select-none ${className}`}>
+      {/* Background cartographic grid */}
+      <svg className="absolute inset-0 h-full w-full opacity-20" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="cadastral-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+            <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-primary/50" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#cadastral-grid)" />
+      </svg>
 
-      {/* Fallback if WebGL unavailable */}
-      {mapError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/70 text-xs text-muted-foreground p-3 text-center">
-          <MapPin className="h-4 w-4 mr-1 text-primary shrink-0" />
-          <span>{title || "Cadastral Parcel"} ({centerLat.toFixed(4)}, {centerLng.toFixed(4)})</span>
+      {/* Actual Property Boundary Polygon or Coordinates Marker */}
+      {validBoundary ? (
+        <svg
+          viewBox="0 0 300 180"
+          className="absolute inset-0 h-full w-full preserve-3d"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Cadastral Parcel Polygon */}
+          <polygon
+            points={svgPoints}
+            className="fill-primary/25 stroke-primary stroke-[2.5]"
+            strokeLinejoin="round"
+          />
+
+          {/* Vertex points */}
+          {svgPoints.split(" ").map((pt, i) => {
+            const [x, y] = pt.split(",").map(Number);
+            return (
+              <circle
+                key={i}
+                cx={x}
+                cy={y}
+                r="3"
+                className="fill-white stroke-primary stroke-[1.5]"
+              />
+            );
+          })}
+
+          {/* Centroid Pin */}
+          <circle
+            cx={centroidSvg.x}
+            cy={centroidSvg.y}
+            r="4"
+            className="fill-emerald-400 stroke-slate-950 stroke-1"
+          />
+        </svg>
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
+          <div className="relative mb-1 flex items-center justify-center">
+            <div className="h-7 w-7 rounded-full bg-primary/20 animate-ping absolute" />
+            <div className="h-6 w-6 rounded-full bg-primary/30 border border-primary flex items-center justify-center relative">
+              <MapPin className="h-3.5 w-3.5 text-primary" />
+            </div>
+          </div>
+          <span className="text-[11px] font-semibold text-foreground/90">
+            {centerLat.toFixed(4)}° N, {centerLng.toFixed(4)}° E
+          </span>
+          <span className="inline-flex items-center gap-1 text-[10px] text-amber-500 font-medium mt-0.5">
+            <AlertCircle className="h-2.5 w-2.5" />
+            Boundary not submitted
+          </span>
         </div>
       )}
 
-      {/* Boundary status badge if no boundary submitted */}
-      {!validBoundary && (
-        <div className="absolute bottom-2 left-2 z-10 rounded bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur-sm shadow-xs border border-border">
-          Boundary not submitted
-        </div>
-      )}
-
-      {/* OpenStreetMap Attribution */}
-      <div className="absolute bottom-1 right-1 z-10 text-[8px] text-muted-foreground/80 bg-background/60 px-1 rounded pointer-events-none">
-        &copy; OpenStreetMap
+      {/* Coordinate & GIS Badge Overlay */}
+      <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between text-[10px] pointer-events-none">
+        <span className="rounded bg-background/80 backdrop-blur-sm px-1.5 py-0.5 font-mono text-muted-foreground border border-border/40 truncate max-w-[170px]">
+          {centerLat.toFixed(4)}, {centerLng.toFixed(4)}
+        </span>
+        {validBoundary && (
+          <span className="inline-flex items-center gap-1 rounded bg-primary/20 backdrop-blur-sm px-1.5 py-0.5 font-medium text-primary border border-primary/30">
+            <CheckCircle2 className="h-2.5 w-2.5 text-primary" />
+            {boundary.length} vertices
+          </span>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-09-07T14:44:09.427Z",
+  "askTerraRemoved": true,
+  "aparsoftPresent": true,
+  "cardMiniMapsLoaded": 4,
+  "detailMapLoaded": true,
+  "n8nWebhookResponse": {
+    "httpStatus": 200,
+    "workflowId": "WF-N8N-TT-KA-2609-WPBAW-1788792286604",
+    "propertyUuid": "4f83b8b1-562a-4318-8092-28c0352ef29b",
+    "passportId": "TT-KA-2609-WPBAW",
+    "decision": "HUMAN_REVIEW_REQUIRED",
+    "status": "manual_review",
+    "confidenceScore": 62,
+    "stepsCount": 10
+  },
+  "rolesTested": {
+    "citizen": {
+      "url": "https://terratrust-ai.vercel.app/dashboard",
+      "passed": true
+    },
+    "government": {
+      "url": "https://terratrust-ai.vercel.app/government",
+      "passed": true
+    },
+    "surveyor": {
+      "url": "https://terratrust-ai.vercel.app/surveyor",
+      "passed": true
+    },
+    "bank": {
+      "url": "https://terratrust-ai.vercel.app/bank",
+      "passed": true
+    },
+    "admin": {
+      "url": "https://terratrust-ai.vercel.app/admin",
+      "passed": true
+    }
+  }
+}

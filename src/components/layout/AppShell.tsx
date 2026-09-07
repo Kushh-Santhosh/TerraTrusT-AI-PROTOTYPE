@@ -6,7 +6,7 @@ import {
   Building2, BarChart3, ShieldCheck, Bell, User, Settings, HelpCircle, LogOut,
   Search, MessageSquare, FileText, Gavel, ShieldAlert, Banknote, LifeBuoy,
   Brain, ScanLine, Activity, Leaf, Compass, Satellite, ListChecks, Lightbulb,
-  PlusCircle, FolderLock, Shield, CheckCircle2, ChevronDown
+  PlusCircle, FolderLock, Shield, CheckCircle2, ChevronDown, Menu, X
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState, useEffect } from "react";
@@ -78,21 +78,22 @@ export const governmentNav: NavGroup[] = [
     group: "Government Operations",
     items: [
       { to: "/government", label: "Government Dashboard", icon: Building2 },
-      { to: "/government/parcels", label: "Cadastral Parcels", icon: FileBadge },
-      { to: "/verification", label: "Verification Queue", icon: ListChecks },
-      { to: "/government/permits", label: "Building Permits", icon: FileText },
-      { to: "/government/disputes", label: "Registry Disputes", icon: Gavel },
-      { to: "/government/audit", label: "Audit Ledger", icon: ShieldCheck },
+      { to: "/verification", label: "Review Queue & Verification", icon: ListChecks },
+      { to: "/surveyor/assignments", label: "Surveyor Assignments", icon: Briefcase },
+      { to: "/government/parcels", label: "Registry Parcels", icon: FileBadge },
+      { to: "/government/permits", label: "Permits & Conversions", icon: FileText },
+      { to: "/government/disputes", label: "Decisions & Disputes", icon: Gavel },
+      { to: "/government/audit", label: "Statutory Audit", icon: ShieldCheck },
     ],
   },
   {
     group: "Land Intelligence",
     items: [
-      { to: "/map", label: "GIS Cadastral Map", icon: Map },
+      { to: "/map", label: "GIS / Parcels Map", icon: Map },
       { to: "/search", label: "Property Search", icon: Search },
-      { to: "/fraud", label: "Risk & Fraud Cases", icon: ShieldAlert },
+      { to: "/fraud", label: "Registry Evidence & Fraud", icon: ShieldAlert },
+      { to: "/ai-ocr", label: "Documents & Evidence", icon: ScanLine },
       { to: "/ai-boundary", label: "Boundary Review", icon: Compass },
-      { to: "/ai-timeline", label: "Ownership Timeline", icon: ListChecks },
     ],
   },
   {
@@ -105,7 +106,7 @@ export const governmentNav: NavGroup[] = [
   {
     group: "Account & Support",
     items: [
-      { to: "/profile", label: "Officer Profile", icon: User },
+      { to: "/profile", label: "Government Profile", icon: User },
       { to: "/notifications", label: "Notifications", icon: Bell },
       { to: "/settings", label: "Settings", icon: Settings },
       { to: "/support", label: "Support Desk", icon: LifeBuoy },
@@ -220,10 +221,27 @@ export const adminNav: NavGroup[] = [
     group: "Account",
     items: [
       { to: "/profile", label: "Admin Profile", icon: User },
+      { to: "/notifications", label: "Notifications", icon: Bell },
       { to: "/settings", label: "Settings", icon: Settings },
     ],
   },
 ];
+
+export function getWorkspaceForRole(role: Role): string {
+  switch (role) {
+    case "government":
+      return "/government";
+    case "surveyor":
+      return "/surveyor";
+    case "bank":
+      return "/bank";
+    case "admin":
+      return "/admin";
+    case "citizen":
+    default:
+      return "/dashboard";
+  }
+}
 
 export function getNavForRole(role: Role): NavGroup[] {
   switch (role) {
@@ -274,6 +292,11 @@ export function AppShell({
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const unread = notifications.filter(n => !n.read).length;
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
 
   const currentRole: Role = normalizeRole(profile?.role || user?.user_metadata?.role || "citizen");
   const displayName = profile?.full_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Kushal Santhosh");
@@ -304,7 +327,7 @@ export function AppShell({
       <aside className="hidden md:flex sticky top-0 h-screen border-r border-border bg-surface-elevated flex-col justify-between">
         <div className="flex flex-col h-[calc(100vh-4.5rem)]">
           <div className="flex h-16 items-center justify-between px-5 border-b border-border/40 shrink-0">
-            <Link to="/"><Logo /></Link>
+            <Link to={getWorkspaceForRole(currentRole)}><Logo /></Link>
             <div className="rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
               <span>{roleLabel}</span>
             </div>
@@ -361,9 +384,16 @@ export function AppShell({
       {/* Main Content Area */}
       <div className="flex min-w-0 flex-col">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/85 px-4 md:px-8 backdrop-blur-xl">
-          <div className="flex items-center md:hidden mr-1">
-            <Link to="/"><Logo /></Link>
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/85 px-4 md:px-8 backdrop-blur-xl">
+          <div className="flex items-center md:hidden mr-1 gap-2">
+            <button
+              onClick={() => setMobileNavOpen(true)}
+              className="p-1.5 rounded-lg border border-border text-foreground hover:bg-muted"
+              aria-label="Open mobile menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <Link to={getWorkspaceForRole(currentRole)}><Logo /></Link>
           </div>
           <div className="relative w-full max-w-md">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -411,7 +441,7 @@ export function AppShell({
                 This workspace requires <span className="font-semibold text-foreground">{Array.isArray(requiredRole) ? requiredRole.join(", ") : requiredRole}</span> role authorization. You are currently signed in as a <span className="font-semibold text-primary">{roleLabel}</span>.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Button onClick={() => navigate({ to: "/dashboard" })}>
+                <Button onClick={() => navigate({ to: getWorkspaceForRole(currentRole) as any })}>
                   Return to my workspace
                 </Button>
               </div>
@@ -421,6 +451,97 @@ export function AppShell({
           )}
         </main>
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      {mobileNavOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileNavOpen(false)}
+          />
+
+          {/* Drawer content */}
+          <aside className="relative flex w-[290px] max-w-[85vw] flex-col justify-between bg-surface-elevated border-r border-border h-full shadow-2xl z-10">
+            <div className="flex flex-col h-[calc(100vh-4.5rem)]">
+              <div className="flex h-16 items-center justify-between px-5 border-b border-border/40 shrink-0">
+                <Link to={getWorkspaceForRole(currentRole)} onClick={() => setMobileNavOpen(false)}>
+                  <Logo />
+                </Link>
+                <div className="flex items-center gap-2">
+                  <div className="rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                    <span>{roleLabel}</span>
+                  </div>
+                  <button
+                    onClick={() => setMobileNavOpen(false)}
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground"
+                    aria-label="Close menu"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+                {getNavForRole(currentRole).map((group) => (
+                  <div key={group.group}>
+                    <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
+                      {group.group}
+                    </p>
+                    <div className="flex flex-col gap-0.5">
+                      {group.items.map((item) => {
+                        const active =
+                          pathname === item.to ||
+                          (item.to !== "/dashboard" && item.to !== "/" && pathname.startsWith(item.to));
+                        return (
+                          <Link
+                            key={item.to}
+                            to={item.to}
+                            onClick={() => setMobileNavOpen(false)}
+                            className={cn(
+                              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition",
+                              active
+                                ? "bg-primary/10 text-primary font-semibold ring-1 ring-primary/25 shadow-sm"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            )}
+                          >
+                            <item.icon
+                              className={cn(
+                                "h-4 w-4 shrink-0",
+                                active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                              )}
+                            />
+                            <span className="truncate">{item.label}</span>
+                            {item.to === "/notifications" && unread > 0 && (
+                              <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                                {unread}
+                              </span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </nav>
+            </div>
+
+            {/* Mobile Sign Out */}
+            <div className="border-t border-border p-3 shrink-0 bg-surface">
+              <button
+                onClick={() => {
+                  setMobileNavOpen(false);
+                  handleSignOut();
+                }}
+                className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition"
+              >
+                <LogOut className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="font-medium">Sign Out</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
