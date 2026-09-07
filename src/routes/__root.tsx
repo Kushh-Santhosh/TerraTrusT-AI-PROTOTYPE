@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { DemoModeProvider } from "@/lib/demo-mode";
 import { AuthProvider } from "@/lib/auth";
+import AparsoftChatbot from "@/components/AparsoftChatbot";
 
 function NotFoundComponent() {
   return (
@@ -107,6 +108,7 @@ function RootComponent() {
         <DemoModeProvider>
           <Outlet />
           <Toaster position="top-right" />
+          <AparsoftChatbot />
         </DemoModeProvider>
       </AuthProvider>
     </QueryClientProvider>
