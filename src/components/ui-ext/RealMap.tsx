@@ -106,6 +106,7 @@ export function RealMap({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [activeVertexIndex, setActiveVertexIndex] = useState<number | null>(null);
+  const [webGlError, setWebGlError] = useState(false);
 
   const fileInputGeoJsonRef = useRef<HTMLInputElement>(null);
   const fileInputKmlRef = useRef<HTMLInputElement>(null);
@@ -158,12 +159,29 @@ export function RealMap({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    const map = new Map({
-      container: mapContainerRef.current,
-      style: getBasemapStyle(),
-      center: [initialCenter.lng, initialCenter.lat],
-      zoom: 16,
-      attributionControl: false,
+    if (typeof Map.supported === "function" && !Map.supported()) {
+      console.warn("MapLibre WebGL2 is not supported on this device/browser.");
+      setWebGlError(true);
+      return;
+    }
+
+    let map: Map;
+    try {
+      map = new Map({
+        container: mapContainerRef.current,
+        style: getBasemapStyle(),
+        center: [initialCenter.lng, initialCenter.lat],
+        zoom: 16,
+        attributionControl: false,
+      });
+    } catch (e) {
+      console.warn("Caught MapLibre initialization error in RealMap:", e);
+      setWebGlError(true);
+      return;
+    }
+
+    map.on("error", (e) => {
+      console.warn("MapLibre map error event in RealMap:", e);
     });
 
     // Add navigation controls (zoom, compass)
@@ -1024,12 +1042,75 @@ export function RealMap({
 
       {/* Real MapLibre Canvas Container */}
       <div className="relative w-full rounded-xl border border-border overflow-hidden shadow-inner bg-muted/40">
-        <div
-          ref={mapContainerRef}
-          id="gis-boundary-canvas"
-          style={{ height: typeof height === "number" ? `${height}px` : height }}
-          className="w-full h-full"
-        />
+        {webGlError ? (
+          <div
+            style={{ height: typeof height === "number" ? `${height}px` : height }}
+            className="w-full h-full p-6 flex flex-col justify-between bg-muted/20"
+          >
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <Layers className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-foreground">GIS Boundary Matrix</p>
+                  <p className="text-[11px] text-muted-foreground font-mono">
+                    {stateCode || "KA"} Cadastral Grid · WGS84 Georeferenced
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="font-mono text-[10px]">
+                {boundary.length} Vertices · {areaSqm.toLocaleString()} m²
+              </Badge>
+            </div>
+
+            {/* Vertices coordinates list */}
+            <div className="my-auto py-3 max-h-[220px] overflow-y-auto space-y-1.5">
+              {boundary.length > 0 ? (
+                boundary.map((v, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-2 rounded-lg border border-border/80 bg-background/80 text-xs"
+                  >
+                    <span className="font-mono font-medium text-primary">Vertex #{i + 1}</span>
+                    <span className="font-mono text-muted-foreground">
+                      Lat: {v.lat.toFixed(6)}°, Lng: {v.lng.toFixed(6)}°
+                    </span>
+                    {!readOnly && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
+                        onClick={() => removeVertex(i)}
+                        disabled={boundary.length <= 3}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-xs text-muted-foreground">
+                  <p>No boundary coordinates marked yet.</p>
+                  <p className="text-[11px] mt-1">Upload a GeoJSON / KML or use Indian reference survey data.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
+              <span className="font-mono text-[11px]">Area: {stateArea}</span>
+              <span className="font-mono text-[11px]">Perimeter: {perimeter.toLocaleString()} m</span>
+            </div>
+          </div>
+        ) : (
+          <div
+            ref={mapContainerRef}
+            id="gis-boundary-canvas"
+            style={{ height: typeof height === "number" ? `${height}px` : height }}
+            className="w-full h-full"
+          />
+        )}
 
         {/* Selected Vertex Floating Action Menu */}
         {activeVertexIndex !== null && !readOnly && (

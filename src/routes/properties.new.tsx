@@ -68,9 +68,10 @@ function generatePassportId(state: string): string {
   const stateCode = state
     .replace(/[^a-zA-Z]/g, "")
     .slice(0, 2)
-    .toUpperCase() || "IN";
-  const num = Math.floor(1000 + Math.random() * 9000);
-  return `TT-${num}-${stateCode}`;
+    .toUpperCase() || "KA";
+  const yearMonth = new Date().toISOString().slice(2, 7).replace("-", "");
+  const randHex = Math.random().toString(36).slice(2, 7).toUpperCase();
+  return `TT-${stateCode}-${yearMonth}-${randHex}`;
 }
 
 export function RegisterPropertyWizard() {

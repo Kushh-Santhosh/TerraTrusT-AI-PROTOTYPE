@@ -71,7 +71,7 @@ export function GlobalTerraAssistant() {
     <>
       {/* Floating Launcher Trigger */}
       {!isOpen && (
-        <aside aria-label="Terra AI Assistant Launcher" className="fixed bottom-6 right-6 z-40">
+        <aside aria-label="Terra AI Assistant Launcher" className="fixed bottom-6 right-24 z-40">
           <button
             onClick={openAssistant}
             className="group relative flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary px-4 py-3 text-primary-foreground shadow-xl transition-all duration-200 hover:scale-105 hover:bg-primary/95 hover:shadow-primary/20 active:scale-95"

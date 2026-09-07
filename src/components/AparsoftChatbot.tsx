@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useAuth } from "@/lib/auth";
 
 const WIDGET_SCRIPT_URL = "https://www.aparsoft.com/static/chatbot-widget/widget.loader.js";
 
@@ -28,12 +27,7 @@ interface LoaderConfig {
 }
 
 export default function AparsoftChatbot() {
-  const { user } = useAuth();
-
   useEffect(() => {
-    // Only mount on authenticated screens
-    if (!user) return;
-
     const loaderConfig: LoaderConfig = {
       apiKey: "sha256$979682ca8ffb0a33f5840bd839f7ea513c652ff0f814d3e3b5b76f22e868e422",
       position: "bottom-right",
@@ -46,7 +40,7 @@ export default function AparsoftChatbot() {
       widgetTitle: "TerraTrust AI Assistant",
       title: "TerraTrust AI Assistant",
       widgetSubtitle: "Powered by Aparsoft AI",
-      welcomeMessage: "Hello! How can I assist you with TerraTrust properties today?",
+      welcomeMessage: "Hello! How can I assist you with TerraTrust land records and property verification today?",
     };
 
     const applyLoaderDataset = (script: HTMLScriptElement, runtimeConfig: LoaderConfig) => {
@@ -67,13 +61,17 @@ export default function AparsoftChatbot() {
       if (runtimeConfig.title) script.dataset.title = runtimeConfig.title;
     };
 
-    // Ensure only one script element exists
     const existingScript = document.querySelector(
       'script[src="' + WIDGET_SCRIPT_URL + '"][data-aparsoft-chatbot]'
     );
     if (existingScript) {
-      return; // Already loaded, do not duplicate
+      existingScript.remove();
     }
+
+    try {
+      window.AparsoftChatbot?.destroy?.();
+    } catch {}
+    window.AparsoftChatbot = null;
 
     const script = document.createElement("script");
     script.src = WIDGET_SCRIPT_URL;
@@ -82,9 +80,13 @@ export default function AparsoftChatbot() {
     document.body.appendChild(script);
 
     return () => {
-      // Cleanup on full unmount if needed
+      script.remove();
+      try {
+        window.AparsoftChatbot?.destroy?.();
+      } catch {}
+      window.AparsoftChatbot = null;
     };
-  }, [user]);
+  }, []);
 
   return null;
 }
