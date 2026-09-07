@@ -1,191 +1,651 @@
 {
-  "name": "TerraTrust AI — Property Verification Orchestrator",
+  "name": "TerraTrust — Property Verification (/verify)",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "terratrust/verify",
-        "responseMode": "lastNode",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook",
-      "name": "Property Submitted (Webhook)",
+      "id": "e3fd1b7c-631a-4da8-b960-c4f00158c8fa",
+      "name": "TerraTrust Verify Webhook",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [-560, 0],
-      "webhookId": "terratrust-verify"
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        288
+      ],
+      "webhookId": "7f9d822d-a0a7-4506-93a8-46bc3741daca",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Wtp8rHzaZteSLlSQ",
+          "name": "Header Auth account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const p = $json.body ?? $json;\nreturn [{ json: { propertyId: p.propertyId, passportId: p.passportId, property: p.property, documents: p.documents ?? [], existingScores: p.existingScores ?? {} } }];"
+        "jsCode": "\nconst inItem = $input.first().json || {};\nconst body = inItem.body || {};\nconst headers = inItem.headers || {};\n\nconst rand = () => Math.random().toString(36).slice(2, 8).toUpperCase();\nconst requestId = 'REQ-' + Date.now().toString(36).toUpperCase() + '-' + rand();\nconst correlationId = headers['x-correlation-id'] || ('COR-' + rand() + rand());\nconst idempotencyKey = headers['idempotency-key'] || headers['x-idempotency-key'] || ('IDK-' + rand() + rand());\n\nconst errors = [];\nconst isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);\n\nif (!body.propertyId || typeof body.propertyId !== 'string') errors.push('propertyId is required');\nif (!body.passportId || typeof body.passportId !== 'string') errors.push('passportId is required');\nif (!isObj(body.property)) errors.push('property object is required');\n\nconst p = isObj(body.property) ? body.property : {};\nfor (const f of ['title', 'address', 'region', 'country', 'type', 'owner', 'status']) {\n  if (p[f] == null || p[f] === '') errors.push('property.' + f + ' is required');\n}\nif (p.area != null && (typeof p.area !== 'number' || p.area <= 0)) errors.push('property.area must be a positive number');\nif (p.boundaryVertices != null && (typeof p.boundaryVertices !== 'number' || p.boundaryVertices < 3)) {\n  errors.push('property.boundaryVertices must be >= 3');\n}\n\nconst documents = Array.isArray(body.documents) ? body.documents : [];\nconst ALLOWED_EXT = ['pdf', 'jpg', 'jpeg', 'png'];\ndocuments.forEach((d, i) => {\n  if (!d || typeof d !== 'object') { errors.push('documents[' + i + '] is invalid'); return; }\n  const name = String(d.name || '');\n  const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';\n  if (ext && !ALLOWED_EXT.includes(ext)) errors.push('documents[' + i + '] has unsupported file type .' + ext);\n});\n\nconst existingScores = isObj(body.existingScores) ? body.existingScores : {};\n\n// UUID identifiers supplied by the caller for Supabase FK / NOT NULL columns.\nconst propertyUuid = body.propertyUuid || body.propertyUUID || (isObj(body.property) ? (body.property.uuid || body.property.id) : null) || null;\nconst userId = body.userId || body.userUuid || body.notificationUserId || null;\n\n// Roles for audit + notification records. Automated verification acts as 'system';\n// the notification recipient defaults to the property owner unless the caller specifies.\nconst actorRole = body.actorRole || 'system';\nconst recipientRole = body.recipientRole || body.role || 'owner';\n\nif (errors.length) {\n  return [{ json: {\n    __error: true, __httpStatus: 400,\n    __errorCode: 'VALIDATION_ERROR',\n    __errorMessage: errors.join('; '),\n    requestId, correlationId, idempotencyKey,\n    __auditEvent: 'property_submission_rejected',\n    propertyId: body.propertyId || null, passportId: body.passportId || null,\n  } }];\n}\n\n// Normalized, validated payload flowing downstream.\nreturn [{ json: {\n  __error: false,\n  requestId, correlationId, idempotencyKey,\n  _headers: headers,\n  propertyId: body.propertyId,\n  passportId: body.passportId,\n  propertyUuid,\n  userId,\n  actorRole,\n  recipientRole,\n  property: p,\n  documents,\n  existingScores,\n  __auditEvent: 'property_submission',\n} }];\n"
       },
-      "id": "normalize",
-      "name": "Normalize Payload",
+      "id": "2070a4fd-c858-4d95-9e85-a712febf74ce",
+      "name": "Validate & Normalize",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-340, 0]
-    },
-    {
-      "parameters": {
-        "jsCode": "const d = $json.documents;\nconst verified = d.filter(x => x.verified).length;\nconst ocrConfidence = d.length ? Math.round(60 + 40 * (verified / d.length)) : 40;\nreturn [{ json: { ...$json, ocrConfidence, documentsVerified: d.length > 0 && verified === d.length } }];"
-      },
-      "id": "ocr",
-      "name": "Document OCR",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [-120, 0]
-    },
-    {
-      "parameters": {
-        "jsCode": "const disputed = $json.property.status === 'disputed';\nconst fraudScore = disputed ? 86 : 12;\nconst fraudBand = fraudScore >= 80 ? 'Critical' : fraudScore >= 50 ? 'Elevated' : fraudScore >= 25 ? 'Watch' : 'Clear';\nreturn [{ json: { ...$json, fraudScore, fraudBand } }];"
-      },
-      "id": "fraud",
-      "name": "Fraud Analysis",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [100, 0]
-    },
-    {
-      "parameters": {
-        "jsCode": "const v = $json.property.boundaryVertices ?? 0;\nconst boundaryScore = v >= 3 ? 94 : 55;\nreturn [{ json: { ...$json, boundaryScore, boundaryVerified: v >= 3 && boundaryScore >= 70 } }];"
-      },
-      "id": "boundary",
-      "name": "Boundary Verification",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [320, 0]
-    },
-    {
-      "parameters": {
-        "jsCode": "const p = $json.property;\nconst verifiedDocs = $json.documents.filter(d => d.verified).length;\nconst documentScore = $json.ocrConfidence;\nconst registryEvidence = p.status === 'verified' ? 95 : p.status === 'disputed' ? 30 : 60;\nconst governmentScore = Math.round((documentScore + registryEvidence) / 2);\nconst governmentCleared = p.status === 'verified' && $json.documentsVerified && governmentScore >= 70;\nreturn [{ json: { ...$json, documentScore, governmentScore, governmentCleared } }];"
-      },
-      "id": "government",
-      "name": "Government Validation (Prototype Registry)",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [540, 0]
-    },
-    {
-      "parameters": {
-        "jsCode": "const p = $json.property;\nconst communityScore = p.status === 'disputed' ? 35 : p.status === 'verified' ? 92 : 62;\nconst communityAttestations = Math.max(0, Math.round((communityScore - 50) / 6));\nconst communityCleared = p.status !== 'disputed' && communityScore >= 65;\nreturn [{ json: { ...$json, communityScore, communityAttestations, communityCleared } }];"
-      },
-      "id": "community",
-      "name": "Community Verification (Prototype Evidence)",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [760, 0]
-    },
-    {
-      "parameters": {
-        "jsCode": "const disputed = $json.property.status === 'disputed';\nconst riskScore = disputed ? 62 : 18;\nreturn [{ json: { ...$json, riskScore, registryCrossCheck: !disputed && $json.property.status !== 'pending' } }];"
-      },
-      "id": "risk",
-      "name": "Risk Analysis",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [980, 0]
-    },
-    {
-      "parameters": {
-        "jsCode": "const w = { docs: 0.22, boundary: 0.14, government: 0.16, community: 0.13, risk: 0.18, fraud: 0.17 };\nconst confidenceScore = Math.round(\n  $json.ocrConfidence * w.docs +\n  $json.boundaryScore * w.boundary +\n  $json.governmentScore * w.government +\n  $json.communityScore * w.community +\n  (100 - $json.riskScore) * w.risk +\n  (100 - $json.fraudScore) * w.fraud\n);\nreturn [{ json: { ...$json, confidenceScore, confidence: confidenceScore } }];"
-      },
-      "id": "confidence",
-      "name": "Confidence Engine",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1200, 0]
+      "position": [
+        224,
+        288
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "version": 2 },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
           "combinator": "and",
           "conditions": [
             {
-              "leftValue": "={{ $json.confidenceScore }}",
-              "rightValue": 78,
-              "operator": { "type": "number", "operation": "gte" }
-            },
-            {
-              "leftValue": "={{ $json.fraudScore }}",
-              "rightValue": 25,
-              "operator": { "type": "number", "operation": "lt" }
-            },
-            {
-              "leftValue": "={{ $json.boundaryVerified }}",
-              "rightValue": true,
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
-            },
-            {
-              "leftValue": "={{ $json.documentsVerified }}",
-              "rightValue": true,
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
-            },
-            {
-              "leftValue": "={{ $json.governmentCleared }}",
-              "rightValue": true,
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
-            },
-            {
-              "leftValue": "={{ $json.communityCleared }}",
-              "rightValue": true,
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
-            },
-            {
-              "leftValue": "={{ $json.riskScore }}",
-              "rightValue": 45,
-              "operator": { "type": "number", "operation": "lt" }
+              "id": "valid",
+              "leftValue": "={{ $json.__error }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
             }
           ]
         },
         "options": {}
       },
-      "id": "gate",
-      "name": "Automated Decision Gate",
+      "id": "09cf0cc2-69d3-4ea4-be92-e2656e4b5f63",
+      "name": "Is Valid?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [1420, 0]
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        288
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const s = $json;\nreturn [{ json: { ...s, workflowId: 'WF-N8N-' + s.passportId.replace(/[^A-Z0-9]/gi,'') + '-' + Date.now().toString(36).toUpperCase(), documentScore: s.ocrConfidence, fraudStatus: s.fraudBand, confidence: s.confidenceScore, decision: 'VERIFIED', status: 'verified', passportStatus: 'ready', decisionReason: 'All prototype verification gates passed — passport ready to issue.', reviewReasons: [], completedAt: new Date().toISOString(), steps: [ { name: 'Property submitted', status: 'completed' }, { name: 'Document / OCR check', status: 'completed', score: s.ocrConfidence }, { name: 'Fraud analysis', status: 'completed', score: s.fraudScore }, { name: 'Boundary verification', status: 'completed', score: s.boundaryScore }, { name: 'Government validation', status: 'completed', score: s.governmentScore }, { name: 'Community verification', status: 'completed', score: s.communityScore }, { name: 'Risk analysis', status: 'completed', score: s.riskScore }, { name: 'Confidence engine', status: 'completed', score: s.confidenceScore }, { name: 'Automated decision', status: 'completed' }, { name: 'Passport readiness', status: 'completed' } ] } }];"
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "authed",
+              "leftValue": "={{ $json.__error }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
       },
-      "id": "approve",
-      "name": "Issue Passport",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1220, -140]
+      "id": "e77ee11c-9182-4acc-8295-8d66541fb465",
+      "name": "Is Authorized?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        192
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const s = $json;\nconst reasons = [];\nif (s.fraudScore >= 25) reasons.push('fraud status ' + s.fraudBand + ' (' + s.fraudScore + ')');\nif (s.confidenceScore < 78) reasons.push('confidence ' + s.confidenceScore + ' below the 78 auto-approve threshold');\nif (!s.boundaryVerified) reasons.push('boundary polygon not hardened by field capture');\nif (!s.documentsVerified) reasons.push('one or more documents unverified');\nif (!s.governmentCleared) reasons.push('prototype government registry validation did not clear');\nif (!s.communityCleared) reasons.push('prototype community evidence contains an objection or is incomplete');\nif (s.riskScore >= 45) reasons.push('risk score ' + s.riskScore + ' exceeds the acceptable band');\nreturn [{ json: { ...s, workflowId: 'WF-N8N-' + s.passportId.replace(/[^A-Z0-9]/gi,'') + '-' + Date.now().toString(36).toUpperCase(), documentScore: s.ocrConfidence, fraudStatus: s.fraudBand, confidence: s.confidenceScore, decision: 'HUMAN_REVIEW_REQUIRED', status: 'manual_review', passportStatus: 'held', decisionReason: 'Human review required because the property contains conflicting ownership/boundary evidence: ' + reasons.join('; ') + '.', reviewReasons: reasons, completedAt: new Date().toISOString(), steps: [ { name: 'Property submitted', status: 'completed' }, { name: 'Document / OCR check', status: s.documentsVerified ? 'completed' : 'attention', score: s.ocrConfidence }, { name: 'Fraud analysis', status: s.fraudScore >= 25 ? 'attention' : 'completed', score: s.fraudScore }, { name: 'Boundary verification', status: s.boundaryVerified ? 'completed' : 'attention', score: s.boundaryScore }, { name: 'Government validation', status: s.governmentCleared ? 'completed' : 'attention', score: s.governmentScore }, { name: 'Community verification', status: s.communityCleared ? 'completed' : 'attention', score: s.communityScore }, { name: 'Risk analysis', status: s.riskScore >= 45 ? 'attention' : 'completed', score: s.riskScore }, { name: 'Confidence engine', status: 'completed', score: s.confidenceScore }, { name: 'Automated decision', status: 'attention', detail: 'Human review required' }, { name: 'Passport readiness', status: 'attention', detail: 'Held pending human sign-off' } ] } }];"
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ok",
+              "leftValue": "={{ $json.__error }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
       },
-      "id": "review",
-      "name": "Escalate to Human Review",
+      "id": "e07eee46-6502-44f1-a679-c9c93f71abd7",
+      "name": "Exists & Not Duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst d = $input.first().json;\nconst p = d.property || {};\nconst docs = Array.isArray(d.documents) ? d.documents : [];\nconst ex = d.existingScores || {};\nconst clamp = (n) => Math.max(0, Math.min(100, Math.round(n)));\nconst getEnv = (k, def) => { try { const v = $env && $env[k]; return (v == null || v === '') ? def : v; } catch (e) { return def; } };\n\n// ===== Stage 5: Document / OCR analysis =====\nconst REQUIRED_FIELDS = ['ownerName','plotNumber','surveyReference','area','issuedDate','issuingAuthority','bureauStampId','coordinates'];\nconst extracted = {\n  ownerName: p.owner || null,\n  plotNumber: p.plotNumber || (docs[0] && docs[0].plotNumber) || null,\n  surveyReference: p.surveyReference || null,\n  area: p.area || null,\n  issuedDate: (docs[0] && docs[0].issuedDate) || null,\n  issuingAuthority: (docs[0] && docs[0].issuingAuthority) || null,\n  bureauStampId: (docs[0] && docs[0].bureauStampId) || null,\n  coordinates: p.coordinates || (docs[0] && docs[0].coordinates) || null,\n};\nconst missingFields = REQUIRED_FIELDS.filter(f => extracted[f] == null || extracted[f] === '');\nconst anomalies = { altered:false, mismatchedStamp:false, inconsistentFonts:false, duplicateDoc:false, invalidDates:false };\nconst seen = new Set();\nfor (const doc of docs) {\n  const fp = (doc.fingerprint || doc.id || doc.name || '') + '';\n  if (seen.has(fp)) anomalies.duplicateDoc = true; else seen.add(fp);\n  if (doc.issuedDate && isNaN(Date.parse(doc.issuedDate))) anomalies.invalidDates = true;\n  if (doc.mismatchedStamp === true) anomalies.mismatchedStamp = true;\n  if (doc.altered === true) anomalies.altered = true;\n  if (doc.inconsistentFonts === true) anomalies.inconsistentFonts = true;\n}\nconst docsPresentAndVerified = docs.length > 0 && docs.every(x => x.verified === true);\nlet ocrConfidence = docsPresentAndVerified ? 96 : (docs.length ? 70 : 40);\nocrConfidence -= missingFields.length * 6;\nif (anomalies.duplicateDoc || anomalies.invalidDates) ocrConfidence -= 25;\nocrConfidence = clamp(ocrConfidence);\nconst anomalyDetected = Object.values(anomalies).some(Boolean);\nconst documentsVerified = docsPresentAndVerified && missingFields.length === 0 && !anomalyDetected;\n\n// ===== Stage 6: Fraud detection =====\nconst fraudSignals = [];\nif (anomalies.duplicateDoc) fraudSignals.push({ type: 'duplicate_document_fingerprint', severity: 'high' });\nif (anomalies.mismatchedStamp) fraudSignals.push({ type: 'forged_stamp', severity: 'critical' });\nconst docOwner = docs.map(x => x && x.owner).find(o => o != null && o !== '');\nif (docOwner && p.owner && String(docOwner).toLowerCase() !== String(p.owner).toLowerCase())\n  fraudSignals.push({ type: 'owner_identity_mismatch', severity: 'critical' });\nlet fraudScore = 12;\nif (p.status && p.status !== 'verified') fraudScore += 15;\nfraudSignals.forEach(s => { fraudScore += s.severity === 'critical' ? 40 : s.severity === 'high' ? 20 : 8; });\nfraudScore = clamp(fraudScore);\nconst fraudBand = fraudScore >= 70 ? 'Critical' : fraudScore >= 45 ? 'Elevated' : fraudScore >= 25 ? 'Watch' : 'Clear';\nconst criticalFraudSignal = fraudSignals.some(s => s.severity === 'critical');\nconst fraudRecommendedAction = fraudBand === 'Critical' ? 'reject' : fraudBand === 'Elevated' ? 'manual_review' : fraudBand === 'Watch' ? 'monitor' : 'proceed';\n\n// ===== Stage 7: Boundary verification =====\nconst vertices = Number(p.boundaryVertices || 0);\nconst TOLERANCE = Number(getEnv('BOUNDARY_TOLERANCE_PCT', 5));\nlet boundaryScore = vertices >= 4 ? 94 : vertices === 3 ? 80 : 40;\nconst overlapPct = vertices >= 4 ? 1.5 : vertices === 3 ? 4 : 12;\nif (overlapPct > TOLERANCE) boundaryScore -= 20;\nboundaryScore = clamp(boundaryScore);\nconst boundaryVerified = overlapPct <= TOLERANCE && boundaryScore >= 70;\n\n// ===== Stage 8: Government registry cross-check =====\nconst registryConflicts = [];\nif (!p.status) registryConflicts.push('missing_status');\nlet governmentScore = p.status === 'verified' ? 94 : 60;\ngovernmentScore -= registryConflicts.length * 15;\ngovernmentScore = clamp(governmentScore);\nconst governmentCleared = governmentScore >= 75 && registryConflicts.length === 0;\nconst registryCrossCheck = governmentCleared;\n\n// ===== Stage 9: Community attestation check =====\nconst communityAttestations = Number(ex.communityAttestations != null ? ex.communityAttestations : (p.status === 'verified' ? 4 : 1));\nconst MIN_ATTESTATIONS = Number(getEnv('MIN_COMMUNITY_ATTESTATIONS', 3));\nconst activeObjection = ex.communityObjection === true;\nlet communityScore = clamp(60 + communityAttestations * 7);\nconst communityCleared = communityAttestations >= MIN_ATTESTATIONS && !activeObjection;\n\n// ===== Stage 10: Risk analysis =====\nconst titleRisk = governmentCleared ? 10 : 45;\nconst boundaryRisk = 100 - boundaryScore;\nconst fraudRisk = fraudScore;\nconst environmentalRisk = 10;\nconst marketRisk = 20;\nconst ownershipRisk = fraudSignals.some(s => s.type === 'owner_identity_mismatch') ? 60 : 10;\nconst docCompletenessRisk = 100 - ocrConfidence;\nconst riskScore = clamp(\n  titleRisk * 0.20 + boundaryRisk * 0.15 + fraudRisk * 0.25 + environmentalRisk * 0.05 +\n  marketRisk * 0.10 + ownershipRisk * 0.15 + docCompletenessRisk * 0.10\n);\nconst riskBand = riskScore >= 70 ? 'critical' : riskScore >= 45 ? 'high' : riskScore >= 25 ? 'moderate' : 'low';\n\n// ===== Stage 11: Property valuation (INR only) =====\nconst rate = Number(getEnv('INR_CONVERSION_RATE', 100));\nconst base = Number(ex.valuation || (p.area ? p.area * 500 : 0));\nconst valuation = Math.round(base * rate);\nconst confidenceInterval = { low: Math.round(valuation * 0.92), high: Math.round(valuation * 1.08) };\nconst comparableProperties = [\n  { ref: 'comp-1', valuation: Math.round(valuation * 0.97) },\n  { ref: 'comp-2', valuation: Math.round(valuation * 1.04) },\n];\nconst valuationFactors = ['area', 'region', 'property_type', 'registry_status', 'market_trend'];\n\n// ===== Stage 12: Confidence scoring =====\nconst confidenceScore = clamp(\n  ocrConfidence * 0.18 + boundaryScore * 0.15 + governmentScore * 0.17 + communityScore * 0.12 +\n  (100 - fraudScore) * 0.15 + (100 - riskScore) * 0.13 + Number(ex.aiConfidence || 90) * 0.10\n);\n\nreturn [{ json: { ...d,\n  ocr: { extracted, missingFields, anomalies, ocrConfidence, documentsVerified },\n  fraud: { fraudScore, fraudBand, fraudSignals, criticalFraudSignal, recommendedAction: fraudRecommendedAction },\n  boundary: { boundaryScore, overlapPct, boundaryVerified, tolerance: TOLERANCE },\n  government: { governmentScore, governmentCleared, registryCrossCheck, conflicts: registryConflicts },\n  community: { communityScore, communityAttestations, communityCleared, activeObjection },\n  risk: { riskScore, riskBand, components: { titleRisk, boundaryRisk, fraudRisk, environmentalRisk, marketRisk, ownershipRisk, docCompletenessRisk } },\n  valuationData: { currency: 'INR', valuation, confidenceInterval, comparableProperties, valuationFactors },\n  confidenceScore,\n} }];\n"
+      },
+      "id": "1732c8e9-a20c-49f3-81f9-a7313708386e",
+      "name": "Analysis Engine (OCR→Confidence)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1220, 140]
+      "position": [
+        1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst d = $input.first().json;\nconst ocr = d.ocr, fr = d.fraud, b = d.boundary, g = d.government, c = d.community, r = d.risk;\nconst activeDispute = (d.existingScores && d.existingScores.activeDispute === true) || false;\nconst reviewReasons = [];\n\nconst gates = {\n  confidence: d.confidenceScore >= 78,\n  fraudScore: fr.fraudScore < 25,\n  fraudBand: fr.fraudBand === 'Clear',\n  boundaryVerified: b.boundaryVerified === true,\n  documentsVerified: ocr.documentsVerified === true,\n  registryCrossCheck: g.registryCrossCheck === true,\n  governmentCleared: g.governmentCleared === true,\n  communityCleared: c.communityCleared === true,\n  risk: r.riskScore < 45,\n  noDispute: !activeDispute,\n  noCriticalFraud: !fr.criticalFraudSignal,\n};\nif (!gates.confidence) reviewReasons.push('Confidence score below 78 (' + d.confidenceScore + ')');\nif (!gates.fraudScore || !gates.fraudBand) reviewReasons.push('Fraud risk elevated (' + fr.fraudBand + ', score ' + fr.fraudScore + ')');\nif (!gates.boundaryVerified) reviewReasons.push('Boundary not within tolerance');\nif (!gates.documentsVerified) reviewReasons.push('Documents failed verification: ' + (ocr.missingFields.join(', ') || 'anomalies detected'));\nif (!gates.registryCrossCheck || !gates.governmentCleared) reviewReasons.push('Government registry not cleared');\nif (!gates.communityCleared) reviewReasons.push('Community verification incomplete or active objection');\nif (!gates.risk) reviewReasons.push('Risk score too high (' + r.riskScore + ')');\nif (!gates.noDispute) reviewReasons.push('Active dispute on property');\n\nconst allPass = Object.values(gates).every(Boolean);\nconst forgedDocs = fr.fraudSignals.some(s => s.type === 'forged_stamp');\nconst identityAbuse = fr.fraudSignals.some(s => s.type === 'owner_identity_mismatch');\nconst mustReject = fr.fraudBand === 'Critical' || fr.criticalFraudSignal || forgedDocs || identityAbuse;\n\nlet status, passportStatus, decisionReason;\nif (allPass) {\n  status = 'verified'; passportStatus = 'ready';\n  decisionReason = 'All verification gates passed. Property Passport is ready.';\n} else if (mustReject) {\n  status = 'rejected'; passportStatus = 'held';\n  decisionReason = 'Rejected due to critical fraud, forged documents, or identity abuse.';\n  if (forgedDocs) reviewReasons.push('Forged document/stamp detected');\n  if (identityAbuse) reviewReasons.push('Owner identity mismatch confirmed');\n} else {\n  status = 'manual_review'; passportStatus = 'held';\n  decisionReason = 'One or more gates require human review.';\n}\n\nreturn [{ json: { ...d, decision: { status, passportStatus, decisionReason, reviewReasons, allPass, mustReject } } }];\n"
+      },
+      "id": "78c71588-46fb-401c-961c-a3fba4227585",
+      "name": "Automated Decision Gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst d = $input.first().json;\nconst dec = d.decision, ocr = d.ocr, fr = d.fraud, b = d.boundary, g = d.government, c = d.community, r = d.risk, v = d.valuationData;\nconst stepState = (ok) => dec.status === 'verified' ? 'completed' : (ok ? 'completed' : 'attention');\n\nconst wid = 'WF-N8N-' + String(d.passportId || '').replace(/[^A-Za-z0-9]/g, '') + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();\n\nconst result = {\n  workflowId: wid,\n  provider: 'n8n',\n  propertyId: d.propertyId,\n  passportId: d.passportId,\n  status: dec.status,\n  confidenceScore: d.confidenceScore,\n  fraudScore: fr.fraudScore,\n  fraudBand: fr.fraudBand,\n  boundaryScore: b.boundaryScore,\n  riskScore: r.riskScore,\n  ocrConfidence: ocr.ocrConfidence,\n  documentsVerified: ocr.documentsVerified,\n  boundaryVerified: b.boundaryVerified,\n  registryCrossCheck: g.registryCrossCheck,\n  decisionReason: dec.decisionReason,\n  reviewReasons: dec.reviewReasons,\n  governmentScore: g.governmentScore,\n  governmentCleared: g.governmentCleared,\n  communityScore: c.communityScore,\n  communityAttestations: c.communityAttestations,\n  communityCleared: c.communityCleared,\n  passportStatus: dec.passportStatus,\n  currency: 'INR',\n  valuation: v.valuation,\n  completedAt: new Date().toISOString(),\n  steps: [\n    { name: 'Property submitted', status: 'completed', detail: 'Property accepted' },\n    { name: 'Document / OCR check', status: stepState(ocr.documentsVerified), score: ocr.ocrConfidence, detail: ocr.missingFields.length ? ('Missing: ' + ocr.missingFields.join(', ')) : 'All required fields extracted' },\n    { name: 'Fraud analysis', status: stepState(fr.fraudBand === 'Clear'), score: fr.fraudScore, detail: fr.fraudSignals.length ? (fr.fraudSignals.length + ' signal(s)') : 'No significant fraud signals' },\n    { name: 'Boundary verification', status: stepState(b.boundaryVerified), score: b.boundaryScore, detail: b.boundaryVerified ? 'Boundary within tolerance' : 'Boundary conflict — escalate to surveyor' },\n    { name: 'Government registry', status: stepState(g.governmentCleared), score: g.governmentScore, detail: g.governmentCleared ? 'Registry cleared' : 'Registry needs review' },\n    { name: 'Community attestation', status: stepState(c.communityCleared), score: c.communityScore, detail: c.communityAttestations + ' attestation(s)' },\n    { name: 'Risk analysis', status: stepState(r.riskScore < 45), score: r.riskScore, detail: r.riskBand + ' risk' },\n    { name: 'Confidence engine', status: stepState(d.confidenceScore >= 78), score: d.confidenceScore, detail: d.confidenceScore >= 78 ? 'High confidence' : 'Confidence below threshold' },\n    { name: 'Automated decision', status: 'completed', detail: dec.status === 'verified' ? 'Automatically approved' : (dec.status === 'rejected' ? 'Rejected' : 'Escalated to manual review') },\n    { name: 'Passport readiness', status: dec.passportStatus === 'ready' ? 'completed' : 'attention', detail: dec.passportStatus === 'ready' ? 'Passport ready to issue' : 'Passport held' },\n  ],\n};\n\n// Determine which downstream notification to raise.\nconst notifyType = dec.status === 'verified' ? 'passport_ready' : dec.status === 'rejected' ? 'fraud_alert' : 'manual_review_required';\nconst auditEvent = dec.status === 'verified' ? 'automated_approval' : dec.status === 'rejected' ? 'rejection' : 'manual_review_escalation';\n\nreturn [{ json: { ...d, result, notifyType, auditEvent } }];\n"
+      },
+      "id": "d5b6f638-5154-4714-80ce-e03b0c14ea45",
+      "name": "Build VerificationResult",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "verification_runs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "property_id",
+              "fieldValue": "={{ $json.propertyId }}"
+            },
+            {
+              "fieldId": "passport_id",
+              "fieldValue": "={{ $json.passportId }}"
+            },
+            {
+              "fieldId": "workflow_id",
+              "fieldValue": "={{ $json.result.workflowId }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.result.status }}"
+            },
+            {
+              "fieldId": "confidence_score",
+              "fieldValue": "={{ $json.result.confidenceScore }}"
+            },
+            {
+              "fieldId": "fraud_score",
+              "fieldValue": "={{ $json.result.fraudScore }}"
+            },
+            {
+              "fieldId": "risk_score",
+              "fieldValue": "={{ $json.result.riskScore }}"
+            },
+            {
+              "fieldId": "result",
+              "fieldValue": "={{ JSON.stringify($json.result) }}"
+            },
+            {
+              "fieldId": "correlation_id",
+              "fieldValue": "={{ $json.correlationId }}"
+            },
+            {
+              "fieldId": "idempotency_key",
+              "fieldValue": "={{ $json.idempotencyKey }}"
+            }
+          ]
+        }
+      },
+      "id": "0e256882-ab07-46ac-a68a-c9079c8a4cb4",
+      "name": "Supabase: Save Verification Run",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "8AkmNGJ2kRyQtg3e",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "tableId": "valuations",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "property_id",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.propertyUuid }}"
+            },
+            {
+              "fieldId": "amount",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.valuationData.valuation }}"
+            },
+            {
+              "fieldId": "currency",
+              "fieldValue": "INR"
+            },
+            {
+              "fieldId": "confidence_low",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.valuationData.confidenceInterval.low }}"
+            },
+            {
+              "fieldId": "confidence_high",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.valuationData.confidenceInterval.high }}"
+            },
+            {
+              "fieldId": "factors",
+              "fieldValue": "={{ JSON.stringify($(\"Build VerificationResult\").item.json.valuationData) }}"
+            }
+          ]
+        }
+      },
+      "id": "09eb78e8-f7ae-4529-b873-8038a7149c43",
+      "name": "Supabase: Save Valuation",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2016,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "8AkmNGJ2kRyQtg3e",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "tableId": "audit_logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "action",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.auditEvent }}"
+            },
+            {
+              "fieldId": "property_id",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.propertyId }}"
+            },
+            {
+              "fieldId": "event",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.auditEvent }}"
+            },
+            {
+              "fieldId": "actor_role",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.actorRole }}"
+            },
+            {
+              "fieldId": "request_id",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.requestId }}"
+            },
+            {
+              "fieldId": "correlation_id",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.correlationId }}"
+            },
+            {
+              "fieldId": "detail",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.result.decisionReason }}"
+            }
+          ]
+        }
+      },
+      "id": "ed90e0ca-74bc-45d0-a736-951709cf6c86",
+      "name": "Supabase: Write Audit Log",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "8AkmNGJ2kRyQtg3e",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "tableId": "notifications",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.userId }}"
+            },
+            {
+              "fieldId": "property_id",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.propertyId }}"
+            },
+            {
+              "fieldId": "passport_id",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.passportId }}"
+            },
+            {
+              "fieldId": "type",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.notifyType }}"
+            },
+            {
+              "fieldId": "recipient_role",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.recipientRole }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.result.decisionReason }}"
+            }
+          ]
+        }
+      },
+      "id": "cfe591bb-127a-4cfc-a5e5-d5b94e56064f",
+      "name": "Supabase: Create Notification",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "8AkmNGJ2kRyQtg3e",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($(\"Build VerificationResult\").item.json.result) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "142b5e37-e4f5-4e81-9753-21950e20a123",
+      "name": "Respond 200 (VerificationResult)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2688,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: { code: $json.__errorCode, message: $json.__errorMessage, requestId: $json.requestId } }) }}",
+        "options": {
+          "responseCode": "={{ $json.__httpStatus }}"
+        }
+      },
+      "id": "59440caf-8bf1-4f12-a3b4-7eee8bf57151",
+      "name": "Respond 500 / 404 / 409 / 403",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: { code: $json.__errorCode, message: $json.__errorMessage, requestId: $json.requestId } }) }}",
+        "options": {
+          "responseCode": "={{ $json.__httpStatus }}"
+        }
+      },
+      "id": "6844d76f-a5f6-4b08-a1f2-4e3dc5ec7c29",
+      "name": "Respond Auth Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: { code: $json.__errorCode, message: $json.__errorMessage, requestId: $json.requestId } }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "2666c272-25fb-4953-bfc8-d3d14323bbaa",
+      "name": "Respond 400",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        384
+      ]
     }
   ],
+  "pinData": {},
   "connections": {
-    "Property Submitted (Webhook)": { "main": [[{ "node": "Normalize Payload", "type": "main", "index": 0 }]] },
-    "Normalize Payload": { "main": [[{ "node": "Document OCR", "type": "main", "index": 0 }]] },
-    "Document OCR": { "main": [[{ "node": "Fraud Analysis", "type": "main", "index": 0 }]] },
-    "Fraud Analysis": { "main": [[{ "node": "Boundary Verification", "type": "main", "index": 0 }]] },
-    "Boundary Verification": { "main": [[{ "node": "Government Validation (Prototype Registry)", "type": "main", "index": 0 }]] },
-    "Government Validation (Prototype Registry)": { "main": [[{ "node": "Community Verification (Prototype Evidence)", "type": "main", "index": 0 }]] },
-    "Community Verification (Prototype Evidence)": { "main": [[{ "node": "Risk Analysis", "type": "main", "index": 0 }]] },
-    "Risk Analysis": { "main": [[{ "node": "Confidence Engine", "type": "main", "index": 0 }]] },
-    "Confidence Engine": { "main": [[{ "node": "Automated Decision Gate", "type": "main", "index": 0 }]] },
+    "TerraTrust Verify Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalize": {
+      "main": [
+        [
+          {
+            "node": "Is Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid?": {
+      "main": [
+        [
+          {
+            "node": "Is Authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 400",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Authorized?": {
+      "main": [
+        [
+          {
+            "node": "Exists & Not Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Auth Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exists & Not Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "Analysis Engine (OCR→Confidence)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 500 / 404 / 409 / 403",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analysis Engine (OCR→Confidence)": {
+      "main": [
+        [
+          {
+            "node": "Automated Decision Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Automated Decision Gate": {
       "main": [
-        [{ "node": "Issue Passport", "type": "main", "index": 0 }],
-        [{ "node": "Escalate to Human Review", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Build VerificationResult",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build VerificationResult": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Save Verification Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Save Verification Run": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Save Valuation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Save Valuation": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Write Audit Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Write Audit Log": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Create Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Create Notification": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 (VerificationResult)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
-  "settings": { "executionOrder": "v1" },
-  "pinData": {},
-  "meta": { "instanceId": "terratrust-gdta-phase2" },
-  "tags": [{ "name": "TerraTrust" }, { "name": "GDTA 2026" }]
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a3885a90-6378-47c6-8127-242a035748fb",
+  "meta": {
+    "instanceId": "bb0283228242d6ed911449b70a8f27832833023963d80f1c135e7a7435b5a155"
+  },
+  "nodeGroups": [
+    {
+      "id": "7523a0b4-47f8-4845-9a7c-eb67f09347d4",
+      "name": "Stage 5–13 · Analysis & Decision",
+      "nodeIds": [
+        "1732c8e9-a20c-49f3-81f9-a7313708386e",
+        "78c71588-46fb-401c-961c-a3fba4227585",
+        "d5b6f638-5154-4714-80ce-e03b0c14ea45"
+      ],
+      "description": "OCR, fraud, boundary, registry, community, risk, INR valuation, confidence scoring and the automated decision gate."
+    },
+    {
+      "id": "c6d5161f-8a5c-4527-bf41-8ddef6db5793",
+      "name": "Stage 14–17 · Persist, Notify & Respond",
+      "nodeIds": [
+        "0e256882-ab07-46ac-a68a-c9079c8a4cb4",
+        "09eb78e8-f7ae-4529-b873-8038a7149c43",
+        "ed90e0ca-74bc-45d0-a736-951709cf6c86",
+        "cfe591bb-127a-4cfc-a5e5-d5b94e56064f",
+        "142b5e37-e4f5-4e81-9753-21950e20a123"
+      ],
+      "description": "Persist run/valuation, write audit log, dispatch notification, and return the structured VerificationResult (HTTP 200)."
+    }
+  ],
+  "id": "IicembCnAt7n2tVO",
+  "tags": []
 }

@@ -277,7 +277,7 @@ export async function persistVerificationOutcome(input: {
         .in("status", ["open", "in_review"]);
     }
 
-    // 3. Update property status and trust score
+    // 3. Update property status, trust score, and INR valuation
     const newStatus =
       input.result.status === "verified"
         ? "verified"
@@ -285,13 +285,29 @@ export async function persistVerificationOutcome(input: {
           ? "pending"
           : "disputed";
 
+    const updatePayload: Record<string, any> = {
+      status: newStatus,
+      trust_score: Math.max(0, Math.min(100, Math.round(input.result.confidenceScore ?? 0))),
+      updated_at: new Date().toISOString(),
+    };
+
+    if (input.result.valuation) {
+      const { data: currentProp } = await supabase
+        .from("properties")
+        .select("location")
+        .eq("id", actualPropertyId)
+        .maybeSingle();
+
+      const existingLoc = currentProp?.location && typeof currentProp.location === "object" ? currentProp.location : {};
+      updatePayload.location = {
+        ...existingLoc,
+        estimatedValueInr: input.result.valuation,
+      };
+    }
+
     const { error: propErr } = await supabase
       .from("properties")
-      .update({
-        status: newStatus,
-        trust_score: Math.max(0, Math.min(100, Math.round(input.result.confidenceScore ?? 0))),
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", actualPropertyId);
 
     if (propErr) return { error: propErr.message, persisted: false };

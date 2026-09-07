@@ -16,6 +16,7 @@ import {
 import { MapPin, Play, RotateCcw, Ruler, User2, Workflow } from "lucide-react";
 import { loadPropertyById } from "@/lib/property-repository";
 import { PropertySubNav } from "@/components/property/PropertySubNav";
+import { persistVerificationOutcome } from "@/lib/supabase-persistence";
 
 export const Route = createFileRoute("/properties/$id/verify")({
   head: () => ({
@@ -53,6 +54,15 @@ function Page() {
 
     const outcome = await runVerification(property);
     setFallbackReason(outcome.fallbackReason);
+
+    // Persist live result to Supabase
+    if (!outcome.fallbackReason && outcome.result) {
+      persistVerificationOutcome({
+        propertyId: property.id,
+        passportId: property.passportId,
+        result: outcome.result,
+      }).catch(console.error);
+    }
 
     outcome.result.steps.forEach((step, i) => {
       timers.current.push(

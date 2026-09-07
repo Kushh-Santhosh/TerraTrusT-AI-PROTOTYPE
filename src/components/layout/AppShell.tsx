@@ -31,6 +31,54 @@ export interface NavGroup {
 }
 
 export function getNavForRole(role: Role): NavGroup[] {
+  // CITIZEN WORKSPACE: Strictly Citizen-facing, preserving all working AI, property, verification, and account features.
+  // Must NOT expose Government, Surveyor, Bank, Admin, Community portals or cross-role switching.
+  if (role === "citizen") {
+    return [
+      {
+        group: "Property Portfolio",
+        items: [
+          { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+          { to: "/properties", label: "My Properties", icon: FileBadge },
+          { to: "/properties/new", label: "Add Property", icon: PlusCircle },
+          { to: "/map", label: "GIS Cadastral Map", icon: Map },
+          { to: "/properties/p_001/documents", label: "Property Documents", icon: FileText },
+          { to: "/ai-passport", label: "Digital Passport", icon: FileBadge },
+        ],
+      },
+      {
+        group: "AI Intelligence Suite",
+        items: [
+          { to: "/ai", label: "AI Intelligence Hub", icon: Brain },
+          { to: "/valuation", label: "AI Valuation", icon: Sparkles },
+          { to: "/ai-ocr", label: "Document OCR", icon: ScanLine },
+          { to: "/ai-boundary", label: "Boundary Detection", icon: Compass },
+          { to: "/ai-satellite", label: "Satellite Compare", icon: Satellite },
+          { to: "/ai-land-health", label: "Land Health", icon: Leaf },
+          { to: "/ai-risk", label: "Risk Analysis", icon: Activity },
+          { to: "/assistant", label: "AI Assistant", icon: MessageSquare },
+        ],
+      },
+      {
+        group: "Verification & Trust",
+        items: [
+          { to: "/verification", label: "Verification Status", icon: Users2 },
+          { to: "/reports", label: "Reports & Certificates", icon: FileBadge },
+          { to: "/disputes", label: "Disputes & Claims", icon: Gavel },
+        ],
+      },
+      {
+        group: "Account & Support",
+        items: [
+          { to: "/notifications", label: "Notifications", icon: Bell },
+          { to: "/profile", label: "Profile", icon: User },
+          { to: "/settings", label: "Settings", icon: Settings },
+          { to: "/support", label: "Support / Help", icon: LifeBuoy },
+        ],
+      },
+    ];
+  }
+
   let roleWorkspace: NavGroup;
 
   switch (role) {
@@ -129,24 +177,12 @@ export function getNavForRole(role: Role): NavGroup[] {
       };
       break;
 
-    case "citizen":
     default:
       roleWorkspace = {
-        group: "Citizen Workspace",
+        group: "Workspace",
         items: [
           { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { to: "/properties", label: "My Properties", icon: FileBadge },
-          { to: "/properties/new", label: "Add Property", icon: PlusCircle },
-          { to: "/map", label: "GIS Map", icon: Map },
-          { to: "/ai-passport", label: "AI Passport", icon: FileBadge },
-          { to: "/valuation", label: "AI Valuation", icon: Sparkles },
-          { to: "/verification", label: "Verification", icon: Users2 },
-          { to: "/assistant", label: "AI Assistant", icon: MessageSquare },
-          { to: "/properties/p_001/documents", label: "Property Documents", icon: FileText },
-          { to: "/reports", label: "Reports & Passport", icon: FileBadge },
-          { to: "/profile", label: "Profile", icon: User },
-          { to: "/notifications", label: "Notifications", icon: Bell },
-          { to: "/support", label: "Support", icon: LifeBuoy },
+          { to: "/properties", label: "Properties", icon: FileBadge },
         ],
       };
       break;
@@ -177,23 +213,9 @@ export function getNavForRole(role: Role): NavGroup[] {
       group: "Trust & Governance",
       items: [
         { to: "/verification", label: "Verification", icon: Users2 },
-        { to: "/community", label: "Community", icon: Users2 },
         { to: "/fraud", label: "Fraud Detection", icon: ShieldAlert },
         { to: "/disputes", label: "Disputes", icon: Gavel },
         { to: "/reports", label: "Reports", icon: FileText },
-      ],
-    },
-    {
-      group: "All Role Portals",
-      items: [
-        { to: "/dashboard", label: "Citizen Dashboard", icon: LayoutDashboard },
-        { to: "/surveyor", label: "Surveyor Portal", icon: Briefcase },
-        { to: "/government", label: "Government Registry", icon: Building2 },
-        { to: "/community", label: "Community Portal", icon: Users2 },
-        { to: "/bank", label: "Bank Underwriting", icon: Banknote },
-        { to: "/admin", label: "Admin Operations", icon: ShieldCheck },
-        { to: "/analytics", label: "Platform Analytics", icon: BarChart3 },
-        { to: "/impact", label: "National Impact", icon: Sparkles },
       ],
     },
     {
@@ -294,38 +316,44 @@ export function AppShell({
         <div className="flex flex-col h-[calc(100vh-4.5rem)]">
           <div className="flex h-16 items-center justify-between px-5 border-b border-border/40 shrink-0">
             <Link to="/"><Logo /></Link>
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition"
-              >
+            {currentRole !== "citizen" ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setRoleMenuOpen(!roleMenuOpen)}
+                  className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition"
+                >
+                  <span>{roleLabel}</span>
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                {roleMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 w-56 rounded-xl border border-border bg-popover p-1.5 shadow-xl z-50">
+                    <p className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Switch Prototype Role</p>
+                    {rolesList.map(r => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => {
+                          setDemoRole?.(r.id);
+                          setRoleMenuOpen(false);
+                        }}
+                        className={cn(
+                          "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-left transition",
+                          currentRole === r.id ? "bg-primary text-primary-foreground font-semibold" : "text-popover-foreground hover:bg-muted"
+                        )}
+                      >
+                        <span>{r.label}</span>
+                        {currentRole === r.id && <CheckCircle2 className="h-3.5 w-3.5" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
                 <span>{roleLabel}</span>
-                <ChevronDown className="h-3 w-3" />
-              </button>
-              {roleMenuOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-56 rounded-xl border border-border bg-popover p-1.5 shadow-xl z-50">
-                  <p className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Switch Prototype Role</p>
-                  {rolesList.map(r => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      onClick={() => {
-                        setDemoRole?.(r.id);
-                        setRoleMenuOpen(false);
-                      }}
-                      className={cn(
-                        "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-left transition",
-                        currentRole === r.id ? "bg-primary text-primary-foreground font-semibold" : "text-popover-foreground hover:bg-muted"
-                      )}
-                    >
-                      <span>{r.label}</span>
-                      {currentRole === r.id && <CheckCircle2 className="h-3.5 w-3.5" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
           
           <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6" suppressHydrationWarning>
@@ -432,15 +460,17 @@ export function AppShell({
                 <Button onClick={() => navigate({ to: "/dashboard" })}>
                   Return to my workspace
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const target = Array.isArray(requiredRole) ? requiredRole[0] : requiredRole;
-                    if (target) setDemoRole?.(normalizeRole(target));
-                  }}
-                >
-                  Switch to {Array.isArray(requiredRole) ? requiredRole[0] : requiredRole}
-                </Button>
+                {currentRole !== "citizen" && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const target = Array.isArray(requiredRole) ? requiredRole[0] : requiredRole;
+                      if (target) setDemoRole?.(normalizeRole(target));
+                    }}
+                  >
+                    Switch to {Array.isArray(requiredRole) ? requiredRole[0] : requiredRole}
+                  </Button>
+                )}
               </div>
             </div>
           ) : (

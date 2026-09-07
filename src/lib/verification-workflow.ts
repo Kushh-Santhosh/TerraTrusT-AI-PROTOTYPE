@@ -41,7 +41,8 @@ export interface VerificationResult {
   communityScore: number | null;
   communityAttestations: number | null;
   communityCleared: boolean | null;
-  passportStatus: "ready" | "held";
+  currency?: string;
+  valuation?: number;
   completedAt: string;
   steps: WorkflowStep[];
 }
@@ -49,6 +50,10 @@ export interface VerificationResult {
 export interface VerificationPayload {
   propertyId: string;
   passportId: string;
+  propertyUuid?: string | null;
+  userId?: string | null;
+  actorRole?: string;
+  recipientRole?: string;
   property: {
     title: string;
     address: string;
@@ -97,10 +102,14 @@ export function activeProvider(): WorkflowProvider {
   return getWebhookUrl() ? "n8n" : "demo";
 }
 
-export function buildPayload(p: Property): VerificationPayload {
+export function buildPayload(p: Property, extra?: { userId?: string; propertyUuid?: string }): VerificationPayload {
   return {
     propertyId: p.id,
     passportId: p.passportId,
+    propertyUuid: extra?.propertyUuid || p.id,
+    userId: extra?.userId || null,
+    actorRole: "citizen",
+    recipientRole: "owner",
     property: {
       title: p.title,
       address: p.address,
@@ -318,6 +327,8 @@ function coerceResult(raw: unknown, p: Property): VerificationResult {
     communityAttestations: r.communityAttestations ?? null,
     communityCleared: r.communityCleared ?? null,
     passportStatus: r.passportStatus ?? (status === "verified" ? "ready" : "held"),
+    currency: r.currency ?? "INR",
+    valuation: r.valuation ?? p.valuation,
     completedAt: r.completedAt ?? new Date().toISOString(),
     steps: Array.isArray(r.steps) && r.steps.length ? r.steps : [],
   };
@@ -347,6 +358,8 @@ function failedLiveResult(p: Property, reason: string): VerificationResult {
     communityAttestations: null,
     communityCleared: null,
     passportStatus: "held",
+    currency: "INR",
+    valuation: p.valuation,
     completedAt: new Date().toISOString(),
     steps: STEP_NAMES.map((name, index) => ({
       name,
@@ -363,7 +376,11 @@ export interface RunOutcome {
 }
 
 /** Calls the n8n webhook when configured; otherwise runs the deterministic simulation. */
-export async function runVerification(p: Property, signal?: AbortSignal): Promise<RunOutcome> {
+export async function runVerification(
+  p: Property,
+  signal?: AbortSignal,
+  extra?: { userId?: string; propertyUuid?: string }
+): Promise<RunOutcome> {
   const url = getWebhookUrl();
   if (!url) return { result: computeVerification(p, "demo") };
 
@@ -371,7 +388,7 @@ export async function runVerification(p: Property, signal?: AbortSignal): Promis
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(buildPayload(p)),
+      body: JSON.stringify(buildPayload(p, extra)),
       signal,
     });
     if (!res.ok) throw new Error(`Webhook responded ${res.status}`);
@@ -380,8 +397,7 @@ export async function runVerification(p: Property, signal?: AbortSignal): Promis
     if (
       !candidate ||
       typeof candidate !== "object" ||
-      !("propertyId" in candidate) ||
-      !("passportId" in candidate) ||
+      !("propertyId" in candidate || "passportId" in candidate) ||
       (!("decision" in candidate) && !("status" in candidate))
     ) {
       throw new Error("Webhook returned an invalid verification result");
