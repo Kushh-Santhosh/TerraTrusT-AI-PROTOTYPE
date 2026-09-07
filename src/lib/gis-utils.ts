@@ -214,6 +214,103 @@ export function parseAndValidateKml(kmlString: string): { coords: LatLng[]; area
 }
 
 /**
+ * Calculates geodesic perimeter of a polygon in meters and feet
+ */
+export function calculatePerimeter(coords: LatLng[]): { meters: number; feet: number } {
+  if (!coords || coords.length < 2) return { meters: 0, feet: 0 };
+  const RADIUS = 6378137;
+  let totalMeters = 0;
+  const len = coords.length;
+
+  for (let i = 0; i < len; i++) {
+    const p1 = coords[i];
+    const p2 = coords[(i + 1) % len];
+    const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+    const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+    const lat1 = (p1.lat * Math.PI) / 180;
+    const lat2 = (p2.lat * Math.PI) / 180;
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    totalMeters += RADIUS * c;
+  }
+
+  const meters = Math.round(totalMeters);
+  const feet = Math.round(totalMeters * 3.28084);
+  return { meters, feet };
+}
+
+/**
+ * Calculates the geographic centroid (mean coordinates) of polygon vertices
+ */
+export function calculateCentroid(coords: LatLng[]): LatLng {
+  if (!coords || coords.length === 0) return { lat: 12.9716, lng: 77.5946 };
+  let sumLat = 0;
+  let sumLng = 0;
+  for (const pt of coords) {
+    sumLat += pt.lat;
+    sumLng += pt.lng;
+  }
+  return {
+    lat: Number((sumLat / coords.length).toFixed(6)),
+    lng: Number((sumLng / coords.length).toFixed(6)),
+  };
+}
+
+/**
+ * Serializes coordinates to downloadable GeoJSON string
+ */
+export function coordsToGeoJsonString(coords: LatLng[], properties?: Record<string, any>): string {
+  const geojson = {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {
+          area_sqm: calculatePolygonArea(coords),
+          perimeter_meters: calculatePerimeter(coords).meters,
+          timestamp: new Date().toISOString(),
+          ...properties,
+        },
+        geometry: coordsToGeoJson(coords),
+      },
+    ],
+  };
+  return JSON.stringify(geojson, null, 2);
+}
+
+/**
+ * Serializes coordinates to downloadable KML string
+ */
+export function coordsToKmlString(coords: LatLng[], name = "TerraTrust Boundary"): string {
+  if (!coords || coords.length === 0) return "";
+  const ring = [...coords];
+  if (ring[0].lat !== ring[ring.length - 1].lat || ring[0].lng !== ring[ring.length - 1].lng) {
+    ring.push(ring[0]);
+  }
+  const coordStr = ring.map((c) => `${c.lng},${c.lat},0`).join(" ");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>${name}</name>
+    <Placemark>
+      <name>${name}</name>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>${coordStr}</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+  </Document>
+</kml>`;
+}
+
+/**
  * Indian States and Union Territories list for standardized localization
  */
 export const INDIAN_STATES_AND_UTS = [

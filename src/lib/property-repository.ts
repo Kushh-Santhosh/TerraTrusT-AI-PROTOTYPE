@@ -42,6 +42,7 @@ export function mapPropertyRow(row: {
     latitude?: number;
     longitude?: number;
     boundary?: PropertyBoundary[];
+    [key: string]: any;
   } | null;
   area: number;
   status: Property["status"];
@@ -65,7 +66,7 @@ export function mapPropertyRow(row: {
     trustScore: row.trust_score,
     area: Number(row.area || 0),
     address: loc.address ?? "Address pending",
-    region: loc.region ?? "Region pending",
+    region: loc.region ?? "Karnataka",
     country: loc.country ?? "India",
     description: loc.description,
     owner: "Authenticated Property Owner",
@@ -77,6 +78,17 @@ export function mapPropertyRow(row: {
       lng: Number(loc.longitude ?? 0),
     },
     boundary: Array.isArray(loc.boundary) ? (loc.boundary as PropertyBoundary[]) : [],
+    surveyorBoundary: Array.isArray(loc.surveyorBoundary) ? (loc.surveyorBoundary as PropertyBoundary[]) : undefined,
+    governmentBoundary: Array.isArray(loc.governmentBoundary) ? (loc.governmentBoundary as PropertyBoundary[]) : undefined,
+    stateCode: loc.stateCode ?? (loc.region?.toLowerCase().includes("maharashtra") ? "MH" : "KA"),
+    cadastralIdentifiers: loc.cadastralIdentifiers ?? {},
+    sourceChecks: loc.sourceChecks ?? {},
+    surveyorDecision: loc.surveyorDecision,
+    surveyorNotes: loc.surveyorNotes,
+    surveyorFieldPhotos: loc.surveyorFieldPhotos,
+    governmentDecision: loc.governmentDecision,
+    governmentOfficerNotes: loc.governmentOfficerNotes,
+    governmentDecidedAt: loc.governmentDecidedAt,
     documents: (row.documents ?? []).map(mapDocumentRow),
     timeline: [],
   };
@@ -229,24 +241,74 @@ export async function loadGovernmentMetrics() {
 export async function loadGovernmentReviewQueue() {
   if (!supabaseConfigured) return [];
   try {
-    const { data, error } = await supabase
+    const { data: reviewCases } = await supabase
       .from("review_cases")
       .select("id, status, reason, created_at, properties(id, passport_id, property_name, status, trust_score, location)")
       .eq("status", "open")
       .order("created_at", { ascending: false });
 
-    if (error || !data) return [];
-    return data.map((r: any) => ({
-      caseId: r.id,
-      propertyId: r.properties?.id,
-      passportId: r.properties?.passport_id,
-      title: r.properties?.property_name || "Untitled Parcel",
-      status: r.properties?.status || "pending",
-      trustScore: r.properties?.trust_score ?? 68,
-      region: r.properties?.location?.region || "Karnataka",
-      reason: r.reason || "Manual review required",
-      createdAt: r.created_at,
-    }));
+    const queue: Array<{
+      caseId: string;
+      propertyId: string;
+      passportId: string;
+      title: string;
+      status: string;
+      trustScore: number;
+      region: string;
+      reason: string;
+      createdAt: string;
+    }> = [];
+
+    const seenIds = new Set<string>();
+
+    if (reviewCases) {
+      for (const r of reviewCases as any[]) {
+        const propId = r.properties?.id;
+        if (propId) seenIds.add(propId);
+        queue.push({
+          caseId: r.id,
+          propertyId: propId,
+          passportId: r.properties?.passport_id || "TT-PENDING",
+          title: r.properties?.property_name || "Untitled Parcel",
+          status: r.properties?.status || "pending",
+          trustScore: r.properties?.trust_score ?? 68,
+          region: r.properties?.location?.region || "Karnataka",
+          reason: r.reason || "Manual review required",
+          createdAt: r.created_at,
+        });
+      }
+    }
+
+    // Also include properties with status = 'pending' that don't already have an open review case
+    const { data: pendingProps } = await supabase
+      .from("properties")
+      .select("id, passport_id, property_name, status, trust_score, location, created_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (pendingProps) {
+      for (const p of pendingProps) {
+        if (!seenIds.has(p.id)) {
+          seenIds.add(p.id);
+          queue.push({
+            caseId: `case_${p.id.slice(0, 8)}`,
+            propertyId: p.id,
+            passportId: p.passport_id,
+            title: p.property_name,
+            status: p.status,
+            trustScore: p.trust_score ?? 70,
+            region: p.location?.region || "Karnataka",
+            reason: p.location?.surveyorDecision === "verified"
+              ? "Surveyor field verification complete. Awaiting government final decision."
+              : "Awaiting field survey & official registry review.",
+            createdAt: p.created_at || new Date().toISOString(),
+          });
+        }
+      }
+    }
+
+    return queue;
   } catch {
     return [];
   }

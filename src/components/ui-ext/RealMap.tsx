@@ -10,13 +10,19 @@ import {
 } from "maplibre-gl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   type LatLng,
   calculatePolygonArea,
   coordsToGeoJson,
   parseAndValidateGeoJson,
   parseAndValidateKml,
+  calculatePerimeter,
+  calculateCentroid,
+  coordsToGeoJsonString,
+  coordsToKmlString,
 } from "@/lib/gis-utils";
+import { formatStateArea } from "@/lib/state-registry";
 import {
   Search,
   MapPin,
@@ -34,6 +40,8 @@ import {
   Check,
   X,
   Loader2,
+  Download,
+  ShieldAlert,
 } from "lucide-react";
 
 import { getBasemapStyle, getBasemapAttribution } from "@/lib/map-style";
@@ -55,6 +63,8 @@ export interface NominatimResult {
 export interface RealMapProps {
   initialCenter: LatLng;
   boundary: LatLng[];
+  secondaryBoundary?: LatLng[];
+  secondaryBoundaryLabel?: string;
   onChange?: (boundary: LatLng[], areaSqm: number) => void;
   onLocationChange?: (center: LatLng) => void;
   onAddressSelect?: (result: NominatimResult) => void;
@@ -62,11 +72,15 @@ export interface RealMapProps {
   height?: number | string;
   readOnly?: boolean;
   enableLocationPicker?: boolean;
+  stateCode?: string;
+  boundaryLabel?: string;
 }
 
 export function RealMap({
   initialCenter,
   boundary,
+  secondaryBoundary,
+  secondaryBoundaryLabel = "SURVEYOR VERIFIED BOUNDARY",
   onChange,
   onLocationChange,
   onAddressSelect,
@@ -74,6 +88,8 @@ export function RealMap({
   height = 480,
   readOnly = false,
   enableLocationPicker = true,
+  stateCode,
+  boundaryLabel = "SUBMITTED CLAIMED BOUNDARY",
 }: RealMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
@@ -94,10 +110,49 @@ export function RealMap({
   const fileInputGeoJsonRef = useRef<HTMLInputElement>(null);
   const fileInputKmlRef = useRef<HTMLInputElement>(null);
 
-  // Live area calculations
+  // Live calculations with Indian State Localizations
   const areaSqm = calculatePolygonArea(boundary);
-  const areaAcres = (areaSqm * 0.000247105).toFixed(3);
-  const areaHectares = (areaSqm / 10000).toFixed(3);
+  const stateArea = formatStateArea(areaSqm, stateCode);
+  const perimeter = calculatePerimeter(boundary);
+  const centroid = calculateCentroid(boundary.length > 0 ? boundary : [initialCenter]);
+
+  // Export handlers
+  const handleExportGeoJson = () => {
+    if (!boundary || boundary.length < 3) {
+      setErrorMsg("Polygon must have at least 3 vertices to export.");
+      return;
+    }
+    const dataStr = coordsToGeoJsonString(boundary, {
+      type: boundaryLabel,
+      state: stateCode || "KA",
+      area_sqm: areaSqm,
+      acres: stateArea.acres,
+    });
+    const blob = new Blob([dataStr], { type: "application/geo+json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `terratrust_boundary_${(stateCode || "IN").toLowerCase()}_${Date.now()}.geojson`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setSuccessMsg("Exported GeoJSON file successfully.");
+  };
+
+  const handleExportKml = () => {
+    if (!boundary || boundary.length < 3) {
+      setErrorMsg("Polygon must have at least 3 vertices to export.");
+      return;
+    }
+    const kmlStr = coordsToKmlString(boundary, `TerraTrust ${boundaryLabel}`);
+    const blob = new Blob([kmlStr], { type: "application/vnd.google-earth.kml+xml" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `terratrust_boundary_${(stateCode || "IN").toLowerCase()}_${Date.now()}.kml`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setSuccessMsg("Exported KML file successfully.");
+  };
 
   // 1. Initialize MapLibre GL Map
   useEffect(() => {
@@ -166,6 +221,39 @@ export function RealMap({
           "line-color": "#0d9488", // teal-600
           "line-width": 2.5,
           "line-dasharray": [2, 1],
+        },
+      });
+
+      // Secondary boundary source & layers (Surveyor / Government overlay)
+      map.addSource("property-secondary-boundary-source", {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[]],
+          },
+          properties: {},
+        },
+      });
+
+      map.addLayer({
+        id: "property-secondary-boundary-fill",
+        type: "fill",
+        source: "property-secondary-boundary-source",
+        paint: {
+          "fill-color": "#f59e0b", // amber-500
+          "fill-opacity": 0.2,
+        },
+      });
+
+      map.addLayer({
+        id: "property-secondary-boundary-stroke",
+        type: "line",
+        source: "property-secondary-boundary-source",
+        paint: {
+          "line-color": "#d97706", // amber-600
+          "line-width": 2.5,
         },
       });
 
@@ -367,12 +455,47 @@ export function RealMap({
     }
   }, [initialCenter.lat, initialCenter.lng]);
 
+  // Synchronizes secondary boundary polygon (surveyor / government overlay)
+  const syncSecondaryBoundaryToMap = useCallback((map: Map, bList?: LatLng[]) => {
+    const source = map.getSource("property-secondary-boundary-source") as GeoJSONSource | undefined;
+    if (source) {
+      if (bList && bList.length >= 3) {
+        const ring = bList.map((p) => [p.lng, p.lat]);
+        ring.push([...ring[0]]);
+        source.setData({
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [ring],
+          },
+          properties: {},
+        });
+      } else {
+        source.setData({
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[]],
+          },
+          properties: {},
+        });
+      }
+    }
+  }, []);
+
   // 3. Update Polygon Layers and Vertex Markers whenever boundary changes
   useEffect(() => {
     if (mapRef.current) {
       syncBoundaryToMap(mapRef.current, boundary, readOnly);
     }
   }, [boundary, readOnly, syncBoundaryToMap]);
+
+  // 3b. Update Secondary Boundary Layer whenever secondaryBoundary changes
+  useEffect(() => {
+    if (mapRef.current) {
+      syncSecondaryBoundaryToMap(mapRef.current, secondaryBoundary);
+    }
+  }, [secondaryBoundary, syncSecondaryBoundaryToMap]);
 
   // 4. "Use My Current Location" Handler
   const handleUseCurrentLocation = () => {
@@ -704,112 +827,163 @@ export function RealMap({
       </div>
 
       {/* Control Bar & Boundary Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 p-2 text-xs">
-        {/* Metric Badges */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded bg-surface px-2 py-1 font-mono text-[11px] font-semibold text-foreground border border-border">
-            Calculated Area: {areaSqm.toLocaleString()} m²
-          </span>
-          <span className="hidden sm:inline-block text-[11px] text-muted-foreground">
-            ({areaAcres} acres · {areaHectares} ha)
-          </span>
-          <span className="rounded bg-primary/10 px-2 py-1 font-mono text-[10px] text-primary">
-            {boundary.length} Vertices
-          </span>
-          <span className="rounded bg-muted px-2 py-1 text-[10px] text-muted-foreground border border-border">
-            Map context · User-submitted boundary
-          </span>
+      <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-elevated/70 p-3 text-xs">
+        {/* Boundary Classification & Primary Units */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/15 border border-teal-500/30 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
+              {boundaryLabel}
+            </span>
+            {secondaryBoundary && secondaryBoundary.length >= 3 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                {secondaryBoundaryLabel} ({calculatePolygonArea(secondaryBoundary).toLocaleString()} m²)
+              </span>
+            )}
+            <span className="text-[11px] font-semibold text-foreground">
+              {stateArea.displayText}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <span>Perimeter: <strong className="font-mono text-foreground">{perimeter.meters.toLocaleString()} m</strong> ({perimeter.feet.toLocaleString()} ft)</span>
+            <span>·</span>
+            <span>Centroid: <strong className="font-mono text-foreground">{centroid.lat.toFixed(4)}°N, {centroid.lng.toFixed(4)}°E</strong></span>
+          </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {!readOnly && (
-            <>
-              {/* Boundary Drawing Mode Toggle */}
-              <Button
-                id="btn-toggle-draw-boundary"
-                type="button"
-                size="sm"
-                variant={isDrawing ? "default" : "outline"}
-                className={`h-7 text-xs gap-1 ${
-                  isDrawing ? "bg-primary text-primary-foreground font-semibold" : ""
-                }`}
-                onClick={() => setIsDrawing(!isDrawing)}
-                title={isDrawing ? "Click on map to place polygon vertices" : "Start drawing polygon"}
-              >
-                <PenTool className="h-3 w-3" />
-                {isDrawing ? "Finish Drawing" : "Draw Boundary"}
-              </Button>
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+          {/* Detailed Measurement Badges */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="rounded bg-surface px-2 py-0.5 font-mono text-[10px] font-semibold text-foreground border border-border">
+              {areaSqm.toLocaleString()} m² ({stateArea.sqft.toLocaleString()} sq ft)
+            </span>
+            <span className="rounded bg-primary/10 px-2 py-0.5 font-mono text-[10px] text-primary border border-primary/20">
+              {boundary.length} Coordinates Placed
+            </span>
+            <span className="text-[10px] text-muted-foreground hidden md:inline">
+              (Subject to licensed field surveyor attestation)
+            </span>
+          </div>
 
-              {/* GeoJSON File Upload */}
-              <input
-                ref={fileInputGeoJsonRef}
-                type="file"
-                accept=".geojson,.json"
-                className="hidden"
-                id="geojson-upload-input"
-                onChange={handleGeoJsonUpload}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs gap-1"
-                onClick={() => fileInputGeoJsonRef.current?.click()}
-                title="Import GeoJSON Polygon"
-              >
-                <Upload className="h-3 w-3 text-primary" />
-                GeoJSON
-              </Button>
+          {/* Action Buttons: Draw, Import GeoJSON/KML, Export GeoJSON/KML, Reset */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {!readOnly && (
+              <>
+                {/* Boundary Drawing Mode Toggle */}
+                <Button
+                  id="btn-toggle-draw-boundary"
+                  type="button"
+                  size="sm"
+                  variant={isDrawing ? "default" : "outline"}
+                  className={`h-7 text-xs gap-1 ${
+                    isDrawing ? "bg-primary text-primary-foreground font-semibold" : ""
+                  }`}
+                  onClick={() => setIsDrawing(!isDrawing)}
+                  title={isDrawing ? "Click on map to place polygon vertices" : "Start drawing polygon"}
+                >
+                  <PenTool className="h-3 w-3" />
+                  {isDrawing ? "Finish Drawing" : "Draw Boundary"}
+                </Button>
 
-              {/* KML File Upload */}
-              <input
-                ref={fileInputKmlRef}
-                type="file"
-                accept=".kml"
-                className="hidden"
-                id="kml-upload-input"
-                onChange={handleKmlUpload}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs gap-1"
-                onClick={() => fileInputKmlRef.current?.click()}
-                title="Import Google Earth KML"
-              >
-                <FileCode className="h-3 w-3 text-accent-foreground" />
-                KML
-              </Button>
+                {/* GeoJSON File Upload */}
+                <input
+                  ref={fileInputGeoJsonRef}
+                  type="file"
+                  accept=".geojson,.json"
+                  className="hidden"
+                  id="geojson-upload-input"
+                  onChange={handleGeoJsonUpload}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  onClick={() => fileInputGeoJsonRef.current?.click()}
+                  title="Import GeoJSON Polygon"
+                >
+                  <Upload className="h-3 w-3 text-primary" />
+                  Import GeoJSON
+                </Button>
 
-              {/* Preset Parcel Button */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
-                onClick={handleResetToPresetParcel}
-                title="Generate standard 50m parcel around center coordinates"
-              >
-                <RotateCcw className="h-3 w-3" />
-                Preset
-              </Button>
-            </>
-          )}
+                {/* KML File Upload */}
+                <input
+                  ref={fileInputKmlRef}
+                  type="file"
+                  accept=".kml"
+                  className="hidden"
+                  id="kml-upload-input"
+                  onChange={handleKmlUpload}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  onClick={() => fileInputKmlRef.current?.click()}
+                  title="Import Google Earth KML"
+                >
+                  <FileCode className="h-3 w-3 text-accent-foreground" />
+                  Import KML
+                </Button>
 
-          {/* Fit to Boundary */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
-            onClick={handleFitToBoundary}
-            title="Fit map view to boundary polygon"
-          >
-            <Maximize2 className="h-3 w-3" />
-            Fit
-          </Button>
+                {/* Preset Parcel Button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+                  onClick={handleResetToPresetParcel}
+                  title="Generate standard 50m parcel around center coordinates"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Reset
+                </Button>
+              </>
+            )}
+
+            {/* Export Buttons */}
+            <Button
+              id="btn-export-geojson"
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={handleExportGeoJson}
+              title="Download current polygon as GeoJSON"
+            >
+              <Download className="h-3 w-3 text-emerald-500" />
+              Export GeoJSON
+            </Button>
+
+            <Button
+              id="btn-export-kml"
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={handleExportKml}
+              title="Download current polygon as KML"
+            >
+              <Download className="h-3 w-3 text-emerald-500" />
+              Export KML
+            </Button>
+
+            {/* Fit to Boundary */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+              onClick={handleFitToBoundary}
+              title="Fit map view to boundary polygon"
+            >
+              <Maximize2 className="h-3 w-3" />
+              Fit
+            </Button>
+          </div>
         </div>
       </div>
 

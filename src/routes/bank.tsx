@@ -12,6 +12,9 @@ export const Route = createFileRoute("/bank")({
   component: Page,
 });
 
+import { recordBankLoanApplication } from "@/lib/supabase-persistence";
+import { toast } from "sonner";
+
 function formatInr(val: number): string {
   if (!val) return "₹0";
   if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
@@ -23,6 +26,13 @@ function Page() {
   const pathname = useRouterState({ select: s => s.location.pathname });
   const [verifiedProps, setVerifiedProps] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Loan origination modal state
+  const [selectedPropForLoan, setSelectedPropForLoan] = useState<Property | null>(null);
+  const [loanAmount, setLoanAmount] = useState<number>(15000000);
+  const [lendingBank, setLendingBank] = useState<string>("State Bank of India");
+  const [loanNotes, setLoanNotes] = useState<string>("");
+  const [isSubmittingLoan, setIsSubmittingLoan] = useState(false);
 
   useEffect(() => {
     loadBankEligibleProperties().then((props) => {
@@ -132,17 +142,158 @@ function Page() {
               },
               {
                 key: "action",
-                label: "Action",
-                render: r => (
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/properties/$id/verify" params={{ id: r.propertyId }}>Inspect Passport</Link>
-                  </Button>
+                label: "Actions",
+                render: (r) => (
+                  <div className="flex items-center gap-1.5">
+                    <Button asChild size="sm" variant="outline" className="text-xs h-7">
+                      <Link to="/properties/$id/verify" params={{ id: r.propertyId }}>
+                        Inspect Passport
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="text-xs h-7 bg-primary text-primary-foreground"
+                      onClick={() => {
+                        const target = verifiedProps.find((p) => p.id === r.propertyId);
+                        if (target) {
+                          setSelectedPropForLoan(target);
+                          setLoanAmount(Math.round((target.valuation || 24000000) * 0.65));
+                        }
+                      }}
+                    >
+                      Originate Loan
+                    </Button>
+                  </div>
                 ),
               },
             ]}
           />
         )}
       </div>
+
+      {/* Loan Origination Dialog */}
+      {selectedPropForLoan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="surface-card w-full max-w-lg p-6 rounded-2xl shadow-2xl border border-border">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">
+              <div>
+                <h3 className="font-bold text-base text-foreground">
+                  Originate Institutional Mortgage Loan
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Secured by Verified Digital Property Passport ({selectedPropForLoan.passportId})
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setSelectedPropForLoan(null)}
+                className="h-8 w-8 p-0 rounded-full"
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-foreground block mb-1">
+                  Verified Property & Legal Owner
+                </label>
+                <div className="p-3 bg-muted/40 rounded-lg border border-border/60 space-y-1">
+                  <p className="font-medium text-foreground">{selectedPropForLoan.title}</p>
+                  <p className="text-muted-foreground font-mono">
+                    Owner: {selectedPropForLoan.owner} · Valuation: {formatInr(selectedPropForLoan.valuation || 24000000)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-foreground block mb-1">
+                    Lending Institution
+                  </label>
+                  <select
+                    value={lendingBank}
+                    onChange={(e) => setLendingBank(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-background p-2.5 text-xs text-foreground"
+                  >
+                    <option value="State Bank of India">State Bank of India (SBI)</option>
+                    <option value="HDFC Bank Institutional">HDFC Bank Institutional</option>
+                    <option value="ICICI Bank Mortgages">ICICI Bank Mortgages</option>
+                    <option value="Axis Bank Secured Lending">Axis Bank Secured Lending</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-foreground block mb-1">
+                    Requested Loan Amount (INR)
+                  </label>
+                  <input
+                    type="number"
+                    value={loanAmount}
+                    onChange={(e) => setLoanAmount(Number(e.target.value))}
+                    className="w-full rounded-lg border border-border bg-background p-2 text-xs font-mono text-foreground"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                    {formatInr(loanAmount)} (65% LTV)
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-foreground block mb-1">
+                  Underwriting Assessment Notes
+                </label>
+                <textarea
+                  value={loanNotes}
+                  onChange={(e) => setLoanNotes(e.target.value)}
+                  placeholder="e.g., Clean title verified via Government Registry and Bhoomi/Kaveri checks. GIS boundary verified by surveyor. Collateral approved."
+                  className="w-full rounded-lg border border-border bg-background p-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-[64px]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/60">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedPropForLoan(null)}
+                  className="rounded-full text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={isSubmittingLoan}
+                  onClick={async () => {
+                    setIsSubmittingLoan(true);
+                    const res = await recordBankLoanApplication({
+                      propertyId: selectedPropForLoan.id,
+                      bankName: lendingBank,
+                      requestedAmountInr: loanAmount,
+                      ltvRatio: 65,
+                      applicantName: selectedPropForLoan.owner,
+                      notes: loanNotes,
+                    });
+                    setIsSubmittingLoan(false);
+
+                    if (res.error) {
+                      toast.error(`Loan origination failed: ${res.error}`);
+                    } else {
+                      toast.success(
+                        `Loan of ${formatInr(loanAmount)} approved and recorded against ${selectedPropForLoan.passportId}.`
+                      );
+                      setSelectedPropForLoan(null);
+                    }
+                  }}
+                  className="rounded-full text-xs bg-primary text-primary-foreground"
+                >
+                  {isSubmittingLoan ? "Persisting to Supabase…" : "Confirm Underwriting Approval"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

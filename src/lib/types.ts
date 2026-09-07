@@ -61,7 +61,18 @@ export interface Property {
   valuation: number; // INR (₹)
   aiConfidence: number; // 0-100
   coords: { lat: number; lng: number };
-  boundary: PropertyBoundary[];
+  boundary: PropertyBoundary[]; // Citizen claimed boundary
+  surveyorBoundary?: PropertyBoundary[]; // Licensed surveyor field verified boundary
+  governmentBoundary?: PropertyBoundary[]; // Authoritative cadastral registry boundary
+  stateCode?: string; // e.g. "KA", "MH", "AP", "TS", "UP"
+  cadastralIdentifiers?: Record<string, any>; // District, Taluk, Hobli, Survey, Hissa, Gat, 7/12, ePID, etc.
+  sourceChecks?: Record<string, any>; // Bhoomi, Kaveri, e-Aasthi, Mahabhumi, 7/12, etc.
+  surveyorDecision?: "verified" | "correction_required" | "pending";
+  surveyorNotes?: string;
+  surveyorFieldPhotos?: string[];
+  governmentDecision?: "approved" | "rejected" | "clarification_requested" | "pending";
+  governmentOfficerNotes?: string;
+  governmentDecidedAt?: string;
   documents: PropertyDocument[];
   timeline: VerificationEvent[];
   image?: string;

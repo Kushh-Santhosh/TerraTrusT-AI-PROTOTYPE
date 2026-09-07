@@ -9,6 +9,7 @@ export interface BoundaryEditorProps {
   onAddressSelect?: (res: any) => void;
   className?: string;
   readOnly?: boolean;
+  stateCode?: string;
 }
 
 export function BoundaryEditor({
@@ -19,6 +20,7 @@ export function BoundaryEditor({
   onAddressSelect,
   className = "",
   readOnly = false,
+  stateCode,
 }: BoundaryEditorProps) {
   return (
     <RealMap
@@ -30,6 +32,7 @@ export function BoundaryEditor({
       className={className}
       readOnly={readOnly}
       height={460}
+      stateCode={stateCode}
     />
   );
 }

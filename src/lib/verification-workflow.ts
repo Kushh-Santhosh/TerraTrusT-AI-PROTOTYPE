@@ -46,6 +46,10 @@ export interface VerificationResult {
   valuation?: number;
   completedAt: string;
   steps: WorkflowStep[];
+  stateCode?: string;
+  cadastralIdentifiers?: Record<string, any>;
+  stateSources?: Record<string, any>;
+  normalizedEvidence?: any[];
 }
 
 export interface VerificationPayload {
@@ -55,6 +59,9 @@ export interface VerificationPayload {
   userId?: string | null;
   actorRole?: string;
   recipientRole?: string;
+  stateCode?: string;
+  cadastralIdentifiers?: Record<string, any>;
+  stateSources?: Record<string, any>;
   property: {
     title: string;
     address: string;
@@ -70,6 +77,8 @@ export interface VerificationPayload {
     latitude?: number;
     longitude?: number;
     boundary: { lat: number; lng: number }[];
+    stateCode?: string;
+    cadastralIdentifiers?: Record<string, any>;
   };
   documents: { id: string; name: string; kind: string; verified: boolean }[];
   existingScores: {
@@ -81,15 +90,15 @@ export interface VerificationPayload {
 
 export const STEP_NAMES = [
   "Property submitted",
-  "Document / OCR check",
-  "Fraud analysis",
-  "Boundary verification",
-  "Government validation",
-  "Community verification",
+  "State registry profile resolved",
+  "Document / OCR evidence check",
+  "Fraud & anomaly analysis",
+  "Boundary & GIS verification",
+  "Official land source checks",
+  "Field surveyor attestation gate",
   "Risk analysis",
   "Confidence engine",
-  "Automated decision",
-  "Passport readiness",
+  "Government decision & passport",
 ] as const;
 
 /** Webhook URL is public config only — never a secret. */
@@ -104,6 +113,7 @@ export function activeProvider(): WorkflowProvider {
 }
 
 export function buildPayload(p: Property, extra?: { userId?: string; propertyUuid?: string }): VerificationPayload {
+  const stateCode = p.stateCode || (p.region.toLowerCase().includes("maharashtra") ? "MH" : "KA");
   return {
     propertyId: p.id,
     passportId: p.passportId,
@@ -111,6 +121,9 @@ export function buildPayload(p: Property, extra?: { userId?: string; propertyUui
     userId: extra?.userId || null,
     actorRole: "citizen",
     recipientRole: "owner",
+    stateCode,
+    cadastralIdentifiers: p.cadastralIdentifiers || {},
+    stateSources: p.sourceChecks || {},
     property: {
       title: p.title,
       address: p.address,
@@ -126,6 +139,8 @@ export function buildPayload(p: Property, extra?: { userId?: string; propertyUui
       latitude: p.coords.lat,
       longitude: p.coords.lng,
       boundary: p.boundary,
+      stateCode,
+      cadastralIdentifiers: p.cadastralIdentifiers || {},
     },
     documents: p.documents.map((d) => ({
       id: d.id,
@@ -332,6 +347,10 @@ function coerceResult(raw: unknown, p: Property): VerificationResult {
     valuation: r.valuation ?? p.valuation,
     completedAt: r.completedAt ?? new Date().toISOString(),
     steps: Array.isArray(r.steps) && r.steps.length ? r.steps : [],
+    stateCode: r.stateCode ?? p.stateCode,
+    cadastralIdentifiers: r.cadastralIdentifiers ?? p.cadastralIdentifiers,
+    stateSources: r.stateSources ?? p.sourceChecks,
+    normalizedEvidence: Array.isArray(r.normalizedEvidence) ? r.normalizedEvidence : undefined,
   };
 }
 
