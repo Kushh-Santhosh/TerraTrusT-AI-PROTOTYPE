@@ -9,9 +9,9 @@ export const Route = createFileRoute("/admin/audit")({
 
 const rows = [
   { at: "2024-09-25 14:38", actor: "admin@terratrust.ai", level: "info", action: "Updated retention policy to 7 years", target: "config" },
-  { at: "2024-09-25 14:21", actor: "K. Bello (officer)", level: "info", action: "Approved permit", target: "PMT-44021" },
-  { at: "2024-09-25 13:08", actor: "system", level: "warning", action: "Duplicate deed detected", target: "TT-5512-AB" },
-  { at: "2024-09-25 11:50", actor: "ops@accessbank.com", level: "info", action: "Mortgage check executed", target: "TT-8421-LG" },
+  { at: "2024-09-25 14:21", actor: "Dr. Vandana Rao (officer)", level: "info", action: "Approved permit", target: "PMT-44021" },
+  { at: "2024-09-25 13:08", actor: "system", level: "warning", action: "Duplicate deed detected", target: "TT-5512-KA" },
+  { at: "2024-09-25 11:50", actor: "underwriting@hdfcbank.com", level: "info", action: "Mortgage check executed", target: "TT-8421-BLR" },
   { at: "2024-09-25 09:02", actor: "admin@terratrust.ai", level: "alert", action: "Suspended account after 12 failed logins", target: "u_8821" },
 ];
 

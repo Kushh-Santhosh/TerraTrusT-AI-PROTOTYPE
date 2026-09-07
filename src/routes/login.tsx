@@ -17,8 +17,7 @@ const demoAccounts = [
   { role: "Citizen", email: "citizen@terratrust.ai", pass: "Terra@2026", to: "/dashboard" as const },
   { role: "Surveyor", email: "surveyor@terratrust.ai", pass: "Survey@2026", to: "/surveyor" as const },
   { role: "Government officer", email: "government@terratrust.ai", pass: "Gov@2026", to: "/government" as const },
-  { role: "Community verifier", email: "community@terratrust.ai", pass: "Community@2026", to: "/community" as const },
-  { role: "Bank", email: "bank@terratrust.ai", pass: "Bank@2026", to: "/bank" as const },
+  { role: "Bank Underwriter", email: "bank@terratrust.ai", pass: "Bank@2026", to: "/bank" as const },
   { role: "Administrator", email: "admin@terratrust.ai", pass: "Admin@2026", to: "/admin" as const },
 ];
 

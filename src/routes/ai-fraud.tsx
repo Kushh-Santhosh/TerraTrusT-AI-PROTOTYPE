@@ -12,10 +12,10 @@ export const Route = createFileRoute("/ai-fraud")({
 });
 
 const cases = [
-  { id: "FC-204", parcel: "TT-7710-LG", type: "Duplicate boundary", score: 78, status: "open" as const, opened: "2026-06-22" },
-  { id: "FC-198", parcel: "TT-3120-AB", type: "Forged stamp", score: 62, status: "review" as const, opened: "2026-06-19" },
-  { id: "FC-192", parcel: "TT-5512-KD", type: "Signature anomaly", score: 41, status: "review" as const, opened: "2026-06-14" },
-  { id: "FC-187", parcel: "TT-2210-KD", type: "Owner ID mismatch", score: 28, status: "closed" as const, opened: "2026-06-08" },
+  { id: "FC-204", parcel: "TT-7710-BLR", type: "Duplicate boundary", score: 78, status: "open" as const, opened: "2026-06-22" },
+  { id: "FC-198", parcel: "TT-3120-KA", type: "Forged stamp", score: 62, status: "review" as const, opened: "2026-06-19" },
+  { id: "FC-192", parcel: "TT-5512-MH", type: "Signature anomaly", score: 41, status: "review" as const, opened: "2026-06-14" },
+  { id: "FC-187", parcel: "TT-2210-KA", type: "Owner ID mismatch", score: 28, status: "closed" as const, opened: "2026-06-08" },
 ];
 
 function FraudPage() {
@@ -27,14 +27,14 @@ function FraudPage() {
     >
       <div className="grid gap-4 md:grid-cols-4">
         <AIInsightCard icon={<ShieldAlert className="h-3 w-3 text-warning-foreground" />} title="Open signals" value="3" hint="2 medium · 1 low" tone="warning" />
-        <AIInsightCard icon={<FileWarning className="h-3 w-3 text-destructive" />} title="High-severity" value="1" hint="Duplicate polygon — TT-7710-LG" tone="danger" />
+        <AIInsightCard icon={<FileWarning className="h-3 w-3 text-destructive" />} title="High-severity" value="1" hint="Duplicate polygon — TT-7710-BLR" tone="danger" />
         <AIInsightCard icon={<Fingerprint className="h-3 w-3 text-primary" />} title="Models running" value="6" hint="Doc · stamp · sig · boundary · ID · network" tone="primary" />
         <AIInsightCard icon={<MapPin className="h-3 w-3 text-success" />} title="Coverage" value="100%" hint="All parcels scanned hourly" tone="success" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
-          <VerdictBanner verdict="review" headline="One parcel requires manual review." detail="TT-7710-LG shares 12% of its polygon with TT-8421-LG. Recommend dispatching a surveyor for re-measurement." />
+          <VerdictBanner verdict="review" headline="One parcel requires manual review." detail="TT-7710-BLR shares 12% of its polygon with TT-8421-BLR. Recommend dispatching a surveyor for re-measurement." />
           <ExplainabilityPanel title="Why FC-204 was flagged" factors={fraudSignals} />
 
           <div>

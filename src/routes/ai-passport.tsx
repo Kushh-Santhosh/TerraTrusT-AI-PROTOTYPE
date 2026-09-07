@@ -17,8 +17,8 @@ function PassportPage() {
       title="AI Property Passport"
       subtitle="A composite, cryptographically signed, machine-verifiable identity for every parcel."
       actions={<>
-        <Button variant="outline" asChild><Link to="/properties/$id/share" params={{ id: "p_001" }}><Share2 className="h-4 w-4 mr-1" /> Share</Link></Button>
-        <Button asChild><Link to="/properties/$id/passport-pdf" params={{ id: "p_001" }}><Download className="h-4 w-4 mr-1" /> Download Passport</Link></Button>
+        <Button variant="outline" asChild><Link to="/properties/$id/share" params={{ id: "c63deb92-22df-4cb7-903c-25866f7d6aa0" }}><Share2 className="h-4 w-4 mr-1" /> Share</Link></Button>
+        <Button asChild><Link to="/properties/$id/passport-pdf" params={{ id: "c63deb92-22df-4cb7-903c-25866f7d6aa0" }}><Download className="h-4 w-4 mr-1" /> Download Passport</Link></Button>
       </>}
     >
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
@@ -69,7 +69,7 @@ function PassportPage() {
               { label: "Deed OCR extraction", detail: "Registered Sale Deed extracted with 99% character confidence." },
               { label: "Sub-registrar Kaveri reconciliation", detail: "Confirmed volume and page registry records with zero encumbrance flags." },
               { label: "Boundary alignment", detail: "Centroid matches Bhoomi survey map naksha within 0.4m tolerance." },
-              { label: "Community validation", detail: "5 ward committee neighbor attestations received and cryptographically logged." },
+              { label: "Cadastral ground validation", detail: "Licensed surveyor boundary capture signed with sub-registrar naksha." },
             ]} />
           </div>
         </div>

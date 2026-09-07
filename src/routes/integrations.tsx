@@ -25,9 +25,9 @@ const integrations = [
 ];
 
 const responseSample = `{
-  "workflowId": "WF-N8N-TT8421LG-...",
-  "propertyId": "p_001",
-  "passportId": "TT-8421-LG",
+  "workflowId": "WF-N8N-TT8421BLR-...",
+  "propertyId": "c63deb92-22df-4cb7-903c-25866f7d6aa0",
+  "passportId": "TT-8421-BLR",
   "status": "verified | manual_review | rejected",
   "confidenceScore": 96,
   "fraudScore": 12,
@@ -79,8 +79,8 @@ function Orchestrator() {
       </dl>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button asChild className="rounded-full"><Link to="/properties/$id/verify" params={{ id: "p_001" }}>Test workflow · TT-8421-LG</Link></Button>
-        <Button asChild variant="outline" className="rounded-full"><Link to="/properties/$id/verify" params={{ id: "p_003" }}>Human-review path · TT-5512-AB</Link></Button>
+        <Button asChild className="rounded-full"><Link to="/properties/$id/verify" params={{ id: "c63deb92-22df-4cb7-903c-25866f7d6aa0" }}>Test workflow · TT-8421-BLR</Link></Button>
+        <Button asChild variant="outline" className="rounded-full"><Link to="/properties/$id/verify" params={{ id: "21d50f16-bbbe-4bf2-be13-51fb000ae922" }}>Human-review path · TT-4628-KA</Link></Button>
         <Button asChild variant="outline" className="rounded-full"><Link to="/developers">Webhook contract</Link></Button>
       </div>
 

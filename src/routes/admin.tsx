@@ -17,7 +17,7 @@ const users = [
   { n: "Kushal Santhosh", e: "kushal@terratrust.ai", r: "Citizen", s: "active" },
   { n: "Arjun Mehta", e: "arjun.surveyor@terratrust.ai", r: "Surveyor", s: "active" },
   { n: "Dr. Vandana Rao", e: "v.rao@revenue.karnataka.gov.in", r: "Officer", s: "active" },
-  { n: "Rajendra Joshi", e: "r.joshi@community.terratrust.ai", r: "Verifier", s: "suspended" },
+  { n: "Sunita Sharma", e: "underwriting@hdfcbank.com", r: "Bank", s: "active" },
   { n: "System Administrator", e: "admin@terratrust.ai", r: "Admin", s: "active" },
 ];
 

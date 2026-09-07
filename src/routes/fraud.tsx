@@ -35,7 +35,7 @@ function FraudPage() {
       <div className="mt-6">
         <DataTable rows={cases} columns={[
           { key: "id", label: "Case", render: r => <span className="font-mono text-xs font-semibold">{r.id}</span> },
-          { key: "parcel", label: "Parcel", render: r => <Link to="/properties/$id" params={{ id: "p_001" }} className="font-medium hover:text-primary">{r.parcel}</Link> },
+          { key: "parcel", label: "Parcel", render: r => <Link to="/properties/$id" params={{ id: "c63deb92-22df-4cb7-903c-25866f7d6aa0" }} className="font-medium hover:text-primary">{r.parcel}</Link> },
           { key: "region", label: "Jurisdiction", render: r => <span className="text-muted-foreground">{r.region}</span> },
           { key: "kind", label: "Anomaly Detected", render: r => <span className="flex items-center gap-1.5"><ShieldAlert className="h-3.5 w-3.5 text-destructive" />{r.kind}</span> },
           { key: "risk", label: "Risk Score", render: r => <Pill tone={r.risk > 80 ? "danger" : r.risk > 60 ? "warning" : "info"}>{r.risk}</Pill> },

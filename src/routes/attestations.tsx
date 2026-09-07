@@ -1,38 +1,32 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
-import { DataTable, Pill, KpiRow } from "@/components/ui-ext/Scaffold";
+import { Button } from "@/components/ui/button";
+import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/attestations")({
   head: () => ({ meta: [{ title: "Attestations — TerraTrust AI" }] }),
-  component: Page,
+  component: AttestationsPage,
 });
 
-const rows = [
-  { id: "A-7741", parcel: "TT-8421-BLR", attester: "Smt. Lakshmi Rao", relation: "Neighbour, 18y", result: "Confirmed", at: "2024-09-23" },
-  { id: "A-7720", parcel: "TT-8421-BLR", attester: "Shri Suresh Hegde", relation: "RWA Secretary", result: "Confirmed", at: "2024-09-20" },
-  { id: "A-7715", parcel: "TT-9930-PN", attester: "R. Venkatraman", relation: "Neighbouring Plot Owner", result: "Confirmed", at: "2024-09-18" },
-  { id: "A-7702", parcel: "TT-2210-MYS", attester: "Gram Panchayat Member", relation: "Village Council", result: "Pending", at: "2024-09-12" },
-  { id: "A-7688", parcel: "TT-5512-GG", attester: "Adv. Rajesh Patil", relation: "Adjacent Commercial Owner", result: "Disputed", at: "2024-09-05" },
-];
-
-function Page() {
+function AttestationsPage() {
   return (
-    <AppShell title="Your attestations" subtitle="Community endorsements you've given or received.">
-      <KpiRow items={[
-        { label: "Given", value: "14" },
-        { label: "Received", value: "9" },
-        { label: "Confirmed", value: "21" },
-        { label: "Disputed", value: "2" },
-      ]} />
-      <div className="mt-6">
-        <DataTable rows={rows} columns={[
-          { key: "id", label: "ID", render: r => <span className="font-mono text-xs">{r.id}</span> },
-          { key: "parcel", label: "Parcel", render: r => <span className="font-mono text-xs">{r.parcel}</span> },
-          { key: "attester", label: "Attester", render: r => r.attester },
-          { key: "relation", label: "Relation", render: r => <span className="text-muted-foreground">{r.relation}</span> },
-          { key: "at", label: "Date", render: r => <span className="text-muted-foreground">{r.at}</span> },
-          { key: "r", label: "Result", render: r => <Pill tone={r.result === "Confirmed" ? "success" : r.result === "Pending" ? "warning" : "danger"}>{r.result}</Pill> },
-        ]} />
+    <AppShell
+      title="Attestations Decommissioned"
+      subtitle="Community attestations have been replaced by surveyor and cadastral registry verification."
+    >
+      <div className="surface-card max-w-xl p-8 text-center mx-auto my-12 border-destructive/30">
+        <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive mb-4">
+          <ShieldAlert className="h-6 w-6" />
+        </div>
+        <h2 className="font-display text-2xl text-foreground">Section Unavailable</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Community attestations are no longer used in TerraTrust AI. Property verification is orchestrated with institutional cadastral registries and licensed field surveyors.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <Button asChild>
+            <Link to="/verification">Go to Verification Hub</Link>
+          </Button>
+        </div>
       </div>
     </AppShell>
   );

@@ -2,22 +2,51 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { StatCard } from "@/components/ui-ext/StatCard";
 import { Button } from "@/components/ui/button";
-import { govKpis, regions, properties } from "@/lib/mock-data";
+import { regions } from "@/lib/mock-data";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MapMock } from "@/components/ui-ext/MapMock";
 import { Building2, AlertTriangle, CheckCircle2, Search, FileText } from "lucide-react";
 import { resolvePropertyReview } from "@/lib/supabase-persistence";
+import { loadGovernmentMetrics, loadGovernmentReviewQueue, loadInstitutionalProperties } from "@/lib/property-repository";
+import type { Property } from "@/lib/types";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/government")({
   head: () => ({ meta: [{ title: "Government Workbench — TerraTrust AI" }] }),
   component: GovernmentPage,
 });
 
+interface ReviewItem {
+  caseId: string;
+  propertyId: string;
+  passportId: string;
+  title: string;
+  status: string;
+  trustScore: number;
+  region: string;
+  reason: string;
+  createdAt: string;
+}
+
 function GovernmentPage() {
   const [resolvedIds, setResolvedIds] = useState<string[]>([]);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [metrics, setMetrics] = useState({
+    totalParcels: 0,
+    verifiedCount: 0,
+    pendingCount: 0,
+    disputedCount: 0,
+    openReviewCount: 0,
+  });
+  const [reviewQueue, setReviewQueue] = useState<ReviewItem[]>([]);
+  const [govProperties, setGovProperties] = useState<Property[]>([]);
+
+  useEffect(() => {
+    loadGovernmentMetrics().then(setMetrics);
+    loadGovernmentReviewQueue().then(setReviewQueue);
+    loadInstitutionalProperties().then(setGovProperties);
+  }, []);
 
   const handleResolve = async (passportId: string, title: string) => {
     setResolvingId(passportId);
@@ -27,14 +56,20 @@ function GovernmentPage() {
     setResolvedIds((prev) => [...prev, passportId]);
     if (res.persisted) {
       toast.success(`${title} (${passportId}) verified and recorded in registry.`);
+      loadGovernmentMetrics().then(setMetrics);
     } else {
       toast.success(`${title} (${passportId}) cleared and marked verified in registry queue.`);
     }
   };
 
-  const disputedParcels = properties
-    .filter(p => p.status === "disputed" || p.status === "pending")
-    .filter(p => !resolvedIds.includes(p.passportId));
+  const activeQueue = reviewQueue.filter(p => !resolvedIds.includes(p.passportId));
+
+  const govKpis = [
+    { label: "Total Parcels Registered", value: `${metrics.totalParcels}`, delta: "+2", trend: "up" as const, hint: "Authenticated Supabase registry" },
+    { label: "Pending Verification", value: `${metrics.pendingCount}`, delta: "Queue", trend: "flat" as const, hint: "Awaiting field & document checks" },
+    { label: "Cadastral Verified", value: `${metrics.verifiedCount}`, delta: "+1", trend: "up" as const, hint: "Active legal Property Passports" },
+    { label: "Open Disputes / Review", value: `${metrics.openReviewCount}`, delta: "Active", trend: "down" as const, hint: "Requires officer resolution" },
+  ];
 
   return (
     <AppShell
@@ -90,8 +125,8 @@ function GovernmentPage() {
             </Link>
           </div>
           <ul className="mt-2 divide-y divide-border">
-            {disputedParcels.map(p => (
-              <li key={p.id} className="py-3">
+            {activeQueue.slice(0, 5).map(p => (
+              <li key={p.caseId} className="py-3">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium text-foreground">{p.title}</p>
@@ -102,7 +137,7 @@ function GovernmentPage() {
                   </span>
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <Link to="/properties/$id/verify" params={{ id: p.id }}>
+                  <Link to="/properties/$id/verify" params={{ id: p.propertyId || p.passportId }}>
                     <Button size="sm" variant="outline" className="text-xs">
                       <Search className="h-3 w-3 mr-1" /> Inspect evidence
                     </Button>
@@ -119,9 +154,9 @@ function GovernmentPage() {
                 </div>
               </li>
             ))}
-            {disputedParcels.length === 0 && (
+            {activeQueue.length === 0 && (
               <li className="py-6 text-center text-sm text-muted-foreground">
-                No active disputes in your state registry queue.
+                No active disputes or open review cases in your state registry queue.
               </li>
             )}
           </ul>
@@ -133,7 +168,7 @@ function GovernmentPage() {
           <p className="text-sm font-medium text-foreground">National Cadastral Map View</p>
           <Link to="/map" className="text-xs text-primary hover:underline">Full screen map</Link>
         </div>
-        <MapMock properties={properties} height={420} />
+        <MapMock properties={govProperties} height={420} />
       </div>
     </AppShell>
   );

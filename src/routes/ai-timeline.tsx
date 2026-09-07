@@ -21,12 +21,12 @@ function TimelinePage() {
         <AIInsightCard title="Transfers detected" value="4" hint="1998 → 2019" tone="primary" />
         <AIInsightCard title="Chain confidence" value="94%" delta={{ value: 6, label: "MoM" }} tone="success" />
         <AIInsightCard title="Gaps" value="0" hint="No unexplained periods" tone="success" />
-        <AIInsightCard title="Sources" value="7" hint="Bureau, gazette, NIN, court" tone="accent" />
+        <AIInsightCard title="Sources" value="7" hint="Registry, gazette, Aadhaar, court" tone="accent" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="surface-card p-6">
-          <SectionTitle eyebrow="Reconstructed chain" title="Lekki Phase 1 Residence · TT-8421-LG" />
+          <SectionTitle eyebrow="Reconstructed chain" title="Indiranagar Residence · TT-8421-BLR" />
           <ol className="relative space-y-8 pl-8">
             <div className="absolute left-3 top-2 h-[calc(100%-1rem)] w-px bg-gradient-to-b from-primary/40 via-primary/15 to-transparent" />
             {ownershipChain.map((e, i) => (

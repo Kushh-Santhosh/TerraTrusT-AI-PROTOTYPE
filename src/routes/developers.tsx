@@ -10,19 +10,19 @@ export const Route = createFileRoute("/developers")({
 });
 
 const sample = `// Fetch a Property Passport
-const res = await fetch("https://api.terratrust.ai/v1/passports/TT-8421-LG", {
+const res = await fetch("https://api.terratrust.ai/v1/passports/TT-8421-BLR", {
   headers: { Authorization: "Bearer tt_live_..." },
 });
 const passport = await res.json();
 console.log(passport.trustScore); // 96`;
 
 const webhookRequest = `{
-  "propertyId": "p_001",
-  "passportId": "TT-8421-LG",
+  "propertyId": "c63deb92-22df-4cb7-903c-25866f7d6aa0",
+  "passportId": "TT-8421-BLR",
   "property": {
     "title": "Ramamurthy Nagar Residence",
     "address": "12, 4th Cross, Ramamurthy Nagar", "region": "Bengaluru", "country": "India",
-    "type": "residential", "area": 540, "owner": "Ananya Sharma",
+    "type": "residential", "area": 540, "owner": "Kushal Santhosh",
     "status": "verified", "boundaryVertices": 4
   },
   "documents": [
@@ -35,9 +35,9 @@ const webhookRequest = `{
 }`;
 
 const webhookResponse = `{
-  "workflowId": "WF-N8N-TT8421LG-...",
-  "propertyId": "p_001",
-  "passportId": "TT-8421-LG",
+  "workflowId": "WF-N8N-TT8421BLR-...",
+  "propertyId": "c63deb92-22df-4cb7-903c-25866f7d6aa0",
+  "passportId": "TT-8421-BLR",
   "status": "verified",       // | manual_review | rejected
   "confidenceScore": 96,
   "fraudScore": 12, "fraudBand": "Clear",

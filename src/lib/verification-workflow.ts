@@ -41,6 +41,7 @@ export interface VerificationResult {
   communityScore: number | null;
   communityAttestations: number | null;
   communityCleared: boolean | null;
+  passportStatus?: "verified" | "pending" | "rejected" | "minted" | "ready" | "held";
   currency?: string;
   valuation?: number;
   completedAt: string;

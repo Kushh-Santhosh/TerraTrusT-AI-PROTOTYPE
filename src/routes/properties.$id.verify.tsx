@@ -138,7 +138,7 @@ function Page() {
       {!result && !running && shown.length === 0 && (
         <div className="mt-6 surface-card p-5">
           <SectionTitle eyebrow="Ready" title="Start the orchestrated run" description="The workflow calls the existing TerraTrust engines in sequence and returns a signed, auditable decision." />
-          <p className="text-sm text-muted-foreground">Try <Link to="/properties/$id/verify" params={{ id: "p_001" }} className="text-primary">TT-8421-LG</Link> for a clean auto-approval, or <Link to="/properties/$id/verify" params={{ id: "p_003" }} className="text-primary">TT-5512-AB</Link> to see the human-review path.</p>
+          <p className="text-sm text-muted-foreground">Try <Link to="/properties/$id/verify" params={{ id: "c63deb92-22df-4cb7-903c-25866f7d6aa0" }} className="text-primary font-mono">TT-8421-BLR</Link> for a clean auto-approval, or <Link to="/properties/$id/verify" params={{ id: "21d50f16-bbbe-4bf2-be13-51fb000ae922" }} className="text-primary font-mono">TT-4628-KA</Link> to see the human-review path.</p>
         </div>
       )}
 

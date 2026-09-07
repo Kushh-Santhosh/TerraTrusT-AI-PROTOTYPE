@@ -81,9 +81,9 @@ export const properties: Property[] = [
       },
       {
         id: "t4",
-        actor: "Community Council",
-        role: "verifier",
-        action: "Neighborhood attestation received",
+        actor: "Senior Cadastral Surveyor",
+        role: "surveyor",
+        action: "Cadastral field boundary attestation completed",
         at: "2024-04-02",
       },
     ],

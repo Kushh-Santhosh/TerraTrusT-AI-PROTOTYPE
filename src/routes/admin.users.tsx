@@ -14,18 +14,18 @@ const rows = [
   { name: "Ananya Sharma", email: "ananya@terratrust.ai", role: "Citizen", region: "Bengaluru", joined: "2024-03-12", status: "Active" },
   { name: "Arjun Nair", email: "arjun@surveyor.in", role: "Surveyor", region: "Bengaluru", joined: "2023-11-04", status: "Active" },
   { name: "Officer K. Rao", email: "krao@karnataka.gov.in", role: "Officer", region: "Bengaluru", joined: "2022-08-19", status: "Active" },
-  { name: "Mediator J. Sharma", email: "jsharma@revenue.gov.in", role: "Verifier", region: "Gurugram", joined: "2024-01-22", status: "Active" },
+  { name: "Sunita Sharma", email: "s.sharma@hdfcbank.com", role: "Bank", region: "Mumbai", joined: "2024-01-22", status: "Active" },
   { name: "State Bank of India — Underwriting", email: "ops@sbi.co.in", role: "Bank", region: "National", joined: "2024-05-30", status: "Active" },
   { name: "Rajesh Verma", email: "rverma@example.com", role: "Citizen", region: "Gurugram", joined: "2024-09-05", status: "Suspended" },
 ];
 
 function Page() {
   return (
-    <AppShell title="Platform Users & Access Management" subtitle="184,221 demonstration users across 6 role workspaces." requiredRole="admin"
+    <AppShell title="Platform Users & Access Management" subtitle="Demonstration users across 5 canonical role workspaces." requiredRole="admin"
       actions={<Button className="rounded-full"><Plus className="h-4 w-4 mr-1" /> Invite User</Button>}>
       
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE USER INVENTORY:</strong> Sample user directories showcasing multi-role access control (RBAC) across Citizen, Surveyor, Officer, Verifier, and Bank roles.
+        <strong className="text-foreground">USER DIRECTORY:</strong> User management showcasing multi-role access control (RBAC) across Citizen, Surveyor, Government, Bank, and Admin roles.
       </div>
 
       <KpiRow items={[

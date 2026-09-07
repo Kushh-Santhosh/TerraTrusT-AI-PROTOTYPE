@@ -11,9 +11,8 @@ export const Route = createFileRoute("/admin/roles")({
 const roles = [
   { icon: User, name: "Citizen", count: 178421, perms: ["Register property","Upload documents","File disputes","Share passport"] },
   { icon: Briefcase, name: "Surveyor", count: 1402, perms: ["Submit GIS surveys","Upload boundary","Sign field reports"] },
-  { icon: Building2, name: "Officer", count: 284, perms: ["Approve permits","Resolve disputes","Update registry","Audit log access"] },
-  { icon: Users2, name: "Verifier", count: 3812, perms: ["Community attest","Mediate disputes"] },
-  { icon: Banknote, name: "Bank", count: 24, perms: ["Read passport (consent)","Run mortgage eligibility"] },
+  { icon: Building2, name: "Government Officer", count: 284, perms: ["Approve permits","Resolve disputes","Update registry","Audit log access"] },
+  { icon: Banknote, name: "Bank Underwriter", count: 24, perms: ["Read passport (consent)","Run mortgage eligibility"] },
   { icon: ShieldCheck, name: "Admin", count: 6, perms: ["All permissions","Manage roles","System config"] },
 ];
 

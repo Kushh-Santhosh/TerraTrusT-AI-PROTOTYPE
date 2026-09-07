@@ -18,7 +18,7 @@ function Page() {
         <Field label="Subject"><Input placeholder="Brief summary" /></Field>
         <Field label="Category"><Input defaultValue="Documents" /></Field>
         <div className="md:col-span-2"><Field label="Describe the issue"><Textarea rows={6} placeholder="What were you trying to do? What happened instead?" /></Field></div>
-        <Field label="Property (optional)"><Input placeholder="TT-8421-LG" /></Field>
+        <Field label="Property (optional)"><Input placeholder="TT-8421-BLR" /></Field>
         <Field label="Priority"><Input defaultValue="Medium" /></Field>
         <div className="md:col-span-2 flex justify-end gap-2">
           <Link to="/support"><Button variant="outline">Cancel</Button></Link>

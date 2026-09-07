@@ -1,5 +1,5 @@
-export type CanonicalRole = "citizen" | "surveyor" | "government" | "community" | "bank" | "admin";
-export type Role = CanonicalRole | "officer" | "verifier";
+export type CanonicalRole = "citizen" | "surveyor" | "government" | "bank" | "admin";
+export type Role = CanonicalRole | "officer";
 
 export interface User {
   id: string;

@@ -73,7 +73,7 @@ function RiskPage() {
           </div>
           <div className="mt-5 rounded-xl bg-warning/10 p-4 ring-1 ring-warning/30">
             <p className="flex items-center gap-2 text-sm font-medium"><ShieldAlert className="h-4 w-4 text-warning-foreground" /> Recommended next action</p>
-            <p className="mt-1 text-xs text-muted-foreground">Hedge market-risk exposure by re-running valuation in 7 days. Re-survey boundary to reduce overlap exposure on TT-7710-LG.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Hedge market-risk exposure by re-running valuation in 7 days. Re-survey boundary to reduce overlap exposure on TT-7710-BLR.</p>
           </div>
         </div>
       </div>

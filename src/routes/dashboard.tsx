@@ -27,17 +27,19 @@ function formatInr(val: number): string {
 function Dashboard() {
   const { user, profile } = useAuth();
   const [timeRange, setTimeRange] = useState("Last 8 months");
-  const [userProperties, setUserProperties] = useState<Property[]>(fallbackProperties);
+  const [userProperties, setUserProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const userName = profile?.full_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Citizen");
 
   useEffect(() => {
     if (user?.id) {
       loadOwnedProperties(user.id).then((props) => {
-        if (props && props.length) {
-          setUserProperties(props);
-        }
+        setUserProperties(props || []);
+        setLoading(false);
       });
+    } else {
+      setLoading(false);
     }
   }, [user?.id]);
 
@@ -46,12 +48,16 @@ function Dashboard() {
   const disputedCount = userProperties.filter(p => p.status === "disputed").length;
   const avgTrust = userProperties.length
     ? Math.round(userProperties.reduce((acc, p) => acc + (p.trustScore || 0), 0) / userProperties.length)
-    : 74;
+    : 0;
 
-  const actionItems = [
-    { title: "Upload tax receipt", desc: "Mysuru Farmstead · raises trust by +12", to: "/properties/p_002" },
-    { title: "Confirm boundary walk", desc: "Bengaluru Residence · surveyor visit Sat", to: "/properties/p_001" },
-    { title: "Respond to dispute notice", desc: "Gurugram Commercial Plot · 3 days left", to: "/disputes/d_001" },
+  const actionItems = userProperties.length > 0 ? [
+    { title: "Review Verification Status", desc: `${userProperties[0].title} · Score: ${userProperties[0].trustScore}/100`, to: `/properties/${userProperties[0].id}/verify` },
+    ...(userProperties[1] ? [{ title: "Inspect Property Boundaries", desc: `${userProperties[1].title} · Cadastral polygon`, to: `/properties/${userProperties[1].id}/boundary` }] : []),
+    { title: "Run Instant AI Valuation", desc: `${userProperties[0].title} · ${formatInr(userProperties[0].valuation || 24000000)}`, to: `/valuation` },
+  ] : [
+    { title: "Register Your First Property", desc: "Mint tamper-evident Property Passport with AI OCR", to: "/properties/new" },
+    { title: "Explore Cadastral Map", desc: "View national land parcels and high-resolution satellite layers", to: "/map" },
+    { title: "AI Intelligence Suite", desc: "Document OCR, boundary detection, and risk analysis", to: "/ai" },
   ];
 
   return (
@@ -190,7 +196,7 @@ function Dashboard() {
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <p className="mb-3 text-sm font-medium">Cadastral & Parcel Boundaries</p>
-          <MapMock properties={userProperties} highlightId="p_001" height={360} />
+          <MapMock properties={userProperties} highlightId={userProperties[0]?.id} height={360} />
         </div>
         <div className="surface-card flex flex-col gap-3 p-5">
           <div className="flex items-center gap-2">

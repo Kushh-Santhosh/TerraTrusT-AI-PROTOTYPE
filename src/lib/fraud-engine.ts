@@ -39,7 +39,7 @@ export function getFraudReport(p: Property): FraudReport {
   if (p.status === "disputed") {
     signals.push({
       id: "f1", kind: "boundary-overlap", severity: "critical", score: 94,
-      title: "Boundary overlap with TT-7710-LG",
+      title: "Boundary overlap with TT-7710-BLR",
       detail: "12.4% polygon intersection with an active parcel filed in 2021.",
       evidence: ["AI polygon diff · 0.84 IoU", "Bureau cadastre overlay", "Adjacent owner objection on file"],
     });

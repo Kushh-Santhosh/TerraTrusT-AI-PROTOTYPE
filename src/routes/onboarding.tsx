@@ -13,7 +13,7 @@ const steps = [
   "Set up your profile",
   "Verify your identity (KYC)",
   "Register your first property",
-  "Invite neighbours for attestation",
+  "AI verification & passport minting",
 ];
 
 function Page() {
@@ -24,7 +24,7 @@ function Page() {
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Welcome to TerraTrust</p>
         <h1 className="font-display mt-2 text-5xl">Let's give your property a passport.</h1>
         <p className="mt-3 text-muted-foreground">In four short steps, you'll have a verifiable, AI-scored digital identity for your land.</p>
-        <div className="mt-8"><Stepper steps={["Profile","KYC","Property","Community"]} current={0} /></div>
+        <div className="mt-8"><Stepper steps={["Profile","KYC","Property","Verification"]} current={0} /></div>
         <div className="surface-card mt-2 p-6">
           <ol className="space-y-3">
             {steps.map((s, i) => (

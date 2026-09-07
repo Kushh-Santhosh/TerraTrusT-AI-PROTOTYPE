@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, supabaseConfigured } from "./supabase";
 
-export type Role = "citizen" | "surveyor" | "government" | "community" | "bank" | "admin";
+export type Role = "citizen" | "surveyor" | "government" | "bank" | "admin";
 
 export interface Profile {
   id: string;
@@ -16,7 +16,6 @@ export const roleLabels: Record<Role, string> = {
   citizen: "Citizen",
   surveyor: "Surveyor",
   government: "Government Officer",
-  community: "Community Verifier",
   bank: "Bank Underwriter",
   admin: "Administrator",
 };
@@ -28,8 +27,6 @@ export function roleHome(role: Role | string): string {
       return "/surveyor";
     case "government":
       return "/government";
-    case "community":
-      return "/community";
     case "bank":
       return "/bank";
     case "admin":
@@ -41,11 +38,10 @@ export function roleHome(role: Role | string): string {
 }
 
 export function normalizeRole(role: unknown): Role {
-  if (role === "surveyor" || role === "government" || role === "community" || role === "bank" || role === "admin") {
+  if (role === "surveyor" || role === "government" || role === "bank" || role === "admin") {
     return role;
   }
   if (role === "officer") return "government";
-  if (role === "verifier") return "community";
   return "citizen";
 }
 
@@ -59,7 +55,6 @@ const DEMO_CREDENTIALS: Record<string, { role: Role; fullName: string; region: s
   "surveyor@terratrust.ai": { role: "surveyor", fullName: "Arjun Mehta", region: "Karnataka" },
   "government@terratrust.ai": { role: "government", fullName: "Dr. Vandana Rao", region: "Karnataka" },
   "officer@terratrust.ai": { role: "government", fullName: "Dr. Vandana Rao", region: "Karnataka" },
-  "community@terratrust.ai": { role: "community", fullName: "Rajendra Joshi", region: "Karnataka" },
   "bank@terratrust.ai": { role: "bank", fullName: "Sunita Sharma", region: "Karnataka" },
   "admin@terratrust.ai": { role: "admin", fullName: "System Administrator", region: "Karnataka" },
 };
@@ -111,15 +106,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     : "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env.local.";
 
   const loadProfile = async (user: User | null) => {
-    if (demoUser) {
-      setProfile({
-        id: demoUser.id,
-        email: demoUser.email,
-        full_name: demoUser.full_name,
-        role: demoUser.role,
-        region: demoUser.region,
-      });
-      return;
+    const rawDemo = typeof window !== "undefined" ? localStorage.getItem("terratrust_demo_session") : null;
+    if (rawDemo) {
+      try {
+        const parsed = JSON.parse(rawDemo);
+        setDemoUser(parsed);
+        setProfile({
+          id: parsed.id,
+          email: parsed.email,
+          full_name: parsed.full_name,
+          role: parsed.role,
+          region: parsed.region,
+        });
+        return;
+      } catch {}
     }
     if (!user) {
       setProfile(null);
@@ -166,6 +166,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (event === "PASSWORD_RECOVERY") setIsRecoverySession(true);
       if (event === "SIGNED_OUT") setIsRecoverySession(false);
       setSession(nextSession);
+      const rawDemo = typeof window !== "undefined" ? localStorage.getItem("terratrust_demo_session") : null;
+      if (rawDemo) {
+        try {
+          const parsed = JSON.parse(rawDemo);
+          setDemoUser(parsed);
+          setProfile({
+            id: parsed.id,
+            email: parsed.email,
+            full_name: parsed.full_name,
+            role: parsed.role,
+            region: parsed.region,
+          });
+          if (mounted) setLoading(false);
+          return;
+        } catch {}
+      }
       loadProfile(nextSession?.user ?? null).finally(() => {
         if (mounted) setLoading(false);
       });
@@ -174,15 +190,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       setSession(data.session);
-      if (demoUser) {
-        setProfile({
-          id: demoUser.id,
-          email: demoUser.email,
-          full_name: demoUser.full_name,
-          role: demoUser.role,
-          region: demoUser.region,
-        });
-        if (mounted) setLoading(false);
+      const rawDemo = typeof window !== "undefined" ? localStorage.getItem("terratrust_demo_session") : null;
+      if (rawDemo) {
+        try {
+          const parsed = JSON.parse(rawDemo);
+          setDemoUser(parsed);
+          setProfile({
+            id: parsed.id,
+            email: parsed.email,
+            full_name: parsed.full_name,
+            role: parsed.role,
+            region: parsed.region,
+          });
+          if (mounted) setLoading(false);
+          return;
+        } catch {}
       } else if (data.session?.user) {
         loadProfile(data.session.user).finally(() => {
           if (mounted) setLoading(false);
@@ -198,7 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [demoUser]);
 
-  const activeUser: User | null = session?.user ?? (demoUser ? ({
+  const activeUser: User | null = demoUser ? ({
     id: demoUser.id,
     email: demoUser.email,
     user_metadata: {
@@ -209,15 +231,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     app_metadata: {},
     aud: "authenticated",
     created_at: new Date().toISOString(),
-  } as unknown as User) : null);
+  } as unknown as User) : (session?.user ?? null);
 
-  const activeProfile: Profile | null = profile ?? (demoUser ? {
+  const activeProfile: Profile | null = demoUser ? {
     id: demoUser.id,
     email: demoUser.email,
     full_name: demoUser.full_name,
     role: demoUser.role,
     region: demoUser.region,
-  } : null);
+  } : profile;
 
   const value: AuthContextValue = {
     session,
@@ -240,6 +262,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const cleanEmail = email.trim().toLowerCase();
         const demo = DEMO_CREDENTIALS[cleanEmail];
         if (demo) {
+          try {
+            await supabase.auth.signInWithPassword({
+              email: "citizen@terratrust.ai",
+              password: "Terra@2026",
+            });
+          } catch {}
+
           const fakeUser = {
             id: `demo_${demo.role}_user`,
             email: cleanEmail,
@@ -356,11 +385,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
 
     setDemoRole(role: Role) {
+      // Connect Supabase session in background if needed
+      supabase.auth.signInWithPassword({
+        email: "citizen@terratrust.ai",
+        password: "Terra@2026",
+      }).catch(() => {});
+
       const meta: Record<string, { email: string; fullName: string }> = {
         citizen: { email: "citizen@terratrust.ai", fullName: "Kushal Santhosh" },
         surveyor: { email: "surveyor@terratrust.ai", fullName: "Arjun Mehta" },
         government: { email: "government@terratrust.ai", fullName: "Dr. Vandana Rao" },
-        community: { email: "community@terratrust.ai", fullName: "Rajendra Joshi" },
         bank: { email: "bank@terratrust.ai", fullName: "Sunita Sharma" },
         admin: { email: "admin@terratrust.ai", fullName: "System Administrator" },
       };
