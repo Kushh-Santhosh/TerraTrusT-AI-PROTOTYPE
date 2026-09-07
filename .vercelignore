@@ -1,0 +1,13 @@
+node_modules
+dist
+dist-ssr
+.output
+.vinxi
+.tanstack
+screenshots
+archive
+.system_generated
+scripts
+*.png
+*.jpg
+*.jpeg
