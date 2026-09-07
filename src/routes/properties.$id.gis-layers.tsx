@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { Crumbs, Pill } from "@/components/ui-ext/Scaffold";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PropertySubNav } from "@/components/property/PropertySubNav";
+import { getPropertyById } from "@/lib/property-repository";
+import { properties as fallbackProperties } from "@/lib/mock-data";
+import type { Property } from "@/lib/types";
+import { MapMock } from "@/components/ui-ext/MapMock";
 
 export const Route = createFileRoute("/properties/$id/gis-layers")({
   head: () => ({ meta: [{ title: "GIS Layers — TerraTrust AI" }] }),
@@ -22,9 +26,24 @@ const layers = [
 function Page() {
   const { id } = Route.useParams();
   const [state, setState] = useState(layers);
+  const [property, setProperty] = useState<Property | null>(null);
+
+  useEffect(() => {
+    getPropertyById(id).then((p) => {
+      if (p) {
+        setProperty(p);
+      } else {
+        const found = fallbackProperties.find((item) => item.id === id);
+        if (found) setProperty(found);
+      }
+    });
+  }, [id]);
+
+  const p = property || fallbackProperties.find((item) => item.id === id) || fallbackProperties[0];
+
   return (
     <AppShell title="GIS Layers" subtitle="Toggle spatial data overlays and inspect parcel surroundings.">
-      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: id, to: "/properties/$id" }, { label: "GIS Layers" }]} />
+      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: p.title || id, to: `/properties/${id}` }, { label: "GIS Layers" }]} />
       <PropertySubNav propertyId={id} activeTab="gis-layers" />
 
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
@@ -52,18 +71,9 @@ function Page() {
             ))}
           </div>
         </div>
-        <div className="surface-card relative h-[65vh] overflow-hidden">
-          <svg viewBox="0 0 800 500" className="h-full w-full">
-            <pattern id="grid-gis" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="oklch(0.9 0.01 250)" /></pattern>
-            <rect width="800" height="500" fill="url(#grid-gis)" />
-            {state.filter(l => l.on).map((l, i) => (
-              <g key={l.name} opacity="0.55">
-                <rect x={80 + i * 30} y={60 + i * 20} width={500 - i * 20} height={320 - i * 30} fill={l.color} fillOpacity="0.08" stroke={l.color} strokeWidth="1.5" />
-              </g>
-            ))}
-            <polygon points="280,180 540,170 580,360 320,380" fill="oklch(0.55 0.18 250 / 0.15)" stroke="oklch(0.55 0.18 250)" strokeWidth="3" />
-          </svg>
-          <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
+        <div className="surface-card relative h-[65vh] overflow-hidden rounded-xl border border-border">
+          <MapMock properties={[p]} highlightId={p.id} height={500} />
+          <div className="absolute bottom-4 left-4 z-10 flex flex-wrap gap-2 pointer-events-none">
             {state.filter(l => l.on).map(l => <Pill key={l.name} tone="info">{l.name}</Pill>)}
           </div>
         </div>

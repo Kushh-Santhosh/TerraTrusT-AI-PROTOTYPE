@@ -171,6 +171,8 @@ export async function loadPropertyById(idOrPassport: string): Promise<Property |
   return demoProperties.find((p) => p.id === idOrPassport || p.passportId === idOrPassport) ?? null;
 }
 
+export const getPropertyById = loadPropertyById;
+
 /** Loads shared properties for institutional roles (Government, Surveyor, Bank, Admin) */
 export async function loadInstitutionalProperties(statusFilter?: Property["status"]): Promise<Property[]> {
   if (!supabaseConfigured) {

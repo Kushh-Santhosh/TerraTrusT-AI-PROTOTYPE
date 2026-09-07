@@ -3,6 +3,12 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Crumbs, KpiRow } from "@/components/ui-ext/Scaffold";
 import { Button } from "@/components/ui/button";
 import { PropertySubNav } from "@/components/property/PropertySubNav";
+import { useEffect, useState } from "react";
+import { getPropertyById } from "@/lib/property-repository";
+import { properties as fallbackProperties } from "@/lib/mock-data";
+import type { Property } from "@/lib/types";
+import { MapMock } from "@/components/ui-ext/MapMock";
+import { PropertyCardMiniMap } from "@/components/property/PropertyCardMiniMap";
 
 export const Route = createFileRoute("/properties/$id/boundary")({
   head: () => ({ meta: [{ title: "Boundary Comparison — TerraTrust AI" }] }),
@@ -11,48 +17,81 @@ export const Route = createFileRoute("/properties/$id/boundary")({
 
 function Page() {
   const { id } = Route.useParams();
+  const [property, setProperty] = useState<Property | null>(null);
+
+  useEffect(() => {
+    getPropertyById(id).then((p) => {
+      if (p) {
+        setProperty(p);
+      } else {
+        const found = fallbackProperties.find((item) => item.id === id);
+        if (found) setProperty(found);
+      }
+    });
+  }, [id]);
+
+  const p = property || fallbackProperties.find((item) => item.id === id) || fallbackProperties[0];
+
   return (
-    <AppShell title="Boundary Comparison" subtitle="Compare claimed GIS polygon, revenue survey boundaries, and high-resolution satellite imagery."
-      actions={<Button variant="outline">Download GeoJSON</Button>}>
-      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: id, to: "/properties/$id" }, { label: "Boundary" }]} />
+    <AppShell
+      title="Boundary Comparison"
+      subtitle="Compare claimed GIS polygon, revenue survey boundaries, and high-resolution satellite imagery."
+      actions={<Button variant="outline">Download GeoJSON</Button>}
+    >
+      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: p.title || id, to: `/properties/${id}` }, { label: "Boundary" }]} />
       <PropertySubNav propertyId={id} activeTab="boundary" />
 
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
         <strong className="text-foreground">GIS CADASTRAL COMPARISON:</strong> Real vertex geofencing calibrated for Indian Survey Numbers and Bhoomi cadastral boundaries.
       </div>
 
-      <KpiRow items={[
-        { label: "Registry match", value: "99.6%" },
-        { label: "Satellite match", value: "98.1%" },
-        { label: "Max deviation", value: "0.4m" },
-        { label: "Confidence", value: "High" },
-      ]} />
+      <KpiRow
+        items={[
+          { label: "Registry match", value: "99.6%" },
+          { label: "Satellite match", value: "98.1%" },
+          { label: "Max deviation", value: "0.4m" },
+          { label: "Confidence", value: "High" },
+        ]}
+      />
+
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        {[
-          { label: "Claimed boundary (GPS/KML)", color: "oklch(0.55 0.18 250)" },
-          { label: "Survey registry boundary", color: "oklch(0.55 0.18 150)" },
-          { label: "Satellite-derived parcel", color: "oklch(0.65 0.18 60)" },
-        ].map(b => (
-          <div key={b.label} className="surface-card p-4">
-            <p className="text-xs font-medium text-muted-foreground">{b.label}</p>
-            <svg viewBox="0 0 200 160" className="mt-2 h-44 w-full rounded-lg bg-muted/40">
-              <pattern id={`p-${b.label}`} width="16" height="16" patternUnits="userSpaceOnUse"><path d="M16 0H0V16" fill="none" stroke="oklch(0.9 0.01 250)" /></pattern>
-              <rect width="200" height="160" fill={`url(#p-${b.label})`} />
-              <polygon points="55,40 150,38 165,110 70,118" fill={`${b.color}33`} stroke={b.color} strokeWidth="2" />
-            </svg>
-          </div>
-        ))}
+        <div className="surface-card p-4">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Claimed boundary (GPS/KML)</p>
+          <PropertyCardMiniMap
+            coords={p.coords}
+            boundary={p.boundary}
+            title={p.title}
+            className="h-44 w-full rounded-lg"
+          />
+        </div>
+        <div className="surface-card p-4">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Survey registry boundary</p>
+          <PropertyCardMiniMap
+            coords={p.coords}
+            boundary={p.surveyorBoundary && p.surveyorBoundary.length >= 3 ? p.surveyorBoundary : p.boundary}
+            title={`${p.title} - Cadastral`}
+            className="h-44 w-full rounded-lg"
+          />
+        </div>
+        <div className="surface-card p-4">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Satellite-derived parcel</p>
+          <PropertyCardMiniMap
+            coords={p.coords}
+            boundary={p.governmentBoundary && p.governmentBoundary.length >= 3 ? p.governmentBoundary : p.boundary}
+            title={`${p.title} - Satellite`}
+            className="h-44 w-full rounded-lg"
+          />
+        </div>
       </div>
+
       <div className="surface-card mt-6 p-5">
-        <h3 className="font-display text-xl">Overlay comparison</h3>
-        <svg viewBox="0 0 400 240" className="mt-3 h-64 w-full rounded-lg bg-muted/40">
-          <pattern id="op" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="oklch(0.9 0.01 250)" /></pattern>
-          <rect width="400" height="240" fill="url(#op)" />
-          <polygon points="120,60 290,58 310,180 140,188" fill="oklch(0.55 0.18 250 / 0.18)" stroke="oklch(0.55 0.18 250)" strokeWidth="2" />
-          <polygon points="122,62 292,58 308,178 142,186" fill="none" stroke="oklch(0.55 0.18 150)" strokeWidth="2" strokeDasharray="6 4" />
-          <polygon points="121,61 291,59 309,179 141,187" fill="none" stroke="oklch(0.65 0.18 60)" strokeWidth="2" strokeDasharray="2 3" />
-        </svg>
-        <p className="mt-3 text-xs text-muted-foreground">All three boundaries align within tolerance (0.4m drift). No overlap conflicts detected with neighboring parcels.</p>
+        <h3 className="font-display text-xl mb-3">Interactive Cadastral GIS View</h3>
+        <div className="overflow-hidden rounded-xl border border-border">
+          <MapMock properties={[p]} highlightId={p.id} height={380} />
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Boundaries align within revenue tolerance (0.4m drift). Coordinate centroid: ({p.coords?.lat?.toFixed(5) || "12.9716"}, {p.coords?.lng?.toFixed(5) || "77.5946"}).
+        </p>
       </div>
     </AppShell>
   );

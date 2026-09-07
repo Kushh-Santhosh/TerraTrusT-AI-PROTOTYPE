@@ -102,14 +102,14 @@ export const STEP_NAMES = [
 ] as const;
 
 /** Webhook URL is public config only — never a secret. */
-export function getWebhookUrl(): string | undefined {
+export function getWebhookUrl(): string {
   const raw = import.meta.env["VITE_N8N_WEBHOOK_URL"] as string | undefined;
   const v = raw?.trim();
-  return v ? v : undefined;
+  return v || "https://kushhhsanthosh.app.n8n.cloud/webhook/terratrust/verify";
 }
 
 export function activeProvider(): WorkflowProvider {
-  return getWebhookUrl() ? "n8n" : "demo";
+  return "n8n";
 }
 
 export function buildPayload(p: Property, extra?: { userId?: string; propertyUuid?: string }): VerificationPayload {

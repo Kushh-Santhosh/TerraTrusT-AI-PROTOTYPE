@@ -9,6 +9,7 @@ import { Filter, Grid3x3, List, Plus, Search, MapPin, Building2 } from "lucide-r
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { Property } from "@/lib/types";
+import { PropertyCardMiniMap } from "@/components/property/PropertyCardMiniMap";
 
 export const Route = createFileRoute("/properties")({
   head: () => ({ meta: [{ title: "Properties — TerraTrust AI" }] }),
@@ -128,20 +129,13 @@ function PropertiesPage() {
               params={{ id: p.id }}
               className="surface-card group overflow-hidden transition hover:shadow-[var(--shadow-elev)]"
             >
-              <div className="relative h-36 overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
-                <svg viewBox="0 0 200 100" className="absolute inset-0 h-full w-full">
-                  <pattern id={`g${p.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M20 0H0V20" fill="none" stroke="oklch(0.9 0.01 250)" />
-                  </pattern>
-                  <rect width="200" height="100" fill={`url(#g${p.id})`} />
-                  <polygon
-                    points="60,30 140,28 158,68 80,76 50,60"
-                    fill="oklch(0.45 0.08 195 / 0.2)"
-                    stroke="oklch(0.45 0.08 195)"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-                <div className="absolute right-3 top-3">
+              <div className="relative h-36 overflow-hidden">
+                <PropertyCardMiniMap
+                  coords={p.coords}
+                  boundary={p.boundary}
+                  title={p.title}
+                />
+                <div className="absolute right-3 top-3 z-20">
                   <StatusBadge status={p.status} />
                 </div>
               </div>
