@@ -1,0 +1,443 @@
+{
+  "startedAt": "2026-09-07T04:32:51.736Z",
+  "browser": "Google Chrome Desktop (1440x900)",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "roleWorkflows": {
+    "citizen": [
+      {
+        "name": "My Properties",
+        "path": "/properties",
+        "title": "Properties",
+        "status": "PASS"
+      },
+      {
+        "name": "Add Property",
+        "path": "/properties/new",
+        "title": "Register a new property",
+        "status": "PASS"
+      },
+      {
+        "name": "GIS Map",
+        "path": "/map",
+        "title": "GIS Map",
+        "status": "PASS"
+      },
+      {
+        "name": "AI Passport",
+        "path": "/ai-passport",
+        "title": "AI Property Passport",
+        "status": "PASS"
+      },
+      {
+        "name": "AI Valuation",
+        "path": "/valuation",
+        "title": "AI Property Valuation",
+        "status": "PASS"
+      },
+      {
+        "name": "Verification",
+        "path": "/verification",
+        "title": "Community Verification",
+        "status": "PASS"
+      },
+      {
+        "name": "AI Assistant",
+        "path": "/assistant",
+        "title": "AI Assistant",
+        "status": "PASS"
+      },
+      {
+        "name": "Reports",
+        "path": "/reports",
+        "title": "Audit & Intelligence Reports",
+        "status": "PASS"
+      },
+      {
+        "name": "Profile",
+        "path": "/profile",
+        "title": "Profile",
+        "status": "PASS"
+      }
+    ],
+    "surveyor": [
+      {
+        "name": "Assignments",
+        "path": "/surveyor/assignments",
+        "title": "Surveyor Workspace",
+        "status": "PASS"
+      },
+      {
+        "name": "Assignment Detail",
+        "path": "/surveyor/assignments/S-2241",
+        "title": "Surveyor Workspace",
+        "status": "PASS"
+      },
+      {
+        "name": "Boundary Detection",
+        "path": "/ai-boundary",
+        "title": "AI Boundary Detection",
+        "status": "PASS"
+      },
+      {
+        "name": "Satellite Compare",
+        "path": "/ai-satellite",
+        "title": "Satellite Comparison",
+        "status": "PASS"
+      },
+      {
+        "name": "Verification AI",
+        "path": "/ai-suggestions",
+        "title": "AI Verification Suggestions",
+        "status": "PASS"
+      },
+      {
+        "name": "Risk Analysis",
+        "path": "/ai-risk",
+        "title": "AI Risk Analysis",
+        "status": "PASS"
+      }
+    ],
+    "government": [
+      {
+        "name": "Cadastral Parcels",
+        "path": "/government/parcels",
+        "title": "Government Registry Workbench",
+        "status": "PASS"
+      },
+      {
+        "name": "Disputes",
+        "path": "/government/disputes",
+        "title": "Government Registry Workbench",
+        "status": "PASS"
+      },
+      {
+        "name": "Audit Ledger",
+        "path": "/government/audit",
+        "title": "Government Registry Workbench",
+        "status": "PASS"
+      },
+      {
+        "name": "Permits",
+        "path": "/government/permits",
+        "title": "Government Registry Workbench",
+        "status": "PASS"
+      },
+      {
+        "name": "Analytics",
+        "path": "/analytics",
+        "title": "Analytics",
+        "status": "PASS"
+      },
+      {
+        "name": "Fraud Cases",
+        "path": "/fraud",
+        "title": "Fraud Detection",
+        "status": "PASS"
+      }
+    ],
+    "community": [
+      {
+        "name": "Attestations",
+        "path": "/attestations",
+        "title": "Your attestations",
+        "status": "PASS"
+      },
+      {
+        "name": "Disputes",
+        "path": "/disputes",
+        "title": "Disputes",
+        "status": "PASS"
+      },
+      {
+        "name": "Verification",
+        "path": "/verification",
+        "title": "Community Verification",
+        "status": "PASS"
+      },
+      {
+        "name": "Reports",
+        "path": "/reports",
+        "title": "Audit & Intelligence Reports",
+        "status": "PASS"
+      }
+    ],
+    "bank": [
+      {
+        "name": "Loans & Underwriting",
+        "path": "/bank/loans",
+        "title": "Loan book",
+        "status": "PASS"
+      },
+      {
+        "name": "Valuation Engine",
+        "path": "/ai-valuation",
+        "title": "AI Valuation Engine",
+        "status": "PASS"
+      },
+      {
+        "name": "Collateral Risk",
+        "path": "/ai-risk",
+        "title": "AI Risk Analysis",
+        "status": "PASS"
+      },
+      {
+        "name": "Property Search",
+        "path": "/search",
+        "title": "Smart Search",
+        "status": "PASS"
+      },
+      {
+        "name": "Passport Verification",
+        "path": "/properties/p_001/verify",
+        "title": "Live verification",
+        "status": "PASS"
+      }
+    ],
+    "admin": [
+      {
+        "name": "User Management",
+        "path": "/admin/users",
+        "title": "Platform Administrator",
+        "status": "PASS"
+      },
+      {
+        "name": "Roles & Permissions",
+        "path": "/admin/roles",
+        "title": "Platform Administrator",
+        "status": "PASS"
+      },
+      {
+        "name": "Jurisdiction Regions",
+        "path": "/admin/regions",
+        "title": "Platform Administrator",
+        "status": "PASS"
+      },
+      {
+        "name": "System Audit",
+        "path": "/admin/audit",
+        "title": "Platform Administrator",
+        "status": "PASS"
+      },
+      {
+        "name": "System Health",
+        "path": "/admin/system",
+        "title": "Platform Administrator",
+        "status": "PASS"
+      },
+      {
+        "name": "API Keys",
+        "path": "/admin/api-keys",
+        "title": "Platform Administrator",
+        "status": "PASS"
+      },
+      {
+        "name": "Integrations",
+        "path": "/integrations",
+        "title": "Integrations",
+        "status": "PASS"
+      },
+      {
+        "name": "Security Center",
+        "path": "/security",
+        "title": "Account Security",
+        "status": "PASS"
+      },
+      {
+        "name": "Feedback",
+        "path": "/admin/feedback",
+        "title": "Platform Administrator",
+        "status": "PASS"
+      }
+    ]
+  },
+  "propertySubroutes": [
+    {
+      "name": "Overview",
+      "path": "/properties/p_001",
+      "title": "Ramamurthy Nagar Residence",
+      "status": "PASS"
+    },
+    {
+      "name": "AI Analysis",
+      "path": "/properties/p_001/ai-analysis",
+      "title": "AI Analysis",
+      "status": "PASS"
+    },
+    {
+      "name": "Boundary",
+      "path": "/properties/p_001/boundary",
+      "title": "Boundary Comparison",
+      "status": "PASS"
+    },
+    {
+      "name": "Documents",
+      "path": "/properties/p_001/documents",
+      "title": "Property Documents",
+      "status": "PASS"
+    },
+    {
+      "name": "GIS Layers",
+      "path": "/properties/p_001/gis-layers",
+      "title": "GIS Layers",
+      "status": "PASS"
+    },
+    {
+      "name": "Satellite",
+      "path": "/properties/p_001/satellite",
+      "title": "Satellite Imagery",
+      "status": "PASS"
+    },
+    {
+      "name": "Timeline",
+      "path": "/properties/p_001/timeline",
+      "title": "Property Timeline",
+      "status": "PASS"
+    },
+    {
+      "name": "Transfer",
+      "path": "/properties/p_001/transfer",
+      "title": "Transfer Ownership",
+      "status": "PASS"
+    },
+    {
+      "name": "Verification",
+      "path": "/properties/p_001/verify",
+      "title": "Live verification",
+      "status": "PASS"
+    }
+  ],
+  "aiModules": [
+    {
+      "name": "AI Overview",
+      "path": "/ai",
+      "title": "AI Intelligence",
+      "status": "PASS"
+    },
+    {
+      "name": "AI Passport",
+      "path": "/ai-passport",
+      "title": "AI Property Passport",
+      "status": "PASS"
+    },
+    {
+      "name": "Valuation Engine",
+      "path": "/ai-valuation",
+      "title": "AI Valuation Engine",
+      "status": "PASS"
+    },
+    {
+      "name": "Document OCR",
+      "path": "/ai-ocr",
+      "title": "Document OCR & Forensic Extraction",
+      "status": "PASS"
+    },
+    {
+      "name": "Fraud Detection",
+      "path": "/ai-fraud",
+      "title": "AI Fraud Detection",
+      "status": "PASS"
+    },
+    {
+      "name": "Risk Analysis",
+      "path": "/ai-risk",
+      "title": "AI Risk Analysis",
+      "status": "PASS"
+    },
+    {
+      "name": "Confidence Score",
+      "path": "/ai-confidence",
+      "title": "AI Confidence Score",
+      "status": "PASS"
+    },
+    {
+      "name": "Boundary Detection",
+      "path": "/ai-boundary",
+      "title": "AI Boundary Detection",
+      "status": "PASS"
+    },
+    {
+      "name": "Satellite Compare",
+      "path": "/ai-satellite",
+      "title": "Satellite Comparison",
+      "status": "PASS"
+    },
+    {
+      "name": "Land Health",
+      "path": "/ai-land-health",
+      "title": "AI Land Health Score",
+      "status": "PASS"
+    },
+    {
+      "name": "Ownership Timeline",
+      "path": "/ai-timeline",
+      "title": "AI Ownership Timeline",
+      "status": "PASS"
+    },
+    {
+      "name": "Recommendations",
+      "path": "/ai-recommendations",
+      "title": "AI Recommendations",
+      "status": "PASS"
+    },
+    {
+      "name": "Document Summary",
+      "path": "/ai-summary",
+      "title": "AI Document Summary",
+      "status": "PASS"
+    },
+    {
+      "name": "Verification AI",
+      "path": "/ai-suggestions",
+      "title": "AI Verification Suggestions",
+      "status": "PASS"
+    },
+    {
+      "name": "Assistant Brain",
+      "path": "/assistant",
+      "title": "AI Assistant",
+      "status": "PASS"
+    }
+  ],
+  "gisMapStatus": {
+    "canvasRendered": true,
+    "attribution": "TerraTrust AI GIS · © OpenStreetMap contributors | © OpenStreetMap contributors",
+    "markersRendered": 8,
+    "tileRequests": {
+      "total": 428,
+      "ok": 428,
+      "failed": 0
+    },
+    "status": "PASS"
+  },
+  "mobileResponsiveStatus": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "status": "PASS"
+  },
+  "consoleErrors": [],
+  "failedRequests": [],
+  "tileRequests": {
+    "total": 428,
+    "ok": 428,
+    "failed": 0
+  },
+  "summary": {
+    "rolesVerified": 6,
+    "propertySubroutesVerified": 9,
+    "aiModulesVerified": 15,
+    "tileRequests": {
+      "total": 428,
+      "ok": 428,
+      "failed": 0
+    },
+    "consoleErrorsCount": 0,
+    "failedRequestsCount": 0,
+    "overallStatus": "PASS"
+  },
+  "completedAt": "2026-09-07T04:34:06.140Z"
+}

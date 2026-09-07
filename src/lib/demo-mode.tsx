@@ -14,13 +14,13 @@ const STEPS: DemoStep[] = [
   { to: "/dashboard",          title: "Citizen dashboard",         body: "Every property in one portfolio. KPIs roll up from real registry signals — no spreadsheets, no missing fields." },
   { to: "/properties/p_001",   title: "Property Passport",         body: "The machine-verifiable identity of a parcel: trust score, AI valuation, ownership history, encumbrances, nearby infrastructure." },
   { to: "/ai-confidence",      title: "Confidence Engine",         body: "Eight weighted signals — government docs, community, surveyor, GIS, utilities, tax, fraud, ownership — fused into one explainable score." },
-  { to: "/ai-valuation",       title: "Explainable AI valuation",  body: "Every dollar of the estimate is traceable to a comparable sale, infrastructure feature, or market factor." },
+  { to: "/ai-valuation",       title: "Explainable AI valuation",  body: "Every rupee of the estimate is traceable to a comparable sale, infrastructure feature, or market factor." },
   { to: "/ai-fraud",           title: "Fraud detection",           body: "Duplicate boundaries, forged stamps, signature anomalies — surfaced before they reach the bureau desk." },
   { to: "/community",          title: "Community verification",    body: "Neighbours attest, surveyors inspect, bureau endorses. Trust compounds." },
   { to: "/government",         title: "Government workbench",      body: "Officers review AI suggestions, approve or escalate, and issue the digital passport in minutes." },
   { to: "/analytics",          title: "National analytics",        body: "Verification completion, fraud heatmaps, regional trust scores, processing time — at a glance." },
   { to: "/assistant",          title: "Conversational AI",         body: "Ask about any property in plain English. Answers are grounded in the same engines you just saw." },
-  { to: "/impact",             title: "National impact",           body: "From 52 days to 5. From 78% less fraud to $184M in annual savings — the case for a national rollout, in one page." },
+  { to: "/impact",             title: "National impact",           body: "From 52 days to 5. From 78% less fraud to ₹1,500 Cr in annual savings — the case for a national rollout, in one page." },
 ];
 
 

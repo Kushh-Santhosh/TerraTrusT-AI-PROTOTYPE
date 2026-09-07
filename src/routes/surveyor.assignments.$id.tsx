@@ -12,14 +12,14 @@ export const Route = createFileRoute("/surveyor/assignments/$id")({
 function Page() {
   const { id } = Route.useParams();
   return (
-    <AppShell title={`Assignment ${id}`} subtitle="Parcel TT-7188-LG · Ikoyi Family Compound"
+    <AppShell title={`Assignment ${id}`} subtitle="Parcel TT-7188-BLR · Whitefield Commercial Plot, Bengaluru"
       actions={<><Button variant="outline"><Upload className="h-4 w-4" /> Upload survey</Button><Button><CheckCircle2 className="h-4 w-4" /> Mark complete</Button></>}>
       <Crumbs items={[{ label: "Assignments", to: "/surveyor/assignments" }, { label: id }]} />
       <KpiRow items={[
         { label: "Area to survey", value: "1,240 sqm" },
         { label: "GPS accuracy", value: "±0.6m" },
         { label: "Visits required", value: "1" },
-        { label: "Fee", value: "$140" },
+        { label: "Fee", value: "₹12,500" },
       ]} />
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="surface-card p-5 lg:col-span-2">

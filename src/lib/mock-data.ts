@@ -14,7 +14,7 @@ export const currentUser: User = {
 export const properties: Property[] = [
   {
     id: "p_001",
-    passportId: "TT-8421-LG",
+    passportId: "TT-8421-BLR",
     title: "Ramamurthy Nagar Residence",
     type: "residential",
     status: "verified",
@@ -27,7 +27,7 @@ export const properties: Property[] = [
     ownerSince: "2019-06-14",
     valuation: 24000000,
     aiConfidence: 92,
-    coords: { lat: 12.9567, lng: 77.62 },
+    coords: { lat: 12.9567, lng: 77.6200 },
     boundary: [
       { lat: 12.9568, lng: 77.6198 },
       { lat: 12.9569, lng: 77.6203 },
@@ -91,7 +91,7 @@ export const properties: Property[] = [
   },
   {
     id: "p_002",
-    passportId: "TT-2210-KD",
+    passportId: "TT-2210-MYS",
     title: "Mysuru Farm Parcel",
     type: "agricultural",
     status: "pending",
@@ -104,7 +104,7 @@ export const properties: Property[] = [
     ownerSince: "2022-01-09",
     valuation: 4850000,
     aiConfidence: 78,
-    coords: { lat: 10.5105, lng: 7.4165 },
+    coords: { lat: 12.2958, lng: 76.6394 },
     boundary: [],
     documents: [
       {
@@ -135,7 +135,7 @@ export const properties: Property[] = [
   },
   {
     id: "p_003",
-    passportId: "TT-5512-AB",
+    passportId: "TT-5512-GG",
     title: "Gurugram Commercial Plot",
     type: "commercial",
     status: "disputed",
@@ -148,7 +148,7 @@ export const properties: Property[] = [
     ownerSince: "2021-05-22",
     valuation: 61200000,
     aiConfidence: 65,
-    coords: { lat: 9.0765, lng: 7.3986 },
+    coords: { lat: 28.4595, lng: 77.0266 },
     boundary: [],
     documents: [
       {
@@ -186,7 +186,7 @@ export const properties: Property[] = [
   },
   {
     id: "p_004",
-    passportId: "TT-9930-OY",
+    passportId: "TT-9930-PN",
     title: "Pune Family Compound",
     type: "residential",
     status: "verified",
@@ -199,7 +199,7 @@ export const properties: Property[] = [
     ownerSince: "2015-11-30",
     valuation: 14200000,
     aiConfidence: 90,
-    coords: { lat: 7.4378, lng: 3.8966 },
+    coords: { lat: 18.5204, lng: 73.8567 },
     boundary: [],
     documents: [
       {

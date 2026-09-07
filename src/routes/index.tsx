@@ -311,7 +311,7 @@ function HowItWorks() {
 function Stats() {
   const items = [
     { v: "2.4M+", l: "Parcels indexed", s: "Across 6 states in pilot" },
-    { v: "$1.8B", l: "Asset value verified", s: "Tied to live property passports" },
+    { v: "₹14,500 Cr", l: "Asset value verified", s: "Tied to live property passports" },
     { v: "612", l: "Disputes resolved", s: "Using GIS conflict detection" },
     { v: "4.92/5", l: "Surveyor quality", s: "Avg rating, past 12 months" },
   ];

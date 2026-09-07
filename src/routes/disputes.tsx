@@ -10,10 +10,10 @@ export const Route = createFileRoute("/disputes")({
 });
 
 const disputes = [
-  { id: "D-3318", parcel: "TT-5512-AB", title: "Overlapping ownership claim", filed: "2024-07-30", status: "Mediation", days: 61 },
-  { id: "D-3301", parcel: "TT-8814-KD", title: "Disputed boundary marker", filed: "2024-09-05", status: "Open", days: 24 },
-  { id: "D-3289", parcel: "TT-1132-LG", title: "Fraudulent CofO suspected", filed: "2024-08-12", status: "Resolved", days: 48 },
-  { id: "D-3276", parcel: "TT-2401-OY", title: "Inheritance share dispute", filed: "2024-06-19", status: "Awaiting hearing", days: 102 },
+  { id: "D-3318", parcel: "TT-5512-GG", title: "Overlapping ownership claim", filed: "2024-07-30", status: "Mediation", days: 61 },
+  { id: "D-3301", parcel: "TT-8814-MYS", title: "Disputed survey boundary marker", filed: "2024-09-05", status: "Open", days: 24 },
+  { id: "D-3289", parcel: "TT-1132-BLR", title: "Forged A-Khata Certificate suspected", filed: "2024-08-12", status: "Resolved", days: 48 },
+  { id: "D-3276", parcel: "TT-2401-PN", title: "Inheritance share partition dispute", filed: "2024-06-19", status: "Awaiting hearing", days: 102 },
 ];
 
 function Page() {

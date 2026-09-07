@@ -20,14 +20,22 @@ function CompleteProfile() {
           <div className="grid gap-2"><Label>Country</Label>
             <Select defaultValue="in"><SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="in">India</SelectItem>
-                <SelectItem value="ng">Nigeria</SelectItem>
-                <SelectItem value="ke">Kenya</SelectItem>
-                <SelectItem value="gh">Ghana</SelectItem>
-                <SelectItem value="za">South Africa</SelectItem>
+                <SelectItem value="in">India (Bharat)</SelectItem>
               </SelectContent></Select>
           </div>
-          <div className="grid gap-2"><Label>Region / State</Label><Input className="h-11" defaultValue="Karnataka (Bengaluru)" /></div>
+          <div className="grid gap-2"><Label>State / Union Territory</Label>
+            <Select defaultValue="karnataka"><SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="karnataka">Karnataka</SelectItem>
+                <SelectItem value="maharashtra">Maharashtra</SelectItem>
+                <SelectItem value="haryana">Haryana (NCR)</SelectItem>
+                <SelectItem value="delhi">Delhi (NCT)</SelectItem>
+                <SelectItem value="telangana">Telangana</SelectItem>
+                <SelectItem value="tamilnadu">Tamil Nadu</SelectItem>
+                <SelectItem value="gujarat">Gujarat</SelectItem>
+                <SelectItem value="up">Uttar Pradesh</SelectItem>
+              </SelectContent></Select>
+          </div>
         </div>
         <div className="grid gap-2"><Label>National ID number</Label><Input className="h-11" placeholder="Aadhaar / Voter ID / PAN" /></div>
         <div className="grid gap-2"><Label>Phone</Label><Input className="h-11" placeholder="+91 98450 12345" /></div>

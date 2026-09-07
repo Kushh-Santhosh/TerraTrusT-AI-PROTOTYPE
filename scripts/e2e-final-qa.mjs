@@ -31,7 +31,7 @@ async function runFullQA() {
     // 1. Landing Page
     // ----------------------------------------------------------------
     console.log('\n--- Scenario 1: Landing Page & Public Navigation ---');
-    await page.goto(BASE_URL, { waitUntil: 'networkidle2' });
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
     const landingTitle = await page.title();
     record(
       'Landing',
@@ -120,7 +120,7 @@ async function runFullQA() {
         page.url().includes('/valuation') ? 'PASS' : 'FAIL',
         `Reached ${page.url()}`
       );
-      await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle2' });
+      await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'domcontentloaded' });
       await new Promise(r => setTimeout(r, 800));
     }
 
@@ -136,7 +136,7 @@ async function runFullQA() {
         page.url().includes('/properties/new') ? 'PASS' : 'FAIL',
         `Reached ${page.url()}`
       );
-      await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle2' });
+      await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'domcontentloaded' });
       await new Promise(r => setTimeout(r, 800));
     }
 
@@ -159,7 +159,7 @@ async function runFullQA() {
     // ----------------------------------------------------------------
     console.log('\n--- Scenario 4: Role-Based Access Control Gate ---');
     // As citizen, try to navigate directly to /admin
-    await page.goto(`${BASE_URL}/admin`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/admin`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
     const adminGateText = await page.evaluate(() => document.body.innerText);
     const gateActive = adminGateText.includes('Access Restricted') && 
@@ -194,7 +194,7 @@ async function runFullQA() {
     // 5. Live n8n Verification Flow
     // ----------------------------------------------------------------
     console.log('\n--- Scenario 5: Live Verification & n8n Orchestration ---');
-    await page.goto(`${BASE_URL}/properties/p_001/verify`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/properties/p_001/verify`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
 
     const verifyHeader = await page.evaluate(() => document.body.innerText);
@@ -246,7 +246,7 @@ async function runFullQA() {
       const demo = { id: 'demo_community_user', email: 'community@terratrust.ai', role: 'community', full_name: 'Rajendra Joshi', region: 'Karnataka' };
       localStorage.setItem('terratrust_demo_session', JSON.stringify(demo));
     });
-    await page.goto(`${BASE_URL}/community`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/community`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
     
     const commButtons = await page.$$('button');
@@ -277,7 +277,7 @@ async function runFullQA() {
       const demo = { id: 'demo_surveyor_user', email: 'surveyor@terratrust.ai', role: 'surveyor', full_name: 'Arjun Mehta', region: 'Karnataka' };
       localStorage.setItem('terratrust_demo_session', JSON.stringify(demo));
     });
-    await page.goto(`${BASE_URL}/surveyor`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/surveyor`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
     const survText = await page.evaluate(() => document.body.innerText);
     const hasSurveyorElements = survText.includes('Surveyor Workspace') && 
@@ -295,7 +295,7 @@ async function runFullQA() {
       const demo = { id: 'demo_government_user', email: 'government@terratrust.ai', role: 'government', full_name: 'Dr. Vandana Rao', region: 'Karnataka' };
       localStorage.setItem('terratrust_demo_session', JSON.stringify(demo));
     });
-    await page.goto(`${BASE_URL}/government`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/government`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
 
     const govButtons = await page.$$('button');
@@ -324,7 +324,7 @@ async function runFullQA() {
       const demo = { id: 'demo_bank_user', email: 'bank@terratrust.ai', role: 'bank', full_name: 'Sunita Sharma', region: 'Karnataka' };
       localStorage.setItem('terratrust_demo_session', JSON.stringify(demo));
     });
-    await page.goto(`${BASE_URL}/bank`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/bank`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
     const bankText = await page.evaluate(() => document.body.innerText);
     const hasInr = bankText.includes('₹') || bankText.includes('Cr');
@@ -341,7 +341,7 @@ async function runFullQA() {
       const demo = { id: 'demo_admin_user', email: 'admin@terratrust.ai', role: 'admin', full_name: 'System Administrator', region: 'Karnataka' };
       localStorage.setItem('terratrust_demo_session', JSON.stringify(demo));
     });
-    await page.goto(`${BASE_URL}/admin`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/admin`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
     const adminText = await page.evaluate(() => document.body.innerText);
     record(
@@ -360,7 +360,7 @@ async function runFullQA() {
     await page.evaluate(() => {
       localStorage.removeItem('terratrust_demo_session');
     });
-    await page.goto(`${BASE_URL}/properties/new`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/properties/new`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
 
     // Verify wizard loaded with 5 steps
@@ -379,7 +379,7 @@ async function runFullQA() {
     );
 
     // Negative Test: Submit empty title
-    const continueBtn = await page.$('button.gap-1\\.5');
+    const continueBtn = await page.$('#wizard-continue-btn');
     if (continueBtn) {
       await continueBtn.click();
       await new Promise(r => setTimeout(r, 300));
@@ -551,7 +551,7 @@ async function runFullQA() {
     }
     if (passportLink) {
       await passportLink.click();
-      await page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {});
+      await page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(() => {});
       await new Promise(r => setTimeout(r, 1000));
 
       const passportPageText = await page.evaluate(() => document.body.innerText);
@@ -571,7 +571,7 @@ async function runFullQA() {
     // 14. Dashboard & My Properties Real Persistence
     // ----------------------------------------------------------------
     console.log('\n--- Scenario 14: Dashboard & Properties List Integration ---');
-    await page.goto(`${BASE_URL}/properties`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/properties`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
 
     const propsListText = await page.evaluate(() => document.body.innerText);
@@ -586,11 +586,11 @@ async function runFullQA() {
     );
 
     // Return to dashboard
-    await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
 
     // Test page refresh persistence
-    await page.reload({ waitUntil: 'networkidle2' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
     const refreshedDashText = await page.evaluate(() => document.body.innerText);
     record(
@@ -607,7 +607,7 @@ async function runFullQA() {
     console.log('\n--- Scenario 15: Responsive Viewport Validation ---');
     // Tablet width (768px)
     await page.setViewport({ width: 768, height: 1024 });
-    await page.goto(`${BASE_URL}/properties/new`, { waitUntil: 'networkidle2' });
+    await page.goto(`${BASE_URL}/properties/new`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 500));
     const tabletOverflow = await page.evaluate(() => document.body.scrollWidth <= window.innerWidth);
     record(
@@ -642,7 +642,7 @@ async function runFullQA() {
     let signOutBtn = null;
     for (const b of allBtns) {
       const t = await page.evaluate(el => el.innerText, b);
-      if (t.includes('Sign out')) {
+      if (t.toLowerCase().includes('sign out')) {
         signOutBtn = b;
         break;
       }

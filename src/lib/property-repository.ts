@@ -104,7 +104,7 @@ export function saveRegisteredLocalProperty(prop: Property): void {
 export async function loadOwnedProperties(userId: string): Promise<Property[]> {
   const localProps = getRegisteredLocalProperties();
 
-  if (!supabaseConfigured || !userId) {
+  if (!supabaseConfigured || !userId || !isUuid(userId)) {
     return [...localProps, ...demoProperties];
   }
 

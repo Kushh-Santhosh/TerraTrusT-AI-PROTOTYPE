@@ -8,11 +8,11 @@ export const Route = createFileRoute("/attestations")({
 });
 
 const rows = [
-  { id: "A-7741", parcel: "TT-8421-LG", attester: "Mrs. T. Aluko", relation: "Neighbour, 18y", result: "Confirmed", at: "2024-09-23" },
-  { id: "A-7720", parcel: "TT-8421-LG", attester: "Chief E. Sanusi", relation: "Community elder", result: "Confirmed", at: "2024-09-20" },
-  { id: "A-7715", parcel: "TT-9930-OY", attester: "I. Adebola", relation: "Neighbour", result: "Confirmed", at: "2024-09-18" },
-  { id: "A-7702", parcel: "TT-2210-KD", attester: "Imam M. Sule", relation: "Community elder", result: "Pending", at: "2024-09-12" },
-  { id: "A-7688", parcel: "TT-5512-AB", attester: "N. Ibrahim", relation: "Adjacent owner", result: "Disputed", at: "2024-09-05" },
+  { id: "A-7741", parcel: "TT-8421-BLR", attester: "Smt. Lakshmi Rao", relation: "Neighbour, 18y", result: "Confirmed", at: "2024-09-23" },
+  { id: "A-7720", parcel: "TT-8421-BLR", attester: "Shri Suresh Hegde", relation: "RWA Secretary", result: "Confirmed", at: "2024-09-20" },
+  { id: "A-7715", parcel: "TT-9930-PN", attester: "R. Venkatraman", relation: "Neighbouring Plot Owner", result: "Confirmed", at: "2024-09-18" },
+  { id: "A-7702", parcel: "TT-2210-MYS", attester: "Gram Panchayat Member", relation: "Village Council", result: "Pending", at: "2024-09-12" },
+  { id: "A-7688", parcel: "TT-5512-GG", attester: "Adv. Rajesh Patil", relation: "Adjacent Commercial Owner", result: "Disputed", at: "2024-09-05" },
 ];
 
 function Page() {
