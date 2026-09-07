@@ -36,32 +36,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-// Standard OpenStreetMap / CARTO raster tile styles requiring no private key
-const OSM_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    "carto-voyager": {
-      type: "raster",
-      tiles: [
-        "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-        "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-        "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-      ],
-      tileSize: 256,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
-    },
-  },
-  layers: [
-    {
-      id: "carto-voyager-layer",
-      type: "raster",
-      source: "carto-voyager",
-      minzoom: 0,
-      maxzoom: 20,
-    },
-  ],
-};
+import { getBasemapStyle, getBasemapAttribution } from "@/lib/map-style";
 
 export interface NominatimResult {
   place_id: number;
@@ -130,7 +105,7 @@ export function RealMap({
 
     const map = new Map({
       container: mapContainerRef.current,
-      style: OSM_STYLE,
+      style: getBasemapStyle(),
       center: [initialCenter.lng, initialCenter.lat],
       zoom: 16,
       attributionControl: false,
@@ -149,8 +124,8 @@ export function RealMap({
     // Add attribution
     map.addControl(
       new AttributionControl({
-        compact: true,
-        customAttribution: "TerraTrust AI GIS · User-submitted boundary",
+        compact: false,
+        customAttribution: `${getBasemapAttribution()} · User-submitted boundary`,
       }),
       "bottom-right"
     );

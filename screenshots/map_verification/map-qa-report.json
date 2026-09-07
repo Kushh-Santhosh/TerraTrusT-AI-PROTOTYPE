@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-09-07T03:48:22.817Z",
+  "canvasExists": true,
+  "attributionText": "TerraTrust AI GIS · © OpenStreetMap contributors | © OpenStreetMap contributors",
+  "totalTileRequests": 176,
+  "successfulTiles": 176,
+  "failedTiles": 0,
+  "sampleTileUrl": "https://tile.openstreetmap.org/15/23449/15193.png",
+  "consoleErrors": [],
+  "failedRequests": [],
+  "status": "PASS"
+}

@@ -15,8 +15,7 @@ import { notifications } from "@/lib/mock-data";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAuth, roleLabels, normalizeRole } from "@/lib/auth";
-import type { Role } from "@/lib/types";
+import { useAuth, roleLabels, normalizeRole, type Role } from "@/lib/auth";
 
 export interface NavItem {
   to: string;
@@ -121,7 +120,7 @@ export function AppShell({
   title,
   subtitle,
   actions,
-  requiredRole: _requiredRole,
+  requiredRole,
 }: {
   children: ReactNode;
   title: string;
@@ -148,6 +147,14 @@ export function AppShell({
   const handleSignOut = async () => {
     await signOut();
     navigate({ to: "/login" });
+  };
+
+  const isAuthorized = () => {
+    if (!requiredRole) return true;
+    const allowed = Array.isArray(requiredRole)
+      ? requiredRole.map(normalizeRole)
+      : [normalizeRole(requiredRole)];
+    return allowed.includes(currentRole);
   };
 
   const rolesList: { id: Role; label: string }[] = [
@@ -289,9 +296,35 @@ export function AppShell({
           </div>
         </div>
 
-        {/* Content Area — Open to all features without artificial blockers */}
+        {/* Content Area */}
         <main className="min-w-0 flex-1 px-4 md:px-8 py-6 md:py-8">
-          {children}
+          {!isAuthorized() ? (
+            <div className="surface-card max-w-xl p-8 text-center mx-auto my-12 border-destructive/30">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive mb-4">
+                <ShieldAlert className="h-6 w-6" />
+              </div>
+              <h2 className="font-display text-2xl text-foreground">Access Restricted</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                This workspace requires <span className="font-semibold text-foreground">{Array.isArray(requiredRole) ? requiredRole.join(", ") : requiredRole}</span> role authorization. You are currently signed in as a <span className="font-semibold text-primary">{roleLabel}</span>.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Button onClick={() => navigate({ to: "/dashboard" })}>
+                  Return to my workspace
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const target = Array.isArray(requiredRole) ? requiredRole[0] : requiredRole;
+                    if (target) setDemoRole?.(normalizeRole(target));
+                  }}
+                >
+                  Switch to {Array.isArray(requiredRole) ? requiredRole[0] : requiredRole}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>

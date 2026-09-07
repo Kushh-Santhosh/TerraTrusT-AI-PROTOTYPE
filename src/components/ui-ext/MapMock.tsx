@@ -7,36 +7,9 @@ import {
   NavigationControl,
   LngLatBounds,
   AttributionControl,
-  type StyleSpecification,
   type GeoJSONSource,
 } from "maplibre-gl";
-
-// Standard OpenStreetMap / CARTO raster tile styles requiring no private key
-const OSM_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    "carto-voyager": {
-      type: "raster",
-      tiles: [
-        "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-        "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-        "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-      ],
-      tileSize: 256,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
-    },
-  },
-  layers: [
-    {
-      id: "carto-voyager-layer",
-      type: "raster",
-      source: "carto-voyager",
-      minzoom: 0,
-      maxzoom: 20,
-    },
-  ],
-};
+import { getBasemapStyle, getBasemapAttribution } from "@/lib/map-style";
 
 /**
  * Real interactive GIS map powered by MapLibre GL JS and OpenStreetMap/CARTO tiles.
@@ -71,7 +44,7 @@ export function MapMock({
 
     const map = new Map({
       container: containerRef.current,
-      style: OSM_STYLE,
+      style: getBasemapStyle(),
       center: [initialCenter.lng, initialCenter.lat],
       zoom: 14,
       attributionControl: false,
@@ -80,8 +53,8 @@ export function MapMock({
     map.addControl(new NavigationControl({ showCompass: true, showZoom: true }), "top-right");
     map.addControl(
       new AttributionControl({
-        compact: true,
-        customAttribution: "TerraTrust AI GIS · Map context",
+        compact: false,
+        customAttribution: getBasemapAttribution(),
       }),
       "bottom-right"
     );

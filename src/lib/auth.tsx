@@ -84,6 +84,7 @@ interface AuthContextValue {
     input: Partial<Pick<Profile, "full_name" | "region">>,
   ) => Promise<{ error: string | null }>;
   signOut: () => Promise<{ error: string | null }>;
+  setDemoRole?: (role: Role) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -352,6 +353,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       setIsRecoverySession(false);
       return { error: null };
+    },
+
+    setDemoRole(role: Role) {
+      const meta: Record<string, { email: string; fullName: string }> = {
+        citizen: { email: "citizen@terratrust.ai", fullName: "Kushal Santhosh" },
+        surveyor: { email: "surveyor@terratrust.ai", fullName: "Arjun Mehta" },
+        government: { email: "government@terratrust.ai", fullName: "Dr. Vandana Rao" },
+        community: { email: "community@terratrust.ai", fullName: "Rajendra Joshi" },
+        bank: { email: "bank@terratrust.ai", fullName: "Sunita Sharma" },
+        admin: { email: "admin@terratrust.ai", fullName: "System Administrator" },
+      };
+      const info = meta[role] || { email: `${role}@terratrust.ai`, fullName: "Demo User" };
+      const sessionObj = {
+        id: `demo_${role}`,
+        email: info.email,
+        role,
+        full_name: info.fullName,
+        region: "Karnataka",
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem("terratrust_demo_session", JSON.stringify(sessionObj));
+      }
+      setDemoUser(sessionObj);
+      setProfile({
+        id: sessionObj.id,
+        email: sessionObj.email,
+        full_name: sessionObj.full_name,
+        role: sessionObj.role,
+        region: sessionObj.region,
+      });
     },
   };
 
