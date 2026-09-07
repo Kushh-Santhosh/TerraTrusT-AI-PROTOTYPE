@@ -83,6 +83,8 @@ function LoginPage() {
           <Label htmlFor="login-email">Email</Label>
           <Input
             id="login-email"
+            name="email"
+            autoComplete="username"
             type="email"
             required
             placeholder="you@email.com"
@@ -98,6 +100,8 @@ function LoginPage() {
           </div>
           <Input
             id="login-password"
+            name="password"
+            autoComplete="current-password"
             type="password"
             required
             placeholder="••••••••"
@@ -111,13 +115,13 @@ function LoginPage() {
         </Button>
       </form>
 
-      <details className="mt-8 rounded-xl border border-dashed border-border/80 bg-muted/20 p-3.5 text-xs text-muted-foreground group">
+      <details open className="mt-8 rounded-xl border border-dashed border-border/80 bg-muted/20 p-3.5 text-xs text-muted-foreground group">
         <summary className="cursor-pointer font-mono font-medium text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground select-none list-none flex items-center justify-between">
-          <span>Development &amp; QA Environment Access</span>
-          <span className="text-[10px] font-sans px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">Testing Only</span>
+          <span>Role Testing &amp; Autofill Access</span>
+          <span className="text-[10px] font-sans px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">Click to Autofill</span>
         </summary>
         <p className="mt-2 text-xs text-muted-foreground">
-          Pre-provisioned testing roles for automated and manual development QA against Supabase.
+          Select any role below to automatically populate credentials and sign into Supabase:
         </p>
         <div className="mt-3 grid gap-2">
           {demoAccounts.map(a => (
@@ -126,18 +130,46 @@ function LoginPage() {
                 <p className="truncate text-xs font-semibold text-foreground">{a.role}</p>
                 <p className="truncate text-[11px] font-mono text-muted-foreground">{a.email}</p>
               </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="shrink-0 rounded-full text-xs h-7 px-3"
-                onClick={() => {
-                  setEmail(a.email);
-                  setPassword(a.pass);
-                }}
-              >
-                Autofill
-              </Button>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full text-xs h-7 px-3"
+                  onClick={() => {
+                    setEmail(a.email);
+                    setPassword(a.pass);
+                    setErrorMsg(null);
+                    toast.info(`Autofilled ${a.role}: ${a.email}`);
+                  }}
+                >
+                  Autofill
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="rounded-full text-xs h-7 px-3"
+                  disabled={submitting}
+                  onClick={async () => {
+                    setEmail(a.email);
+                    setPassword(a.pass);
+                    setErrorMsg(null);
+                    setSubmitting(true);
+                    const { error, role } = await signIn(a.email, a.pass);
+                    setSubmitting(false);
+                    if (error) {
+                      setErrorMsg(error);
+                      toast.error(error);
+                      return;
+                    }
+                    const destination = roleHome(role || "citizen");
+                    toast.success(`Signed in as ${a.role}`);
+                    navigate({ to: destination });
+                  }}
+                >
+                  Sign In
+                </Button>
+              </div>
             </div>
           ))}
         </div>

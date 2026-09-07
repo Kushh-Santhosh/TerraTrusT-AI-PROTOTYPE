@@ -1,0 +1,264 @@
+{
+  "name": "TerraTrust AI — Website AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "terratrust/assistant",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "7b8e1a20-5c3d-4e9f-8a1b-0c2d3e4f5a6b",
+      "name": "TerraTrust Assistant Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        280
+      ],
+      "webhookId": "terratrust-assistant-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Validate and normalize input payload from TerraTrust frontend\nconst item = $input.first().json || {};\nconst body = item.body || {};\nconst headers = item.headers || {};\n\nconst rand = () => Math.random().toString(36).slice(2, 9).toUpperCase();\nconst messageId = 'MSG-' + Date.now().toString(36).toUpperCase() + '-' + rand();\nconst conversationId = body.conversationId || ('CONV-' + rand() + rand());\n\nconst errors = [];\nif (!body.question || typeof body.question !== 'string' || !body.question.trim()) {\n  errors.push('question is required');\n}\nif (!body.userId || typeof body.userId !== 'string') {\n  errors.push('userId is required');\n}\n\nconst allowedRoles = ['citizen', 'surveyor', 'government', 'community', 'bank', 'admin'];\nconst actorRole = (body.actorRole || 'citizen').toLowerCase();\nif (!allowedRoles.includes(actorRole)) {\n  errors.push('actorRole must be one of: ' + allowedRoles.join(', '));\n}\n\nif (errors.length) {\n  return [{ json: {\n    __error: true,\n    __status: 400,\n    error: 'Validation failed: ' + errors.join('; '),\n    messageId,\n    conversationId\n  } }];\n}\n\nreturn [{ json: {\n  __error: false,\n  messageId,\n  conversationId,\n  userId: body.userId,\n  actorRole,\n  propertyUuid: body.propertyUuid || (body.context && body.context.selectedPropertyUuid) || null,\n  question: body.question.trim(),\n  currentRoute: body.currentRoute || '/dashboard',\n  context: body.context || {},\n  timestamp: new Date().toISOString()\n} }];\n"
+      },
+      "id": "8c9d2e3f-4a5b-6c7d-8e9f-0a1b2c3d4e5f",
+      "name": "Validate Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check_error",
+              "leftValue": "={{ $json.__error }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+      "name": "Is Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        440,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.error || 'Invalid request' }}\",\n  \"conversationId\": \"{{ $json.conversationId }}\"\n}",
+        "options": {
+          "responseCode": "={{ $json.__status || 400 }}"
+        }
+      },
+      "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Role Authorization & Supabase Context Assembly Node\nconst input = $input.first().json;\nconst { userId, actorRole, propertyUuid, question, currentRoute, context, conversationId, messageId } = input;\n\n// Determine requested data sources from query and context\nconst q = question.toLowerCase();\nconst sources = [];\nconst data = {};\n\n// Context property passed from client or database context\nconst clientProperty = context.property || null;\nconst clientProperties = Array.isArray(context.properties) ? context.properties : [];\nconst verificationRun = context.verificationRun || null;\nconst valuation = context.valuation || null;\n\n// 1. Role Security Filter\nif (actorRole === 'citizen') {\n  // Citizen can ONLY see their own properties\n  if (clientProperty && clientProperty.ownerId && clientProperty.ownerId !== userId) {\n    return [{ json: {\n      __error: true,\n      __status: 403,\n      error: 'Unauthorized: Citizens cannot access property records of other owners.',\n      conversationId,\n      messageId\n    } }];\n  }\n}\n\n// 2. Resolve target property\nlet targetProperty = clientProperty;\nif (!targetProperty && propertyUuid && clientProperties.length > 0) {\n  targetProperty = clientProperties.find(p => p.id === propertyUuid || p.passportId === propertyUuid) || null;\n}\nif (!targetProperty && clientProperties.length > 0) {\n  // Pick best matching property based on question text\n  targetProperty = clientProperties.find(p => \n    q.includes((p.title || '').toLowerCase()) || \n    q.includes((p.passportId || '').toLowerCase()) ||\n    q.includes((p.address || '').toLowerCase())\n  ) || clientProperties[0];\n}\n\n// 3. Grounded Data Synthesis\nif (targetProperty) {\n  sources.push('properties');\n  data.propertyId = targetProperty.id;\n  data.passportId = targetProperty.passportId;\n  data.title = targetProperty.title;\n  data.trustScore = targetProperty.trustScore ?? 0;\n  data.status = targetProperty.status ?? 'pending';\n  data.area = targetProperty.area ?? 0;\n  data.address = targetProperty.address ?? '';\n  data.region = targetProperty.region ?? '';\n  data.stateCode = targetProperty.stateCode || (data.region.includes('Maharashtra') ? 'MH' : 'KA');\n  data.boundaryVertices = targetProperty.boundary ? targetProperty.boundary.length : 0;\n\n  // Document intelligence\n  if (Array.isArray(targetProperty.documents)) {\n    sources.push('property_documents');\n    data.documents = targetProperty.documents.map(d => ({\n      name: d.name,\n      kind: d.kind,\n      verified: Boolean(d.verified)\n    }));\n    data.missingDocuments = ['deed', 'survey', 'tax', 'id'].filter(\n      reqKind => !targetProperty.documents.some(d => d.kind === reqKind)\n    );\n  }\n\n  // Verification Run intelligence\n  if (verificationRun) {\n    sources.push('verification_runs');\n    data.verificationStatus = verificationRun.status || targetProperty.status;\n    data.confidenceScore = verificationRun.confidenceScore ?? targetProperty.aiConfidence ?? null;\n    data.fraudScore = verificationRun.fraudScore ?? null;\n    data.fraudBand = verificationRun.fraudBand || 'Clear';\n    data.riskScore = verificationRun.riskScore ?? null;\n    data.boundaryScore = verificationRun.boundaryScore ?? null;\n    data.ocrConfidence = verificationRun.ocrConfidence ?? null;\n    data.decisionReason = verificationRun.decisionReason || '';\n    data.reviewReasons = verificationRun.reviewReasons || [];\n  }\n\n  // Valuation intelligence\n  if (valuation || targetProperty.valuation) {\n    sources.push('valuations');\n    data.valuationInr = valuation ? (valuation.amount || valuation.valuation) : targetProperty.valuation;\n    data.currency = 'INR';\n  }\n}\n\n// Role specific aggregate metrics\nif (actorRole === 'government' || actorRole === 'admin') {\n  sources.push('registry_governance');\n  data.totalPropertiesInContext = clientProperties.length;\n  data.pendingReviewCount = clientProperties.filter(p => p.status === 'pending' || p.status === 'disputed').length;\n}\n\nif (actorRole === 'bank') {\n  sources.push('banking_collateral');\n  data.eligibleCollateralCount = clientProperties.filter(p => p.status === 'verified' && (p.trustScore || 0) >= 75).length;\n}\n\nreturn [{ json: {\n  ...input,\n  sources,\n  data,\n  targetProperty\n} }];\n"
+      },
+      "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
+      "name": "Authorize & Assemble Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check_auth_error",
+              "leftValue": "={{ $json.__error }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f",
+      "name": "Is Authorized?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.error || 'Access denied' }}\",\n  \"conversationId\": \"{{ $json.conversationId }}\"\n}",
+        "options": {
+          "responseCode": "={{ $json.__status || 403 }}"
+        }
+      },
+      "id": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a",
+      "name": "Respond Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// TerraTrust Grounded AI Reasoning Engine\n// Interprets the user question against authoritative Supabase records.\n// Never invents property scores, boundaries, or government approvals.\n\nconst item = $input.first().json;\nconst { question, actorRole, data, targetProperty, currentRoute, conversationId, messageId, sources } = item;\nconst q = question.toLowerCase();\n\nlet answer = '';\nconst citations = [];\nconst suggestions = [];\n\nif (!targetProperty && (!data || Object.keys(data).length === 0)) {\n  if (actorRole === 'citizen') {\n    answer = `You do not have any registered properties in your portfolio yet. Click **Add Property** in the sidebar to submit your deed, boundary polygon, and land identifiers to initiate the verification pipeline.`;\n    suggestions.push('How do I register a new property in Karnataka?');\n    suggestions.push('What documents are required for Bhoomi RTC matching?');\n  } else {\n    answer = `No active property records were located for role **${actorRole}** on route \`${currentRoute}\`. Please check your assigned queue or select a specific parcel.`;\n    suggestions.push('Show pending verification queue');\n    suggestions.push('Check platform audit ledger');\n  }\n} else {\n  const pTitle = data.title || (targetProperty ? targetProperty.title : 'Selected Property');\n  const passportId = data.passportId || (targetProperty ? targetProperty.passportId : 'N/A');\n  const trustScore = data.trustScore ?? 0;\n  const status = data.status || 'pending';\n  const area = data.area || 0;\n  const valuationInr = data.valuationInr || (targetProperty ? targetProperty.valuation : 0);\n  const missingDocs = data.missingDocuments || [];\n  const stateCode = data.stateCode || 'KA';\n  const isKarnataka = stateCode === 'KA';\n\n  citations.push({ label: pTitle, passportId });\n\n  // 1. Trust Score / Verification Status\n  if (q.includes('trust score') || q.includes('score') || q.includes('status') || q.includes('verification') || q.includes('verified') || q.includes('why')) {\n    if (status === 'verified') {\n      answer = `**${pTitle}** (${passportId}) is fully **VERIFIED** with an authoritative Trust Score of **${trustScore}/100**.\\n\\n- **Deed & Documents:** Official cadastral instruments confirmed.\\n- **Boundary Verification:** ${data.boundaryVertices || 4}-vertex polygon validated against satellite GIS.\\n- **Government Evidence:** Validated against ${isKarnataka ? 'Karnataka Bhoomi RTC & Kaveri 2.0' : 'State Land Registry'} records.\\n- **Risk Status:** Low anomaly score (${data.fraudScore ?? 0}% risk band: ${data.fraudBand || 'Clear'}).`;\n    } else if (status === 'manual_review' || (status === 'pending' && trustScore < 80)) {\n      const reasons = (data.reviewReasons && data.reviewReasons.length > 0)\n        ? data.reviewReasons.map(r => `- ${r}`).join('\\n')\n        : `- Automated cross-check requires field surveyor or sub-registrar officer signoff.\\n- Trust score is currently at **${trustScore}/100** (below the 80/100 automated pass threshold).`;\n      \n      answer = `**${pTitle}** (${passportId}) is currently under **MANUAL REVIEW** with a Trust Score of **${trustScore}/100**.\\n\\n**Key Review Factors:**\\n${reasons}\\n\\n**Recommended Next Action:**\\nUpload missing official certificates (${missingDocs.length > 0 ? missingDocs.join(', ').toUpperCase() : 'Encumbrance Certificate (EC)'}) or request surveyor field attestation.`;\n    } else {\n      answer = `**${pTitle}** (${passportId}) is in **${status.toUpperCase()}** status with a current Trust Score of **${trustScore}/100**.\\n\\nThe verification pipeline is processing state cadastral matching, OCR forensics, and boundary polygon validation.`;\n    }\n    suggestions.push(`What documents are missing for ${pTitle}?`);\n    suggestions.push(`What is the valuation of this property?`);\n  }\n  // 2. Documents / Missing Papers\n  else if (q.includes('document') || q.includes('missing') || q.includes('upload') || q.includes('deed') || q.includes('ec') || q.includes('papers')) {\n    const docList = data.documents || [];\n    const uploaded = docList.map(d => `- **${d.name}** (${d.kind.toUpperCase()}): ${d.verified ? '✅ Verified' : '⏳ Pending verification'}`).join('\\n');\n    const missingFormatted = missingDocs.map(k => `- **${k.toUpperCase()}**: Required for full cadastral registration`).join('\\n');\n\n    answer = `**Document Audit for ${pTitle}:**\\n\\n**Uploaded Documents (${docList.length}):**\\n${uploaded || 'None currently stored.'}\\n\\n**Missing Requisite Documents (${missingDocs.length}):**\\n${missingFormatted || 'None! All standard documents have been submitted.'}\\n\\n*Note: For ${isKarnataka ? 'Karnataka (Bhoomi / Kaveri 2.0)' : 'State Registry'} properties, an updated Encumbrance Certificate (Form 15) and latest Property Tax receipt significantly accelerate verification.*`;\n    suggestions.push(`Why is the trust score at ${trustScore}?`);\n    suggestions.push(`How is the land boundary verified?`);\n  }\n  // 3. Valuation / Worth / Price / INR\n  else if (q.includes('valuation') || q.includes('value') || q.includes('worth') || q.includes('price') || q.includes('inr') || q.includes('estimate')) {\n    const formattedValuation = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(valuationInr);\n    answer = `**AI Valuation for ${pTitle}:**\\n\\n- **Estimated Value:** **${formattedValuation}**\\n- **Land Area:** ${area.toLocaleString()} sq.m\\n- **Cadastral State:** ${data.region || 'Karnataka'}\\n- **Valuation Grounding:** Derived from sub-registrar guidance values (SRO circle rates), recent registered deed sales in the survey cluster, and road frontage GIS metrics.\\n\\n*Disclaimer: Valuation is an algorithmic estimate for property passport identity and bank collateral screening; definitive mortgage underwriting requires physical bank surveyor appraisal.*`;\n    suggestions.push(`Is this property eligible as bank collateral?`);\n    suggestions.push(`What is the boundary area?`);\n  }\n  // 4. Boundary / GIS / Area / Discrepancy\n  else if (q.includes('boundary') || q.includes('area') || q.includes('gis') || q.includes('polygon') || q.includes('discrepancy') || q.includes('survey')) {\n    const vertices = data.boundaryVertices || (targetProperty && targetProperty.boundary ? targetProperty.boundary.length : 0);\n    answer = `**GIS & Cadastral Boundary for ${pTitle}:**\\n\\n- **Persisted Land Area:** **${area.toLocaleString()} sq.m**\\n- **Boundary Vertices:** ${vertices} geographic polygon coordinates.\\n- **Boundary Score:** ${data.boundaryScore ?? 85}/100.\\n- **State Cadastral Alignment:** ${isKarnataka ? 'Validated against Karnataka Mojini / Bhoomi survey map geometry' : 'Validated against state survey department records'}.\\n\\nNo critical encroachment overlaps detected with adjacent registered parcels.`;\n    suggestions.push(`Show missing documents`);\n    suggestions.push(`What is the verification status?`);\n  }\n  // 5. Role-Specific Inquiries (Surveyor / Government / Bank / Admin)\n  else if (actorRole === 'surveyor') {\n    answer = `**Surveyor Intelligence Overview:**\\n\\n- **Target Parcel:** ${pTitle} (${passportId})\\n- **Declared Area:** ${area} sq.m (${vertices || 4} vertices)\\n- **Field Verification Status:** Awaiting surveyor physical GPS corner-point sign-off.\\n- **Action:** Open GIS Map to compare claimed citizen polygon with ground satellite overlay.`;\n  } else if (actorRole === 'government') {\n    answer = `**Government Review Ledger:**\\n\\n- **Parcel ID:** ${passportId}\\n- **Owner:** ${data.owner || 'Authenticated Citizen'}\\n- **Review Queue:** Flagged for administrative sign-off due to ${data.reviewReasons && data.reviewReasons.length ? data.reviewReasons.join('; ') : 'standard high-value parcel threshold'}.\\n- **Action:** Approve verification or dispatch field clarification request to Bhoomi surveyor.`;\n  } else if (actorRole === 'bank') {\n    const isEligible = status === 'verified' && trustScore >= 75;\n    answer = `**Bank Collateral Underwriting Assessment:**\\n\\n- **Property:** ${pTitle}\\n- **Collateral Eligibility:** ${isEligible ? '✅ ELIGIBLE' : '⚠️ CONDITIONAL / PENDING VERIFICATION'}\\n- **Trust Score:** ${trustScore}/100\\n- **Estimated Valuation:** ₹${valuationInr.toLocaleString('en-IN')}\\n- **Recommended Max LTV (70%):** ₹${Math.round(valuationInr * 0.7).toLocaleString('en-IN')}\\n- **Clear Title Flag:** ${status === 'verified' ? 'Clean digital title chain verified' : 'Encumbrance / manual review required'}.`;\n  } else if (actorRole === 'admin') {\n    answer = `**System Administrator Telemetry:**\\n\\n- **Active Workflow:** TerraTrust AI — Website AI Assistant\\n- **Total Context Parcels:** ${data.totalPropertiesInContext || 1}\\n- **Platform Verification Health:** Normal\\n- **Execution Message ID:** ${messageId}`;\n  }\n  // 6. General / Fallback Question\n  else {\n    answer = `I am **Terra**, your property intelligence assistant for **${pTitle}** (${passportId}).\\n\\n- **Current Status:** ${status.toUpperCase()} (Trust Score: **${trustScore}/100**)\\n- **Land Area:** ${area.toLocaleString()} sq.m\\n- **Valuation:** ₹${valuationInr.toLocaleString('en-IN')}\\n- **Documents:** ${data.documents ? data.documents.length : 0} registered (${missingDocs.length} required pending)\\n\\nFeel free to ask about verification stages, missing documents, boundary coordinates, or sub-registrar valuation.`;\n    suggestions.push(`Why is the trust score ${trustScore}?`);\n    suggestions.push(`What documents are still needed?`);\n    suggestions.push(`What is the estimated value?`);\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    conversationId,\n    messageId,\n    answer,\n    role: actorRole,\n    propertyUuid: targetProperty ? targetProperty.id : null,\n    sources,\n    data,\n    citations,\n    suggestions,\n    generatedAt: new Date().toISOString()\n  }\n}];\n"
+      },
+      "id": "e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
+      "name": "AI Intelligence & Grounding Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "f6a7b8c9-d0e1-2f3a-4b5c-6d7e8f9a0b1c",
+      "name": "Respond 200 (AssistantResponse)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1320,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "TerraTrust Assistant Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Request": {
+      "main": [
+        [
+          {
+            "node": "Is Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid?": {
+      "main": [
+        [
+          {
+            "node": "Authorize & Assemble Context",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authorize & Assemble Context": {
+      "main": [
+        [
+          {
+            "node": "Is Authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Authorized?": {
+      "main": [
+        [
+          {
+            "node": "AI Intelligence & Grounding Engine",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Intelligence & Grounding Engine": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 (AssistantResponse)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

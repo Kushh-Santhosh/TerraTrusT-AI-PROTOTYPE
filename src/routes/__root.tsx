@@ -13,6 +13,9 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { DemoModeProvider } from "@/lib/demo-mode";
 import { AuthProvider } from "@/lib/auth";
+import { AssistantProvider } from "@/context/AssistantContext";
+import { GlobalTerraAssistant } from "@/components/assistant/GlobalTerraAssistant";
+import AparsoftChatbot from "@/components/AparsoftChatbot";
 
 function NotFoundComponent() {
   return (
@@ -105,8 +108,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <DemoModeProvider>
-          <Outlet />
-          <Toaster position="top-right" />
+          <AssistantProvider>
+            <Outlet />
+            <GlobalTerraAssistant />
+            <AparsoftChatbot />
+            <Toaster position="top-right" />
+          </AssistantProvider>
         </DemoModeProvider>
       </AuthProvider>
     </QueryClientProvider>
