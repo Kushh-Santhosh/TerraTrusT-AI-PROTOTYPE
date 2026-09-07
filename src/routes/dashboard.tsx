@@ -87,7 +87,7 @@ function Dashboard() {
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <div className="surface-card p-5 lg:col-span-2">
+        <div className="surface-card p-5 lg:col-span-2 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Verifications over time</p>
@@ -135,7 +135,7 @@ function Dashboard() {
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <div className="surface-card p-5 lg:col-span-2">
+        <div className="surface-card p-5 lg:col-span-2 min-w-0 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
             <p className="font-medium">My properties</p>
             <Link to="/properties" className="text-xs text-primary inline-flex items-center gap-1 hover:underline">
