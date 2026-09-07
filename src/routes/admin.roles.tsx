@@ -18,7 +18,11 @@ const roles = [
 
 function Page() {
   return (
-    <AppShell title="Role management" subtitle="Permissions and audit boundaries for every role in TerraTrust.">
+    <AppShell
+      title="Role management"
+      subtitle="Permissions and audit boundaries for every role in TerraTrust."
+      requiredRole="admin"
+    >
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {roles.map(r => (
           <div key={r.name} className="surface-card p-5">

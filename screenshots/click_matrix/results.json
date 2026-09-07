@@ -1,0 +1,611 @@
+{
+  "admin": {
+    "total": 15,
+    "passed": 15,
+    "failed": 0,
+    "items": [
+      {
+        "label": "Admin Dashboard",
+        "href": "/admin",
+        "actualUrl": "http://localhost:3000/admin",
+        "heading": "Platform Administrator",
+        "status": "PASS"
+      },
+      {
+        "label": "User Management",
+        "href": "/admin/users",
+        "actualUrl": "http://localhost:3000/admin/users",
+        "heading": "Platform Users & Access Management",
+        "status": "PASS"
+      },
+      {
+        "label": "RBAC & Permissions",
+        "href": "/admin/roles",
+        "actualUrl": "http://localhost:3000/admin/roles",
+        "heading": "Role management",
+        "status": "PASS"
+      },
+      {
+        "label": "Jurisdictions & Regions",
+        "href": "/admin/regions",
+        "actualUrl": "http://localhost:3000/admin/regions",
+        "heading": "State Land Verification Profiles",
+        "status": "PASS"
+      },
+      {
+        "label": "System Settings & Health",
+        "href": "/admin/system",
+        "actualUrl": "http://localhost:3000/admin/system",
+        "heading": "System health",
+        "status": "PASS"
+      },
+      {
+        "label": "n8n & External Services",
+        "href": "/integrations",
+        "actualUrl": "http://localhost:3000/integrations",
+        "heading": "Integrations",
+        "status": "PASS"
+      },
+      {
+        "label": "API Credentials",
+        "href": "/admin/api-keys",
+        "actualUrl": "http://localhost:3000/admin/api-keys",
+        "heading": "Institutional API Tokens",
+        "status": "PASS"
+      },
+      {
+        "label": "System Audit Logs",
+        "href": "/admin/audit",
+        "actualUrl": "http://localhost:3000/admin/audit",
+        "heading": "System audit",
+        "status": "PASS"
+      },
+      {
+        "label": "User Feedback",
+        "href": "/admin/feedback",
+        "actualUrl": "http://localhost:3000/admin/feedback",
+        "heading": "User feedback",
+        "status": "PASS"
+      },
+      {
+        "label": "Support Desk",
+        "href": "/support",
+        "actualUrl": "http://localhost:3000/support",
+        "heading": "Support Desk",
+        "status": "PASS"
+      },
+      {
+        "label": "Platform Analytics",
+        "href": "/analytics",
+        "actualUrl": "http://localhost:3000/analytics",
+        "heading": "Analytics",
+        "status": "PASS"
+      },
+      {
+        "label": "Security Center",
+        "href": "/security",
+        "actualUrl": "http://localhost:3000/security",
+        "heading": "Account Security",
+        "status": "PASS"
+      },
+      {
+        "label": "Admin Profile",
+        "href": "/profile",
+        "actualUrl": "http://localhost:3000/profile",
+        "heading": "Profile",
+        "status": "PASS"
+      },
+      {
+        "label": "Notifications",
+        "href": "/notifications",
+        "actualUrl": "http://localhost:3000/notifications",
+        "heading": "Notifications",
+        "status": "PASS"
+      },
+      {
+        "label": "Settings",
+        "href": "/settings",
+        "actualUrl": "http://localhost:3000/settings",
+        "heading": "Settings",
+        "status": "PASS"
+      }
+    ]
+  },
+  "surveyor": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "items": [
+      {
+        "label": "Surveyor Dashboard",
+        "href": "/surveyor",
+        "actualUrl": "http://localhost:3000/surveyor",
+        "heading": "Surveyor Workspace",
+        "status": "PASS"
+      },
+      {
+        "label": "My Assignments",
+        "href": "/surveyor/assignments",
+        "actualUrl": "http://localhost:3000/surveyor/assignments",
+        "heading": "Field Assignments",
+        "status": "PASS"
+      },
+      {
+        "label": "Field Tools",
+        "href": "/surveyor/tools",
+        "actualUrl": "http://localhost:3000/surveyor/tools",
+        "heading": "Surveyor Toolkit",
+        "status": "PASS"
+      },
+      {
+        "label": "Boundary Capture",
+        "href": "/ai-boundary",
+        "actualUrl": "http://localhost:3000/ai-boundary",
+        "heading": "AI Boundary Detection",
+        "status": "PASS"
+      },
+      {
+        "label": "Assigned Properties",
+        "href": "/properties",
+        "actualUrl": "http://localhost:3000/properties",
+        "heading": "Properties",
+        "status": "PASS"
+      },
+      {
+        "label": "GIS Map",
+        "href": "/map",
+        "actualUrl": "http://localhost:3000/map",
+        "heading": "GIS Cadastral Map",
+        "status": "PASS"
+      },
+      {
+        "label": "Satellite Compare",
+        "href": "/ai-satellite",
+        "actualUrl": "http://localhost:3000/ai-satellite",
+        "heading": "Satellite Comparison",
+        "status": "PASS"
+      },
+      {
+        "label": "Document Review",
+        "href": "/ai-ocr",
+        "actualUrl": "http://localhost:3000/ai-ocr",
+        "heading": "Document OCR & Forensic Extraction",
+        "status": "PASS"
+      },
+      {
+        "label": "Verification Evidence",
+        "href": "/verification",
+        "actualUrl": "http://localhost:3000/verification",
+        "heading": "Verification Status & Pipeline",
+        "status": "PASS"
+      },
+      {
+        "label": "Survey Reports",
+        "href": "/reports",
+        "actualUrl": "http://localhost:3000/reports",
+        "heading": "Audit & Intelligence Reports",
+        "status": "PASS"
+      },
+      {
+        "label": "Surveyor Profile",
+        "href": "/profile",
+        "actualUrl": "http://localhost:3000/profile",
+        "heading": "Profile",
+        "status": "PASS"
+      },
+      {
+        "label": "Notifications",
+        "href": "/notifications",
+        "actualUrl": "http://localhost:3000/notifications",
+        "heading": "Notifications",
+        "status": "PASS"
+      },
+      {
+        "label": "Settings",
+        "href": "/settings",
+        "actualUrl": "http://localhost:3000/settings",
+        "heading": "Settings",
+        "status": "PASS"
+      },
+      {
+        "label": "Support Desk",
+        "href": "/support",
+        "actualUrl": "http://localhost:3000/support",
+        "heading": "Support Desk",
+        "status": "PASS"
+      }
+    ]
+  },
+  "government": {
+    "total": 18,
+    "passed": 18,
+    "failed": 0,
+    "items": [
+      {
+        "label": "Government Dashboard",
+        "href": "/government",
+        "actualUrl": "http://localhost:3000/government",
+        "heading": "Government Registry Workbench",
+        "status": "PASS"
+      },
+      {
+        "label": "Review Queue & Verification",
+        "href": "/verification",
+        "actualUrl": "http://localhost:3000/verification",
+        "heading": "Verification Status & Pipeline",
+        "status": "PASS"
+      },
+      {
+        "label": "Surveyor Assignments",
+        "href": "/surveyor/assignments",
+        "actualUrl": "http://localhost:3000/surveyor/assignments",
+        "heading": "Field Assignments",
+        "status": "PASS"
+      },
+      {
+        "label": "Registry Parcels",
+        "href": "/government/parcels",
+        "actualUrl": "http://localhost:3000/government/parcels",
+        "heading": "Land Records Registry",
+        "status": "PASS"
+      },
+      {
+        "label": "Permits & Conversions",
+        "href": "/government/permits",
+        "actualUrl": "http://localhost:3000/government/permits",
+        "heading": "Municipal & Revenue Permits",
+        "status": "PASS"
+      },
+      {
+        "label": "Decisions & Disputes",
+        "href": "/government/disputes",
+        "actualUrl": "http://localhost:3000/government/disputes",
+        "heading": "Active Land Disputes Queue",
+        "status": "PASS"
+      },
+      {
+        "label": "Statutory Audit",
+        "href": "/government/audit",
+        "actualUrl": "http://localhost:3000/government/audit",
+        "heading": "Audit trail",
+        "status": "PASS"
+      },
+      {
+        "label": "GIS / Parcels Map",
+        "href": "/map",
+        "actualUrl": "http://localhost:3000/map",
+        "heading": "GIS Cadastral Map",
+        "status": "PASS"
+      },
+      {
+        "label": "Property Search",
+        "href": "/search",
+        "actualUrl": "http://localhost:3000/search",
+        "heading": "Smart Search",
+        "status": "PASS"
+      },
+      {
+        "label": "Registry Evidence & Fraud",
+        "href": "/fraud",
+        "actualUrl": "http://localhost:3000/fraud",
+        "heading": "Fraud Detection",
+        "status": "PASS"
+      },
+      {
+        "label": "Documents & Evidence",
+        "href": "/ai-ocr",
+        "actualUrl": "http://localhost:3000/ai-ocr",
+        "heading": "Document OCR & Forensic Extraction",
+        "status": "PASS"
+      },
+      {
+        "label": "Boundary Review",
+        "href": "/ai-boundary",
+        "actualUrl": "http://localhost:3000/ai-boundary",
+        "heading": "AI Boundary Detection",
+        "status": "PASS"
+      },
+      {
+        "label": "Official Reports",
+        "href": "/reports",
+        "actualUrl": "http://localhost:3000/reports",
+        "heading": "Audit & Intelligence Reports",
+        "status": "PASS"
+      },
+      {
+        "label": "Jurisdiction Analytics",
+        "href": "/analytics",
+        "actualUrl": "http://localhost:3000/analytics",
+        "heading": "Analytics",
+        "status": "PASS"
+      },
+      {
+        "label": "Government Profile",
+        "href": "/profile",
+        "actualUrl": "http://localhost:3000/profile",
+        "heading": "Profile",
+        "status": "PASS"
+      },
+      {
+        "label": "Notifications",
+        "href": "/notifications",
+        "actualUrl": "http://localhost:3000/notifications",
+        "heading": "Notifications",
+        "status": "PASS"
+      },
+      {
+        "label": "Settings",
+        "href": "/settings",
+        "actualUrl": "http://localhost:3000/settings",
+        "heading": "Settings",
+        "status": "PASS"
+      },
+      {
+        "label": "Support Desk",
+        "href": "/support",
+        "actualUrl": "http://localhost:3000/support",
+        "heading": "Support Desk",
+        "status": "PASS"
+      }
+    ]
+  },
+  "bank": {
+    "total": 15,
+    "passed": 15,
+    "failed": 0,
+    "items": [
+      {
+        "label": "Bank Dashboard",
+        "href": "/bank",
+        "actualUrl": "http://localhost:3000/bank",
+        "heading": "Bank origination & underwriting",
+        "status": "PASS"
+      },
+      {
+        "label": "Property Search",
+        "href": "/search",
+        "actualUrl": "http://localhost:3000/search",
+        "heading": "Smart Search",
+        "status": "PASS"
+      },
+      {
+        "label": "Eligible Properties",
+        "href": "/properties",
+        "actualUrl": "http://localhost:3000/properties",
+        "heading": "Properties",
+        "status": "PASS"
+      },
+      {
+        "label": "Verification Results",
+        "href": "/verification",
+        "actualUrl": "http://localhost:3000/verification",
+        "heading": "Verification Status & Pipeline",
+        "status": "PASS"
+      },
+      {
+        "label": "Collateral Review",
+        "href": "/ai-risk",
+        "actualUrl": "http://localhost:3000/ai-risk",
+        "heading": "AI Risk Analysis",
+        "status": "PASS"
+      },
+      {
+        "label": "Active Loan Cases",
+        "href": "/bank/loans",
+        "actualUrl": "http://localhost:3000/bank/loans",
+        "heading": "Loan book",
+        "status": "PASS"
+      },
+      {
+        "label": "AI Valuation Engine",
+        "href": "/valuation",
+        "actualUrl": "http://localhost:3000/valuation",
+        "heading": "AI Property Valuation",
+        "status": "PASS"
+      },
+      {
+        "label": "Trust / Confidence",
+        "href": "/ai-confidence",
+        "actualUrl": "http://localhost:3000/ai-confidence",
+        "heading": "AI Confidence Score",
+        "status": "PASS"
+      },
+      {
+        "label": "Property Passport",
+        "href": "/ai-passport",
+        "actualUrl": "http://localhost:3000/ai-passport",
+        "heading": "AI Property Passport",
+        "status": "PASS"
+      },
+      {
+        "label": "Portfolio Analytics",
+        "href": "/analytics",
+        "actualUrl": "http://localhost:3000/analytics",
+        "heading": "Analytics",
+        "status": "PASS"
+      },
+      {
+        "label": "Audit Reports",
+        "href": "/reports",
+        "actualUrl": "http://localhost:3000/reports",
+        "heading": "Audit & Intelligence Reports",
+        "status": "PASS"
+      },
+      {
+        "label": "Banker Profile",
+        "href": "/profile",
+        "actualUrl": "http://localhost:3000/profile",
+        "heading": "Profile",
+        "status": "PASS"
+      },
+      {
+        "label": "Notifications",
+        "href": "/notifications",
+        "actualUrl": "http://localhost:3000/notifications",
+        "heading": "Notifications",
+        "status": "PASS"
+      },
+      {
+        "label": "Settings",
+        "href": "/settings",
+        "actualUrl": "http://localhost:3000/settings",
+        "heading": "Settings",
+        "status": "PASS"
+      },
+      {
+        "label": "Support Desk",
+        "href": "/support",
+        "actualUrl": "http://localhost:3000/support",
+        "heading": "Support Desk",
+        "status": "PASS"
+      }
+    ]
+  },
+  "citizen": {
+    "total": 20,
+    "passed": 20,
+    "failed": 0,
+    "items": [
+      {
+        "label": "Dashboard",
+        "href": "/dashboard",
+        "actualUrl": "http://localhost:3000/dashboard",
+        "heading": "Welcome back, Kushal Santhosh",
+        "status": "PASS"
+      },
+      {
+        "label": "My Properties",
+        "href": "/properties",
+        "actualUrl": "http://localhost:3000/properties",
+        "heading": "Properties",
+        "status": "PASS"
+      },
+      {
+        "label": "Add Property",
+        "href": "/properties/new",
+        "actualUrl": "http://localhost:3000/properties/new",
+        "heading": "Register a new property",
+        "status": "PASS"
+      },
+      {
+        "label": "GIS Cadastral Map",
+        "href": "/map",
+        "actualUrl": "http://localhost:3000/map",
+        "heading": "GIS Cadastral Map",
+        "status": "PASS"
+      },
+      {
+        "label": "Digital Passport",
+        "href": "/ai-passport",
+        "actualUrl": "http://localhost:3000/ai-passport",
+        "heading": "AI Property Passport",
+        "status": "PASS"
+      },
+      {
+        "label": "AI Intelligence Hub",
+        "href": "/ai",
+        "actualUrl": "http://localhost:3000/ai",
+        "heading": "AI Intelligence",
+        "status": "PASS"
+      },
+      {
+        "label": "AI Valuation",
+        "href": "/valuation",
+        "actualUrl": "http://localhost:3000/valuation",
+        "heading": "AI Property Valuation",
+        "status": "PASS"
+      },
+      {
+        "label": "Document OCR",
+        "href": "/ai-ocr",
+        "actualUrl": "http://localhost:3000/ai-ocr",
+        "heading": "Document OCR & Forensic Extraction",
+        "status": "PASS"
+      },
+      {
+        "label": "Boundary Detection",
+        "href": "/ai-boundary",
+        "actualUrl": "http://localhost:3000/ai-boundary",
+        "heading": "AI Boundary Detection",
+        "status": "PASS"
+      },
+      {
+        "label": "Satellite Compare",
+        "href": "/ai-satellite",
+        "actualUrl": "http://localhost:3000/ai-satellite",
+        "heading": "Satellite Comparison",
+        "status": "PASS"
+      },
+      {
+        "label": "Land Health",
+        "href": "/ai-land-health",
+        "actualUrl": "http://localhost:3000/ai-land-health",
+        "heading": "AI Land Health Score",
+        "status": "PASS"
+      },
+      {
+        "label": "Risk Analysis",
+        "href": "/ai-risk",
+        "actualUrl": "http://localhost:3000/ai-risk",
+        "heading": "AI Risk Analysis",
+        "status": "PASS"
+      },
+      {
+        "label": "AI Assistant",
+        "href": "/assistant",
+        "actualUrl": "http://localhost:3000/assistant",
+        "heading": "AI Assistant",
+        "status": "PASS"
+      },
+      {
+        "label": "Verification Status",
+        "href": "/verification",
+        "actualUrl": "http://localhost:3000/verification",
+        "heading": "Verification Status & Pipeline",
+        "status": "PASS"
+      },
+      {
+        "label": "Reports & Certificates",
+        "href": "/reports",
+        "actualUrl": "http://localhost:3000/reports",
+        "heading": "Audit & Intelligence Reports",
+        "status": "PASS"
+      },
+      {
+        "label": "Disputes & Claims",
+        "href": "/disputes",
+        "actualUrl": "http://localhost:3000/disputes",
+        "heading": "Disputes & Claims",
+        "status": "PASS"
+      },
+      {
+        "label": "Notifications",
+        "href": "/notifications",
+        "actualUrl": "http://localhost:3000/notifications",
+        "heading": "Notifications",
+        "status": "PASS"
+      },
+      {
+        "label": "Profile",
+        "href": "/profile",
+        "actualUrl": "http://localhost:3000/profile",
+        "heading": "Profile",
+        "status": "PASS"
+      },
+      {
+        "label": "Settings",
+        "href": "/settings",
+        "actualUrl": "http://localhost:3000/settings",
+        "heading": "Settings",
+        "status": "PASS"
+      },
+      {
+        "label": "Support / Help",
+        "href": "/support",
+        "actualUrl": "http://localhost:3000/support",
+        "heading": "Support Desk",
+        "status": "PASS"
+      }
+    ]
+  }
+}

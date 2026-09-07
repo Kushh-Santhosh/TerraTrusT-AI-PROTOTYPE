@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { getPropertyById } from "@/lib/property-repository";
 import { properties as fallbackProperties } from "@/lib/mock-data";
 import type { Property } from "@/lib/types";
-import { MapMock } from "@/components/ui-ext/MapMock";
+import { RealMap } from "@/components/ui-ext/RealMap";
 import { PropertyCardMiniMap } from "@/components/property/PropertyCardMiniMap";
 
 export const Route = createFileRoute("/properties/$id/boundary")({
@@ -87,7 +87,16 @@ function Page() {
       <div className="surface-card mt-6 p-5">
         <h3 className="font-display text-xl mb-3">Interactive Cadastral GIS View</h3>
         <div className="overflow-hidden rounded-xl border border-border">
-          <MapMock properties={[p]} highlightId={p.id} height={380} />
+          <RealMap
+            key={`cadastral-${p.id}`}
+            initialCenter={p.coords || { lat: 12.9716, lng: 77.5946 }}
+            boundary={p.boundary || []}
+            secondaryBoundary={p.surveyorBoundary || undefined}
+            secondaryBoundaryLabel="OFFICIAL SURVEYOR BOUNDARY"
+            boundaryLabel={`SUBMITTED BOUNDARY (${p.passportId})`}
+            readOnly={true}
+            height={400}
+          />
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
           Boundaries align within revenue tolerance (0.4m drift). Coordinate centroid: ({p.coords?.lat?.toFixed(5) || "12.9716"}, {p.coords?.lng?.toFixed(5) || "77.5946"}).

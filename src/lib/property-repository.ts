@@ -368,3 +368,8 @@ export async function loadReviewCases(propertyId?: string) {
     return [];
   }
 }
+
+/** General purpose property fetcher alias */
+export async function getProperties(): Promise<Property[]> {
+  return loadInstitutionalProperties();
+}

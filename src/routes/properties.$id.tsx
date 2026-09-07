@@ -5,7 +5,7 @@ import { TrustScore } from "@/components/ui-ext/TrustScore";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { properties, valuationTrend } from "@/lib/mock-data";
-import { MapMock } from "@/components/ui-ext/MapMock";
+import { RealMap } from "@/components/ui-ext/RealMap";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Download, FileText, History, MapPinned, MapPin, QrCode, Share2, ShieldCheck, Sparkles, Users2, CheckCircle2, AlertTriangle, Workflow } from "lucide-react";
 import { computeConfidence } from "@/lib/confidence-engine";
@@ -120,7 +120,16 @@ function PassportPage() {
                   </span>
                 </div>
                 <div className="overflow-hidden rounded-xl border border-border">
-                  <MapMock properties={[p]} highlightId={p.id} height={340} />
+                  <RealMap
+                    key={p.id}
+                    initialCenter={p.coords || { lat: 12.9716, lng: 77.5946 }}
+                    boundary={p.boundary || []}
+                    secondaryBoundary={p.surveyorBoundary || undefined}
+                    secondaryBoundaryLabel="OFFICIAL SURVEYOR BOUNDARY"
+                    boundaryLabel={`CADASTRAL RECORD (${p.passportId})`}
+                    readOnly={true}
+                    height={340}
+                  />
                 </div>
               </div>
 
@@ -194,7 +203,18 @@ function PassportPage() {
             </TabsContent>
 
             <TabsContent value="boundary" className="mt-4">
-              <MapMock properties={[p]} highlightId={p.id} height={420} />
+              <div className="overflow-hidden rounded-xl border border-border">
+                <RealMap
+                  key={`boundary-${p.id}`}
+                  initialCenter={p.coords || { lat: 12.9716, lng: 77.5946 }}
+                  boundary={p.boundary || []}
+                  secondaryBoundary={p.surveyorBoundary || undefined}
+                  secondaryBoundaryLabel="SURVEYOR OBSERVED BOUNDARY"
+                  boundaryLabel={`SUBMITTED GEOMETRY (${p.passportId})`}
+                  readOnly={true}
+                  height={420}
+                />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

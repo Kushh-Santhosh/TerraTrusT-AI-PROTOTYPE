@@ -17,7 +17,11 @@ const rows = [
 
 function Page() {
   return (
-    <AppShell title="System audit" subtitle="Searchable, immutable log of every privileged action.">
+    <AppShell
+      title="System audit"
+      subtitle="Searchable, immutable log of every privileged action."
+      requiredRole="admin"
+    >
       <KpiRow items={[
         { label: "Events today", value: "11,238" },
         { label: "Alerts", value: "3" },

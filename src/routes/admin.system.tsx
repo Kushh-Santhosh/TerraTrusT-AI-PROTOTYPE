@@ -19,7 +19,11 @@ const services = [
 
 function Page() {
   return (
-    <AppShell title="System health" subtitle="Live status across every backend service.">
+    <AppShell
+      title="System health"
+      subtitle="Live status across every backend service."
+      requiredRole="admin"
+    >
       <KpiRow items={[
         { label: "Overall uptime", value: "99.98%" },
         { label: "Active incidents", value: "1" },

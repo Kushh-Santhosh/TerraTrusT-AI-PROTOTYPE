@@ -17,7 +17,11 @@ const items = [
 
 function Page() {
   return (
-    <AppShell title="User feedback" subtitle="What the field is saying.">
+    <AppShell
+      title="User feedback"
+      subtitle="What the field is saying."
+      requiredRole="admin"
+    >
       <KpiRow items={[
         { label: "NPS", value: "62", hint: "+8 vs last quarter" },
         { label: "Avg. rating", value: "4.6 / 5" },

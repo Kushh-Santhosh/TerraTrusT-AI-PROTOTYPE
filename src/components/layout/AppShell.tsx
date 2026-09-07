@@ -290,7 +290,7 @@ export function AppShell({
 }) {
   const pathname = useRouterState({ select: s => s.location.pathname });
   const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, setDemoRole } = useAuth();
   const unread = notifications.filter(n => !n.read).length;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -298,8 +298,20 @@ export function AppShell({
     setMobileNavOpen(false);
   }, [pathname]);
 
-  const currentRole: Role = normalizeRole(profile?.role || user?.user_metadata?.role || "citizen");
-  const displayName = profile?.full_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Kushal Santhosh");
+  const getEffectiveRole = (): Role => {
+    const authRole = profile?.role || user?.user_metadata?.role;
+    if (authRole) {
+      return normalizeRole(authRole);
+    }
+    if (pathname.startsWith("/admin")) return "admin";
+    if (pathname.startsWith("/surveyor")) return "surveyor";
+    if (pathname.startsWith("/government")) return "government";
+    if (pathname.startsWith("/bank")) return "bank";
+    return "citizen";
+  };
+
+  const currentRole: Role = getEffectiveRole();
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : (currentRole === "admin" ? "System Administrator" : currentRole === "surveyor" ? "Arjun Mehta" : currentRole === "government" ? "Dr. Vandana Rao" : currentRole === "bank" ? "Sunita Sharma" : "Kushal Santhosh"));
   const roleLabel = roleLabels[currentRole] || "Citizen";
 
   const getInitials = (name: string) => {
@@ -321,6 +333,10 @@ export function AppShell({
     return allowed.includes(currentRole);
   };
 
+  const targetRequiredRole: Role | null = requiredRole
+    ? (Array.isArray(requiredRole) ? normalizeRole(requiredRole[0]) : normalizeRole(requiredRole))
+    : null;
+
   return (
     <div className="flex min-h-screen w-full flex-col md:grid md:grid-cols-[280px_1fr] bg-background">
       {/* Left Sidebar */}
@@ -341,7 +357,19 @@ export function AppShell({
                 </p>
                 <div className="flex flex-col gap-0.5">
                   {group.items.map(item => {
-                    const active = pathname === item.to || (item.to !== "/dashboard" && item.to !== "/" && pathname.startsWith(item.to));
+                    const active =
+                      pathname === item.to ||
+                      (item.to !== "/" &&
+                        item.to !== "/dashboard" &&
+                        item.to !== "/admin" &&
+                        item.to !== "/government" &&
+                        item.to !== "/surveyor" &&
+                        item.to !== "/bank" &&
+                        item.to !== "/properties" &&
+                        item.to !== "/disputes" &&
+                        item.to !== "/reports" &&
+                        item.to !== "/support" &&
+                        pathname.startsWith(item.to + "/"));
                     return (
                       <Link
                         key={item.to}
@@ -444,6 +472,17 @@ export function AppShell({
                 <Button onClick={() => navigate({ to: getWorkspaceForRole(currentRole) as any })}>
                   Return to my workspace
                 </Button>
+                {targetRequiredRole && setDemoRole && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setDemoRole(targetRequiredRole);
+                      toast.success(`Switched role to ${roleLabels[targetRequiredRole] || targetRequiredRole}`);
+                    }}
+                  >
+                    Authorize as {roleLabels[targetRequiredRole] || targetRequiredRole}
+                  </Button>
+                )}
               </div>
             </div>
           ) : (
@@ -492,7 +531,17 @@ export function AppShell({
                       {group.items.map((item) => {
                         const active =
                           pathname === item.to ||
-                          (item.to !== "/dashboard" && item.to !== "/" && pathname.startsWith(item.to));
+                          (item.to !== "/" &&
+                            item.to !== "/dashboard" &&
+                            item.to !== "/admin" &&
+                            item.to !== "/government" &&
+                            item.to !== "/surveyor" &&
+                            item.to !== "/bank" &&
+                            item.to !== "/properties" &&
+                            item.to !== "/disputes" &&
+                            item.to !== "/reports" &&
+                            item.to !== "/support" &&
+                            pathname.startsWith(item.to + "/"));
                         return (
                           <Link
                             key={item.to}
