@@ -11,22 +11,22 @@ import { Loader2 } from "lucide-react";
 const localTestAccounts = import.meta.env.DEV
   ? [
       [
-        "Citizen",
+        "Demo Citizen",
         import.meta.env.VITE_TEST_CITIZEN_EMAIL,
         import.meta.env.VITE_TEST_CITIZEN_PASSWORD,
       ],
       [
-        "Government",
+        "Demo Government",
         import.meta.env.VITE_TEST_GOVERNMENT_EMAIL,
         import.meta.env.VITE_TEST_GOVERNMENT_PASSWORD,
       ],
       [
-        "Surveyor",
+        "Demo Surveyor",
         import.meta.env.VITE_TEST_SURVEYOR_EMAIL,
         import.meta.env.VITE_TEST_SURVEYOR_PASSWORD,
       ],
-      ["Bank", import.meta.env.VITE_TEST_BANK_EMAIL, import.meta.env.VITE_TEST_BANK_PASSWORD],
-      ["Admin", import.meta.env.VITE_TEST_ADMIN_EMAIL, import.meta.env.VITE_TEST_ADMIN_PASSWORD],
+      ["Demo Bank", import.meta.env.VITE_TEST_BANK_EMAIL, import.meta.env.VITE_TEST_BANK_PASSWORD],
+      ["Demo Admin", import.meta.env.VITE_TEST_ADMIN_EMAIL, import.meta.env.VITE_TEST_ADMIN_PASSWORD],
     ].filter((account): account is [string, string, string] => Boolean(account[1] && account[2]))
   : [];
 
@@ -182,7 +182,7 @@ function LoginPage() {
             {localTestAccounts.map(([role, testEmail, testPassword]) => (
               <Button
                 key={role}
-                id={`test-login-${role.toLowerCase()}`}
+                id={`test-login-${role.toLowerCase().replace(/\s+/g, "-")}`}
                 type="button"
                 variant="outline"
                 size="sm"

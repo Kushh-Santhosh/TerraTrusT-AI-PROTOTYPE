@@ -98,26 +98,6 @@ export function mapPropertyRow(row: {
   };
 }
 
-export function getRegisteredLocalProperties(): Property[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem("terratrust_registered_properties");
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveRegisteredLocalProperty(prop: Property): void {
-  if (typeof window === "undefined") return;
-  try {
-    const existing = getRegisteredLocalProperties().filter(
-      (p) => p.id !== prop.id && p.passportId !== prop.passportId,
-    );
-    localStorage.setItem("terratrust_registered_properties", JSON.stringify([prop, ...existing]));
-  } catch {}
-}
-
 /** Loads properties owned by a citizen user */
 export async function loadOwnedProperties(userId: string): Promise<Property[]> {
   if (!supabaseConfigured || !userId || !isUuid(userId)) {
