@@ -26,7 +26,7 @@ function Page() {
       <PropertySubNav propertyId={id} activeTab="satellite" />
 
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE SATELLITE COMPARISON:</strong> Multi-epoch satellite scans for ground boundary alignment and encroachment monitoring.
+        <strong className="text-foreground">SATELLITE COMPARISON:</strong> Multi-epoch satellite scans for ground boundary alignment and encroachment monitoring.
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_280px]">

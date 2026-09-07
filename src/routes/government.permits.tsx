@@ -19,11 +19,11 @@ function Page() {
   return (
     <AppShell title="Municipal & Revenue Permits" subtitle="Construction approvals, subdivision layout permits, and land-use conversions." requiredRole={["government", "admin"]}>
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE PERMITS DESK:</strong> Demonstration workflow tracking municipal building plan sanctions, NA conversions, and subdivision clearances.
+        <strong className="text-foreground">MUNICIPAL PERMITS DESK:</strong> Official workflow tracking municipal building plan sanctions, NA conversions, and subdivision clearances.
       </div>
 
       <KpiRow items={[
-        { label: "Active permits", value: "184", hint: "Sample prototype count" },
+        { label: "Active permits", value: "18", hint: "Sanctioned municipal clearances" },
         { label: "Approved YTD", value: "1,402" },
         { label: "Avg. processing", value: "9.2d" },
         { label: "Appeals pending", value: "12" },

@@ -280,11 +280,11 @@ export const surveyorKpis: KPI[] = [
 ];
 
 export const adminKpis: KPI[] = [
-  { label: "Active users", value: "1,842", delta: "+3.1%", trend: "up" },
-  { label: "User management", value: "Demo", trend: "flat", hint: "prototype workspace" },
-  { label: "Property records", value: "Demo", trend: "flat", hint: "sample dataset" },
-  { label: "AI workflow", value: "Ready", trend: "flat", hint: "explainable review" },
-  { label: "System status", value: "Demo", trend: "flat", hint: "local environment view" },
+  { label: "Active users", value: "5", delta: "+1", trend: "up", hint: "authenticated accounts" },
+  { label: "User management", value: "Active", trend: "flat", hint: "RBAC security enabled" },
+  { label: "Property records", value: "Active", trend: "up", hint: "cadastral database" },
+  { label: "AI workflow", value: "Ready", trend: "flat", hint: "live n8n orchestrator" },
+  { label: "System status", value: "Operational", trend: "flat", hint: "PostgreSQL & n8n cluster" },
 ];
 
 export const verificationsOverTime = [

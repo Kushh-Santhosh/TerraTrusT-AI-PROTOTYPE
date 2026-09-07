@@ -16,9 +16,9 @@ export const Route = createFileRoute("/valuation")({
 function ValuationPage() {
   return (
     <AppShell title="AI Property Valuation" subtitle="Defensible, explainable Indian land values backed by sub-registrar comparables, satellite geography, and infrastructure signals.">
-      {/* Prototype / Estimate Notice */}
+      {/* Valuation Notice */}
       <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-xs text-muted-foreground flex items-center justify-between">
-        <span><strong className="text-foreground">PROTOTYPE VALUATION MODEL:</strong> Explainable AI model outputs based on registered circle rates and recent Indian registry comparables. Non-binding estimate; not an official legal government stamp valuation.</span>
+        <span><strong className="text-foreground">AI VALUATION MODEL:</strong> Explainable AI model outputs based on registered circle rates and recent Indian registry comparables. Non-binding estimate; not an official legal government stamp valuation.</span>
         <span className="rounded bg-primary/20 px-2 py-0.5 font-mono text-[10px] text-primary font-bold">₹ INR ONLY</span>
       </div>
 

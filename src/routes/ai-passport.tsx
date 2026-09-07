@@ -22,7 +22,7 @@ function PassportPage() {
       </>}
     >
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE PROPERTY PASSPORT:</strong> Machine-verifiable identity combining sub-registrar deeds, cadastral survey, and AI forensic trust checks.
+        <strong className="text-foreground">DIGITAL PROPERTY PASSPORT:</strong> Machine-verifiable identity combining sub-registrar deeds, cadastral survey, and AI forensic trust checks.
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">

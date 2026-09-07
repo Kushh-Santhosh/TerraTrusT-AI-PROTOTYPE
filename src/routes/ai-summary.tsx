@@ -34,7 +34,7 @@ function SummaryPage() {
       actions={<><Button variant="outline"><Copy className="h-4 w-4 mr-1" /> Copy</Button><Button><Download className="h-4 w-4 mr-1" /> Export PDF</Button></>}
     >
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE LEGAL SUMMARY:</strong> Plain-language AI summarizer trained on Indian conveyance deeds and registry clauses. Non-binding advisory summary.
+        <strong className="text-foreground">LEGAL SUMMARY ENGINE:</strong> Plain-language AI summarizer trained on Indian conveyance deeds and registry clauses. Non-binding advisory summary.
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

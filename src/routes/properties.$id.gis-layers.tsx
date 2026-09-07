@@ -28,7 +28,7 @@ function Page() {
       <PropertySubNav propertyId={id} activeTab="gis-layers" />
 
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE GIS LAYERS:</strong> Indian municipal zoning, survey parcel grids, and infrastructure overlays.
+        <strong className="text-foreground">CADASTRAL GIS LAYERS:</strong> Indian municipal zoning, survey parcel grids, and infrastructure overlays.
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">

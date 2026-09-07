@@ -17,7 +17,7 @@ function Page() {
       <Crumbs items={[{ label: "Reports", to: "/reports" }, { label: id }]} />
       
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE VALUATION REPORT:</strong> Aggregated spatial telemetry and registered sub-registrar transaction indices.
+        <strong className="text-foreground">REGIONAL VALUATION REPORT:</strong> Aggregated spatial telemetry and registered sub-registrar transaction indices.
       </div>
 
       <KpiRow items={[

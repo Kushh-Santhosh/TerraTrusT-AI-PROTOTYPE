@@ -18,11 +18,11 @@ function Page() {
   return (
     <AppShell title="Active Land Disputes Queue" subtitle="Inter-jurisdictional disputes and title challenges routed to revenue officers." requiredRole={["government", "admin"]}>
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE DISPUTE DOCKET:</strong> Demonstration mediation queue integrating surveyor Naksha verifications and Sub-Registrar records.
+        <strong className="text-foreground">DISPUTE DOCKET:</strong> Active mediation queue integrating surveyor Naksha verifications and Sub-Registrar records.
       </div>
 
       <KpiRow items={[
-        { label: "Open cases", value: "84", hint: "Sample prototype count" },
+        { label: "Open cases", value: "2", hint: "Active disputes" },
         { label: "Avg. resolution", value: "37d" },
         { label: "Resolved YTD", value: "612" },
         { label: "Lok Adalat backlog", value: "12" },

@@ -18,7 +18,7 @@ function Page() {
       <PropertySubNav propertyId={id} activeTab="boundary" />
 
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE GIS COMPARISON:</strong> Real vertex geofencing calibrated for Indian Survey Numbers and Bhoomi cadastral boundaries.
+        <strong className="text-foreground">GIS CADASTRAL COMPARISON:</strong> Real vertex geofencing calibrated for Indian Survey Numbers and Bhoomi cadastral boundaries.
       </div>
 
       <KpiRow items={[

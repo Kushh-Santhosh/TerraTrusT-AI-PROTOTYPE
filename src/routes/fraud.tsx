@@ -23,7 +23,7 @@ function FraudPage() {
       actions={<Button variant="outline" className="rounded-full"><Download className="h-4 w-4 mr-1" /> Export Audit Log</Button>}>
       
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE FRAUD ANOMALY ENGINE:</strong> Evidentiary discrepancy detector testing document watermarks, duplicate survey numbers, and polygon geometry intersections.
+        <strong className="text-foreground">FRAUD ANOMALY ENGINE:</strong> Evidentiary discrepancy detector testing document watermarks, duplicate survey numbers, and polygon geometry intersections.
       </div>
 
       <KpiRow items={[

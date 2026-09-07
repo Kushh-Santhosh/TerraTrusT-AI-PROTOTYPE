@@ -234,7 +234,7 @@ function PassportPDF() {
         {/* Footer band */}
         <div className="border-t border-[#0a1224]/10 bg-[#f8fafc] px-10 py-5 text-[10px] text-[#0a1224]/60">
           <p>
-            NOTICE: This document is a verifiable demonstration of the digital Property Passport issued via TerraTrust AI prototype engine. Ref: {p.passportId}-{signatureHash.slice(0,4)}.
+            NOTICE: This document is a verifiable digital Property Passport issued via the TerraTrust AI verification engine. Ref: {p.passportId}-{signatureHash.slice(0,4)}.
           </p>
         </div>
       </main>

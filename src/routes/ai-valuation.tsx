@@ -30,9 +30,9 @@ function ValuationEnginePage() {
       subtitle="Defensible, explainable Indian land values backed by sub-registrar deeds, spatial indicators, and macro signals."
       actions={<AIBadge tone="accent">Model Indic v2.4 · Calibrated weekly</AIBadge>}
     >
-      {/* Prototype / Estimate Notice */}
+      {/* Valuation Notice */}
       <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-xs text-muted-foreground flex items-center justify-between">
-        <span><strong className="text-foreground">PROTOTYPE VALUATION ENGINE:</strong> Machine learning valuation based on registered circle rates, sub-registrar transaction datasets, and infrastructure corridors. Non-binding estimate; not an official government legal title valuation.</span>
+        <span><strong className="text-foreground">AI VALUATION ENGINE:</strong> Machine learning valuation based on registered circle rates, sub-registrar transaction datasets, and infrastructure corridors. Non-binding estimate; not an official government legal title valuation.</span>
         <span className="rounded bg-primary/20 px-2 py-0.5 font-mono text-[10px] text-primary font-bold">₹ INR ONLY</span>
       </div>
 

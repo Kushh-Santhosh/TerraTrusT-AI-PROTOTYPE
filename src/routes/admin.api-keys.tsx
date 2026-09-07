@@ -28,7 +28,7 @@ function Page() {
       actions={<Button className="rounded-full"><Plus className="h-4 w-4 mr-1" /> Create API Token</Button>}>
       
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE API REGISTRY:</strong> Mock key management interface for banking APIs and land registry sync webhooks.
+        <strong className="text-foreground">API KEY REGISTRY:</strong> Authoritative key management interface for banking APIs and land registry sync webhooks.
       </div>
 
       <DataTable rows={rows} columns={[

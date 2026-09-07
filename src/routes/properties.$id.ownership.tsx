@@ -23,7 +23,7 @@ function Page() {
       <PropertySubNav propertyId={id} activeTab="ownership" />
 
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE TITLE CHAIN:</strong> Traceable title sequence linked to sub-registrar deed numbers and Encumbrance Certificates (Form 15/16).
+        <strong className="text-foreground">OFFICIAL TITLE CHAIN:</strong> Traceable title sequence linked to sub-registrar deed numbers and Encumbrance Certificates (Form 15/16).
       </div>
 
       <DataTable rows={rows} columns={[

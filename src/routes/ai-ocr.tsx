@@ -19,7 +19,7 @@ function OCRPage() {
       actions={<><Button variant="outline"><Upload className="h-4 w-4 mr-1" /> Upload Deed</Button><Button><ScanLine className="h-4 w-4 mr-1" /> Re-scan</Button></>}
     >
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE OCR ENGINE:</strong> Forensic OCR trained on Indian bilingual deed templates (English &amp; Kannada), e-Stamp certificates, and sub-registrar seal formats.
+        <strong className="text-foreground">FORENSIC OCR ENGINE:</strong> Calibrated on Indian bilingual deed templates, e-Stamp certificates, and sub-registrar seal formats.
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

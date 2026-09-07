@@ -377,65 +377,67 @@ export function RealMap({
     vertexMarkersRef.current.forEach((m) => m.remove());
     vertexMarkersRef.current = [];
 
-    // Add interactive draggable markers for each vertex
-    bList.forEach((pt, index) => {
-      const vEl = document.createElement("div");
-      vEl.className =
-        "vertex-handle group cursor-move flex items-center justify-center -translate-x-1/2 -translate-y-1/2";
-      vEl.innerHTML = `
-        <div class="w-4 h-4 rounded-full bg-white border-2 border-teal-600 shadow-md flex items-center justify-center transition-transform hover:scale-125 hover:bg-teal-50">
-          <span class="text-[8px] font-bold text-teal-800 leading-none">${index + 1}</span>
-        </div>
-      `;
+    // Only instantiate interactive draggable DOM markers when editing is enabled
+    if (!isReadOnly) {
+      bList.forEach((pt, index) => {
+        const vEl = document.createElement("div");
+        vEl.className =
+          "vertex-handle group cursor-move flex items-center justify-center -translate-x-1/2 -translate-y-1/2";
+        vEl.innerHTML = `
+          <div class="w-4 h-4 rounded-full bg-white border-2 border-teal-600 shadow-md flex items-center justify-center transition-transform hover:scale-125 hover:bg-teal-50">
+            <span class="text-[8px] font-bold text-teal-800 leading-none">${index + 1}</span>
+          </div>
+        `;
 
-      vEl.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setActiveVertexIndex(index);
+        vEl.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setActiveVertexIndex(index);
+        });
+
+        const vMarker = new Marker({
+          element: vEl,
+          draggable: true,
+        })
+          .setLngLat([pt.lng, pt.lat])
+          .addTo(map);
+
+        vMarker.on("drag", () => {
+          const lngLat = vMarker.getLngLat();
+          const updated = [...boundaryRef.current];
+          updated[index] = {
+            lat: Number(lngLat.lat.toFixed(6)),
+            lng: Number(lngLat.lng.toFixed(6)),
+          };
+
+          const src = map.getSource("property-boundary-source") as GeoJSONSource | undefined;
+          if (src && updated.length >= 3) {
+            const ring = updated.map((p) => [p.lng, p.lat]);
+            ring.push([...ring[0]]);
+            src.setData({
+              type: "Feature",
+              geometry: {
+                type: "Polygon",
+                coordinates: [ring],
+              },
+              properties: {},
+            });
+          }
+        });
+
+        vMarker.on("dragend", () => {
+          const lngLat = vMarker.getLngLat();
+          const updated = [...boundaryRef.current];
+          updated[index] = {
+            lat: Number(lngLat.lat.toFixed(6)),
+            lng: Number(lngLat.lng.toFixed(6)),
+          };
+          const newArea = calculatePolygonArea(updated);
+          onChangeRef.current?.(updated, newArea);
+        });
+
+        vertexMarkersRef.current.push(vMarker);
       });
-
-      const vMarker = new Marker({
-        element: vEl,
-        draggable: !isReadOnly,
-      })
-        .setLngLat([pt.lng, pt.lat])
-        .addTo(map);
-
-      vMarker.on("drag", () => {
-        const lngLat = vMarker.getLngLat();
-        const updated = [...boundaryRef.current];
-        updated[index] = {
-          lat: Number(lngLat.lat.toFixed(6)),
-          lng: Number(lngLat.lng.toFixed(6)),
-        };
-
-        const src = map.getSource("property-boundary-source") as GeoJSONSource | undefined;
-        if (src && updated.length >= 3) {
-          const ring = updated.map((p) => [p.lng, p.lat]);
-          ring.push([...ring[0]]);
-          src.setData({
-            type: "Feature",
-            geometry: {
-              type: "Polygon",
-              coordinates: [ring],
-            },
-            properties: {},
-          });
-        }
-      });
-
-      vMarker.on("dragend", () => {
-        const lngLat = vMarker.getLngLat();
-        const updated = [...boundaryRef.current];
-        updated[index] = {
-          lat: Number(lngLat.lat.toFixed(6)),
-          lng: Number(lngLat.lng.toFixed(6)),
-        };
-        const newArea = calculatePolygonArea(updated);
-        onChangeRef.current?.(updated, newArea);
-      });
-
-      vertexMarkersRef.current.push(vMarker);
-    });
+    }
   }, []);
 
   // 2. Synchronize initialCenter / external center changes

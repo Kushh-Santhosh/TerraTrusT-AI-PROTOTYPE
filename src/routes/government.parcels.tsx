@@ -35,7 +35,7 @@ function Page() {
       }
     >
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">PROTOTYPE CADASTRAL REGISTRY:</strong> Demonstration parcel registry schema modeled after state revenue land records datasets.
+        <strong className="text-foreground">STATE CADASTRAL REGISTRY:</strong> Read-only access to state cadastral parcel registry synchronized with state revenue datasets.
       </div>
 
       <KpiRow

@@ -25,9 +25,9 @@ function Page() {
       <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: id, to: "/properties/$id" }, { label: "AI Analysis" }]} />
       <PropertySubNav propertyId={id} activeTab="ai-analysis" />
 
-      {/* Prototype / Estimate Notice */}
+      {/* Estimate Notice */}
       <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-xs text-muted-foreground flex items-center justify-between">
-        <span><strong className="text-foreground">PROTOTYPE SAMPLE DATA:</strong> Explainable AI model outputs. AI estimates are non-binding and do not replace official government sub-registrar stamp duty or revenue valuations.</span>
+        <span><strong className="text-foreground">AI FORENSIC ANALYSIS:</strong> Explainable AI model outputs. AI estimates are non-binding and do not replace official government sub-registrar stamp duty or revenue valuations.</span>
         <Pill tone="primary">AI v2.4 India</Pill>
       </div>
 

@@ -154,6 +154,13 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
+                {userProperties.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-3 py-8 text-center text-xs text-muted-foreground">
+                      No registered properties in your portfolio yet. Click <Link to="/properties/new" className="text-primary font-medium hover:underline">&quot;New Property Passport&quot;</Link> to register your first parcel.
+                    </td>
+                  </tr>
+                )}
                 {userProperties.map(p => (
                   <tr key={p.id} className="hover:bg-muted/40 transition">
                     <td className="px-3 py-3">
