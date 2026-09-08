@@ -171,7 +171,6 @@ export function computeVerification(
 
   const boundaryFactor = confidence.factors.find((f) => f.key === "gisBoundary");
   const docFactor = confidence.factors.find((f) => f.key === "govDocs");
-  const communityFactor = confidence.factors.find((f) => f.key === "community");
   const taxFactor = confidence.factors.find((f) => f.key === "taxHistory");
   const boundaryScore = Math.round(boundaryFactor?.raw ?? 70);
   const ocrConfidence = Math.round(docFactor?.raw ?? 80);
@@ -182,9 +181,6 @@ export function computeVerification(
   const registryCrossCheck = p.status !== "disputed" && p.status !== "pending";
   const governmentScore = Math.round(((docFactor?.raw ?? 70) + (taxFactor?.raw ?? 70)) / 2);
   const governmentCleared = registryCrossCheck && governmentScore >= 70;
-  const communityScore = Math.round(communityFactor?.raw ?? 70);
-  const communityAttestations = Math.max(0, Math.round((communityScore - 50) / 6));
-  const communityCleared = communityScore >= 65 && p.status !== "disputed";
 
   const critical = fraud.band === "Critical" || fraud.band === "Elevated";
   let status: VerificationStatus;
@@ -209,9 +205,6 @@ export function computeVerification(
     reviewReasons.push(`Composite risk ${riskScore}/100 exceeds the acceptable band.`);
   if (!governmentCleared)
     reviewReasons.push("Government registry cross-check is on hold for this parcel.");
-  if (!communityCleared)
-    reviewReasons.push("Community verification is incomplete or an objection is on file.");
-
   if (reviewReasons.length > 0) {
     status = "manual_review";
     const priority =
@@ -296,9 +289,9 @@ export function computeVerification(
     reviewReasons,
     governmentScore,
     governmentCleared,
-    communityScore,
-    communityAttestations,
-    communityCleared,
+    communityScore: null,
+    communityAttestations: null,
+    communityCleared: null,
     passportStatus: status === "verified" ? "ready" : "held",
     completedAt: new Date().toISOString(),
     steps,

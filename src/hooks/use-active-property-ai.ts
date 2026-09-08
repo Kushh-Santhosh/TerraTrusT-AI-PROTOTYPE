@@ -27,7 +27,7 @@ export function useActivePropertyAI(feature: PropertyFeature, propertyId?: strin
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      if (!user?.id) return;
+      if (!user?.id || !profile?.role) return;
       const selected = propertyId
         ? await loadPropertyById(propertyId)
         : ((profile?.role === "citizen"

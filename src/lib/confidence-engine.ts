@@ -44,7 +44,7 @@ function toneFor(raw: number): ConfidenceTone {
 
 const WEIGHTS = {
   govDocs:          0.22,
-  community:        0.13,
+  officialEvidence: 0.13,
   surveyor:         0.16,
   gisBoundary:      0.14,
   utilityBills:     0.07,
@@ -60,10 +60,24 @@ export function computeConfidence(p: Property): ConfidenceReport {
   const verifiedRatio = docCount === 0 ? 0 : verifiedDocs / docCount;
   const isDisputed = p.status === "disputed";
   const isVerified = p.status === "verified";
+  const sourceValues = Object.values(p.sourceChecks ?? {});
+  const verifiedSources = sourceValues.filter((source) => {
+    if (source && typeof source === "object") {
+      const value = source as Record<string, unknown>;
+      return value.verified === true || value.status === "verified" || value.status === "confirmed";
+    }
+    return source === true || source === "verified" || source === "confirmed";
+  }).length;
+  const officialEvidence = sourceValues.length
+    ? Math.round((verifiedSources / sourceValues.length) * 100)
+    : p.governmentDecision === "approved"
+      ? 90
+      : p.governmentDecision === "rejected"
+        ? 20
+        : 0;
 
   // ----- per-factor raw signals (0..100) -----
   const govDocs = Math.round(40 + verifiedRatio * 55 + (isVerified ? 5 : 0));
-  const community = Math.round(jitter(s, 55, 95, 1) - (isDisputed ? 25 : 0));
   const surveyor = Math.round((p.boundary.length ? 88 : 62) + jitter(s, -4, 6, 2));
   const gisBoundary = Math.round(p.aiConfidence * 0.9 + (p.boundary.length ? 8 : -4));
   const utilityBills = Math.round(jitter(s, 60, 92, 3) - (p.type === "agricultural" ? 18 : 0));
@@ -75,9 +89,13 @@ export function computeConfidence(p: Property): ConfidenceReport {
     ["govDocs", "Government documents", govDocs,
       `${verifiedDocs} of ${docCount || 1} filings verified against the bureau registry${isVerified ? " · bureau endorsement on file" : ""}.`,
       p.documents.slice(0, 3).map(d => `${d.name} — ${d.verified ? "verified" : "pending"}`)],
-    ["community", "Community verification", community,
-      `${Math.max(0, Math.round((community - 50) / 6))} neighbour attestations recorded${isDisputed ? "; one objection on file" : "; no objections"}.`,
-      ["Neighbourhood council acknowledgement", "Adjacent owner sign-off", isDisputed ? "Contested by adjoining parcel" : "No conflicting claims"]],
+    ["officialEvidence", "Official registry evidence", officialEvidence,
+      sourceValues.length
+        ? `${verifiedSources} of ${sourceValues.length} official source checks are confirmed.`
+        : p.governmentDecision === "approved"
+          ? "Government approval is recorded for this parcel."
+          : "No official registry evidence has been recorded yet.",
+      Object.keys(p.sourceChecks ?? {}).map((source) => `${source}: ${String(p.sourceChecks?.[source])}`)],
     ["surveyor", "Surveyor inspection", surveyor,
       `${p.boundary.length ? "On-site GPS sweep with " + p.boundary.length + " vertices captured." : "Awaiting field re-measurement; using historical sketch."}`,
       [p.boundary.length ? "RTK GPS capture · ±0.4m" : "Sketch only", "Inspection photos · 12 frames", "Surveyor digital signature"]],

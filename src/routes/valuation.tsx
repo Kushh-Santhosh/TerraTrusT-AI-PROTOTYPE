@@ -36,7 +36,7 @@ function ValuationPage() {
   useEffect(() => {
     let cancelled = false;
     async function loadProperties() {
-      if (!user?.id) return;
+      if (!user?.id || !profile?.role) return;
       const loaded =
         profile?.role === "citizen"
           ? await loadOwnedProperties(user.id)
