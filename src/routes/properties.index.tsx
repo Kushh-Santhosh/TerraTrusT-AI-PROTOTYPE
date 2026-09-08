@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { properties as fallbackProperties } from "@/lib/mock-data";
 import { loadOwnedProperties } from "@/lib/property-repository";
 import { useAuth } from "@/lib/auth";
 import { Filter, Grid3x3, List, Plus, Search, MapPin, Building2 } from "lucide-react";
@@ -27,18 +26,17 @@ function PropertiesPage() {
   const { user } = useAuth();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const [propertiesList, setPropertiesList] = useState<Property[]>(fallbackProperties);
+  const [propertiesList, setPropertiesList] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user?.id) {
       loadOwnedProperties(user.id).then((data) => {
-        if (data && data.length > 0) {
-          setPropertiesList(data);
-        }
+        setPropertiesList(data);
         setLoading(false);
       });
     } else {
+      setPropertiesList([]);
       setLoading(false);
     }
   }, [user?.id]);
@@ -96,7 +94,11 @@ function PropertiesPage() {
         </div>
       </div>
 
-      {filteredProperties.length === 0 ? (
+      {loading ? (
+        <div className="surface-card p-12 text-center text-sm text-muted-foreground">
+          Loading your persisted properties...
+        </div>
+      ) : filteredProperties.length === 0 ? (
         /* Empty State */
         <div className="surface-card flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-dashed border-border">
           <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10 text-primary mb-4">
