@@ -306,6 +306,14 @@ export async function createSurveyorAssignment(input: {
   return { error: error?.message ?? null, persisted: !error, data };
 }
 
+export async function requestSurveyorVerification(propertyId: string): Promise<PersistenceOutcome<string>> {
+  if (!supabaseConfigured) return { error: "Supabase not configured", persisted: false };
+  const { data, error } = await supabase.rpc("request_surveyor_verification", {
+    p_property_id: propertyId,
+  });
+  return { error: error?.message ?? null, persisted: !error, data: data ?? undefined };
+}
+
 /**
  * Resolves property review by government officer via RPC
  */
@@ -481,10 +489,10 @@ export async function recordSurveyorDecision(input: {
       surveyorSubmittedAt: new Date().toISOString(),
     };
 
-    const newScore =
-      input.decision === "verified"
-        ? Math.max(prop?.trust_score ?? 60, 85)
-        : Math.min(prop?.trust_score ?? 60, 50);
+    const baseScore = prop?.trust_score ?? 0;
+    const newScore = input.decision === "verified"
+      ? Math.min(99, baseScore + 20)
+      : Math.max(0, baseScore - 20);
 
     const { error: updateErr } = await supabase
       .from("properties")
@@ -560,7 +568,9 @@ export async function recordGovernmentDecision(input: {
 
     const newScore =
       input.resolution === "approved"
-        ? Math.max(prop?.trust_score ?? 70, 95)
+        ? currentLoc.surveyorDecision === "verified"
+          ? 100
+          : Math.max(prop?.trust_score ?? 70, 95)
         : input.resolution === "rejected"
           ? 25
           : 55;

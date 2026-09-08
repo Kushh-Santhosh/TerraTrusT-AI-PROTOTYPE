@@ -67,6 +67,7 @@ export const citizenNav: NavGroup[] = [
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/properties", label: "My Properties", icon: FileBadge },
+      { to: "/land-risk-search", label: "Land Risk Search", icon: ShieldAlert },
       { to: "/properties/new", label: "Add Property", icon: PlusCircle },
       { to: "/map", label: "GIS Cadastral Map", icon: Map },
       { to: "/ai-passport", label: "Digital Passport", icon: FileBadge },

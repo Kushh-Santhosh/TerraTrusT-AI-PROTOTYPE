@@ -66,6 +66,10 @@ function SurveyorAssignmentDetail() {
 
   const handleSubmitDecision = async () => {
     if (!property) return;
+    if (!fieldNotes.trim() || !evidenceFile) {
+      setOutcomeMessage("Add field notes and upload evidence before submitting a surveyor decision.");
+      return;
+    }
     setSubmitting(true);
     setOutcomeMessage(null);
 

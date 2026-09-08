@@ -3,9 +3,8 @@ import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { StatCard } from "@/components/ui-ext/StatCard";
 import { TrustScore } from "@/components/ui-ext/TrustScore";
 import { Button } from "@/components/ui/button";
-import { citizenKpis, notifications, properties as fallbackProperties, verificationsOverTime } from "@/lib/mock-data";
-import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { ArrowRight, Plus, Sparkles, Bell } from "lucide-react";
+import { notifications } from "@/lib/mock-data";
+import { ArrowRight, Plus, Sparkles, Bell, ShieldCheck, ClipboardCheck } from "lucide-react";
 import { MapMock } from "@/components/ui-ext/MapMock";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
@@ -26,7 +25,6 @@ function formatInr(val: number): string {
 
 function Dashboard() {
   const { user, profile } = useAuth();
-  const [timeRange, setTimeRange] = useState("Last 8 months");
   const [userProperties, setUserProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -88,38 +86,25 @@ function Dashboard() {
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="surface-card p-5 lg:col-span-2 min-w-0 overflow-hidden">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="font-medium">Verifications over time</p>
-              <p className="text-xs text-muted-foreground">Monthly verification trends across registered parcels</p>
+              <p className="font-medium">Land Property Evaluation</p>
+              <p className="text-xs text-muted-foreground">Current estimated value and verification outlook from your persisted property records</p>
             </div>
-            <select
-              aria-label="Filter verification timeframe"
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground cursor-pointer"
-            >
-              <option value="Last 8 months">Last 8 months</option>
-              <option value="Last 12 months">Last 12 months</option>
-            </select>
+            <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
-          <div className="mt-4 h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={verificationsOverTime}>
-                <defs>
-                  <linearGradient id="v" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.45 0.08 195)" stopOpacity={0.4}/>
-                    <stop offset="100%" stopColor="oklch(0.45 0.08 195)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="oklch(0.92 0.008 250)" vertical={false} />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "oklch(0.5 0.018 255)" }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "oklch(0.5 0.018 255)" }} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid oklch(0.92 0.008 250)", fontSize: 12 }} />
-                <Area type="monotone" dataKey="verified" stroke="oklch(0.45 0.08 195)" fill="url(#v)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+          {userProperties[0] ? (
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-lg bg-muted/40 p-4"><p className="text-xs text-muted-foreground">Current estimated value</p><p className="mt-1 font-display text-2xl">{userProperties[0].valuation ? formatInr(userProperties[0].valuation) : "Valuation pending"}</p></div>
+              <div className="rounded-lg bg-muted/40 p-4"><p className="text-xs text-muted-foreground">Verification</p><p className="mt-1 font-display text-2xl">{userProperties[0].trustScore} / 100</p><p className="text-xs text-muted-foreground">{userProperties[0].surveyorDecision === "verified" ? "Surveyor field verification complete" : "Surveyor verification pending"}</p></div>
+              <div className="rounded-lg bg-muted/40 p-4"><p className="text-xs text-muted-foreground">Future outlook</p><p className="mt-1 text-sm font-medium">Projection unavailable</p><p className="text-xs text-muted-foreground">More market/property data is required.</p></div>
+            </div>
+          ) : <p className="mt-6 rounded-lg border border-border p-5 text-sm text-muted-foreground">Valuation pending. Register a property to run AI valuation.</p>}
+          <div className="mt-5 flex flex-wrap gap-2">
+            {userProperties[0] && <Link to="/properties/$id" params={{ id: userProperties[0].id }}><Button variant="outline" size="sm"><ClipboardCheck className="mr-1.5 h-4 w-4" /> View verification</Button></Link>}
+            <Link to="/valuation"><Button size="sm"><Sparkles className="mr-1.5 h-4 w-4" /> Run AI valuation</Button></Link>
           </div>
+          <p className="mt-4 text-[11px] text-muted-foreground">AI-estimated scenario — not a guaranteed market return.</p>
         </div>
 
         <div className="surface-card flex flex-col p-5">

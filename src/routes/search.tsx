@@ -3,9 +3,11 @@ import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, Filter, Sparkles, Hash, User2, Navigation, FileBadge, Building2 } from "lucide-react";
-import { properties } from "@/lib/mock-data";
+import { loadInstitutionalProperties } from "@/lib/property-repository";
+import type { Property } from "@/lib/types";
+import { useAuth } from "@/lib/auth";
 import { Pill } from "@/components/ui-ext/Scaffold";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export const Route = createFileRoute("/search")({
   head: () => ({ meta: [{ title: "Smart search — TerraTrust AI" }] }),
@@ -36,7 +38,7 @@ function detectMode(q: string): SearchMode {
   return "auto";
 }
 
-function scoreMatch(p: typeof properties[number], q: string, mode: SearchMode): number {
+function scoreMatch(p: Property, q: string, mode: SearchMode): number {
   const lo = q.toLowerCase().trim();
   if (!lo) return 1;
   let s = 0;
@@ -57,9 +59,15 @@ function scoreMatch(p: typeof properties[number], q: string, mode: SearchMode): 
 }
 
 function SearchPage() {
+  const { profile } = useAuth();
   const [q, setQ] = useState("");
   const [f, setF] = useState("All");
   const [mode, setMode] = useState<SearchMode>("auto");
+  const [properties, setProperties] = useState<Property[]>([]);
+
+  useEffect(() => {
+    loadInstitutionalProperties().then(setProperties);
+  }, []);
 
   const effectiveMode = mode === "auto" ? detectMode(q) : mode;
   const modeMeta = MODES.find(m => m.id === (mode === "auto" ? effectiveMode : mode)) ?? MODES[0];
@@ -81,7 +89,7 @@ function SearchPage() {
   }, [q, f, effectiveMode]);
 
   return (
-    <AppShell title="Smart Search" subtitle="Find any property by passport ID, GPS coordinates, registered owner, survey number, or locality.">
+    <AppShell title="Property Search" subtitle="Inspect available property records, verification, risk, and land details." requiredRole={["government", "admin"]}>
       <div className="surface-card p-6">
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
@@ -138,7 +146,7 @@ function SearchPage() {
                 <Pill tone="primary">Trust {p.trustScore}</Pill>
               </div>
               <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> {p.address} · {p.region}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Owner: {p.owner} · {p.coords.lat.toFixed(4)}° N, {p.coords.lng.toFixed(4)}° E</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{p.coords.lat.toFixed(4)}° N, {p.coords.lng.toFixed(4)}° E · {p.area.toLocaleString()} m²</p>
             </div>
             <div className="text-right">
               <p className="text-[10px] uppercase text-muted-foreground font-semibold">AI Valuation</p>

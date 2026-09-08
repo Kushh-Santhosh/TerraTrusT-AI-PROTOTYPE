@@ -14,12 +14,12 @@ import { getEncumbrances, getNearbyInfra, getRiskIndicators, getOwnershipHistory
 import { getFraudReport } from "@/lib/fraud-engine";
 import { ConfidenceBreakdown } from "@/components/ui-ext/ConfidenceBreakdown";
 import { EncumbrancePanel, NearbyInfraPanel, RiskIndicatorsPanel, OwnershipHistoryPanel } from "@/components/ui-ext/IntelPanels";
-import { loadPropertyById } from "@/lib/property-repository";
+import { loadPropertyById, loadPropertySurveyorAssignment } from "@/lib/property-repository";
 import { PropertySubNav } from "@/components/property/PropertySubNav";
 import { PassportQRCode } from "@/components/property/PassportQRCode";
 import type { Property } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
-import { deleteOwnedProperty } from "@/lib/supabase-persistence";
+import { deleteOwnedProperty, requestSurveyorVerification } from "@/lib/supabase-persistence";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +48,8 @@ function PassportPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteText, setDeleteText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [requestingSurveyor, setRequestingSurveyor] = useState(false);
+  const [surveyorRequested, setSurveyorRequested] = useState(false);
   const { user } = useAuth();
   const navigate = Route.useNavigate();
   const pathname = useRouterState({ select: s => s.location.pathname });
@@ -64,6 +66,11 @@ function PassportPage() {
       active = false;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (!p) return;
+    loadPropertySurveyorAssignment(p.id).then((assignment) => setSurveyorRequested(Boolean(assignment && ["assigned", "in_progress", "submitted"].includes(assignment.status))));
+  }, [p]);
 
   if (pathname !== `/properties/${id}`) return <Outlet />;
   if (loading) {
@@ -89,6 +96,19 @@ function PassportPage() {
   const history = getOwnershipHistory(p);
   const fraud = getFraudReport(p);
   const isOwner = Boolean(user?.id && p.ownerId === user.id);
+
+  async function handleSurveyorRequest() {
+    if (!p) return;
+    setRequestingSurveyor(true);
+    const result = await requestSurveyorVerification(p.id);
+    setRequestingSurveyor(false);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setSurveyorRequested(true);
+    toast.success("Surveyor verification requested");
+  }
 
   async function handleDelete() {
     if (!p || !user?.id || deleteText !== p.passportId) return;
@@ -161,6 +181,25 @@ function PassportPage() {
       </div>
 
       <PassportQRCode property={p} />
+
+      <div className="surface-card border-primary/15 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="font-medium">Verification Progress</p>
+            <p className="mt-1 text-sm text-muted-foreground">{p.trustScore} / 100 · {p.surveyorDecision === "verified" ? "Surveyor field verification completed" : "Surveyor field verification pending"}</p>
+          </div>
+          {isOwner && p.surveyorDecision !== "verified" && (
+            <Button onClick={handleSurveyorRequest} disabled={requestingSurveyor || surveyorRequested}>
+              {surveyorRequested || p.surveyorDecision === "pending" ? "Surveyor verification requested" : requestingSurveyor ? "Requesting..." : "Request Surveyor Verification"}
+            </Button>
+          )}
+        </div>
+        <div className="mt-4 grid gap-2 text-xs sm:grid-cols-3">
+          <div className="rounded-lg bg-muted/40 p-3">AI & document verification<br /><span className="font-medium">{p.trustScore > 0 ? "Completed" : "Pending"}</span></div>
+          <div className="rounded-lg bg-muted/40 p-3">GIS boundary<br /><span className="font-medium">{p.boundary.length >= 3 ? "Completed" : "Pending"}</span></div>
+          <div className="rounded-lg bg-muted/40 p-3">Surveyor field verification<br /><span className="font-medium">{p.surveyorDecision === "verified" ? "Completed" : p.surveyorDecision === "correction_required" ? "Requires review" : "Pending"}</span></div>
+        </div>
+      </div>
 
       {isOwner && (
         <div className="flex justify-end">

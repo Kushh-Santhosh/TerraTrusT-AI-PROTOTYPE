@@ -346,6 +346,19 @@ export async function loadSurveyorAssignments(userId?: string): Promise<Property
   }
 }
 
+export async function loadPropertySurveyorAssignment(propertyId: string) {
+  if (!supabaseConfigured) return null;
+  const { data } = await supabase
+    .from("surveyor_assignments")
+    .select("id, status, created_at, updated_at")
+    .eq("property_id", propertyId)
+    .in("status", ["assigned", "in_progress", "submitted"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data ?? null;
+}
+
 /** Loads the latest verification result for a property */
 export async function loadPropertyVerification(propertyId: string) {
   if (!supabaseConfigured) return null;
