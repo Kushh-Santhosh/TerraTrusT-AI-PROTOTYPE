@@ -6,7 +6,67 @@ function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-export type PersistenceOutcome = { error: string | null; persisted: boolean; data?: any };
+export type PersistenceOutcome<T = unknown> = {
+  error: string | null;
+  persisted: boolean;
+  data?: T;
+};
+
+export async function persistPropertyAIAnalysis(input: {
+  propertyId: string;
+  passportId: string;
+  model: string;
+  confidence: number | null;
+  result: object;
+}): Promise<PersistenceOutcome> {
+  if (!supabaseConfigured) return { error: "Supabase not configured", persisted: false };
+
+  try {
+    const { data, error } = await supabase
+      .from("ai_property_analyses")
+      .insert({
+        property_id: input.propertyId,
+        passport_id: input.passportId,
+        model: input.model,
+        confidence: input.confidence,
+        result: input.result,
+      })
+      .select()
+      .single();
+
+    return { error: error?.message ?? null, persisted: !error, data };
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Failed to persist AI analysis",
+      persisted: false,
+    };
+  }
+}
+
+export async function loadLatestPropertyAIAnalysis(propertyId: string): Promise<{
+  error: string | null;
+  data?: {
+    id: string;
+    property_id: string;
+    passport_id: string;
+    model: string;
+    confidence: number | null;
+    result: Record<string, unknown>;
+    created_at: string;
+  };
+}> {
+  if (!supabaseConfigured) return { error: "Supabase not configured" };
+
+  const { data, error } = await supabase
+    .from("ai_property_analyses")
+    .select("id, property_id, passport_id, model, confidence, result, created_at")
+    .eq("property_id", propertyId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return { error: error?.message ?? null, data: data ?? undefined };
+}
 
 /**
  * Creates a new property record in the database
@@ -29,7 +89,7 @@ export async function createProperty(input: {
   area: number;
   status?: "verified" | "pending" | "disputed" | "draft";
   trustScore?: number;
-}): Promise<PersistenceOutcome> {
+}): Promise<PersistenceOutcome<{ id: string; passport_id: string }>> {
   if (!supabaseConfigured) {
     return { error: null, persisted: false };
   }
@@ -306,7 +366,7 @@ export async function persistVerificationOutcome(input: {
           ? "pending"
           : "disputed";
 
-    const updatePayload: Record<string, any> = {
+    const updatePayload: Record<string, unknown> = {
       status: newStatus,
       trust_score: Math.max(0, Math.min(100, Math.round(input.result.confidenceScore ?? 0))),
       updated_at: new Date().toISOString(),
@@ -525,7 +585,9 @@ export async function recordBankLoanApplication(input: {
         notes: input.notes || "Collateral assessed against verified Digital Property Passport",
         status: "underwriting_approved",
       })
-      .select("id, property_id, bank_name, requested_amount_inr, ltv_ratio, applicant_name, notes, status, created_at")
+      .select(
+        "id, property_id, bank_name, requested_amount_inr, ltv_ratio, applicant_name, notes, status, created_at",
+      )
       .single();
 
     if (error) return { error: error.message, persisted: false };
@@ -563,7 +625,7 @@ export async function loadAdminPlatformData() {
         supabase.from("verification_results").select("*", { count: "exact", head: true }),
       ]);
 
-    const activeUsers = (profilesData ?? []).map((p: any) => ({
+    const activeUsers = (profilesData ?? []).map((p: Record<string, string | null>) => ({
       name: p.full_name || p.email?.split("@")[0] || "User",
       email: p.email || "user@terratrust.ai",
       role: p.role ? p.role.charAt(0).toUpperCase() + p.role.slice(1) : "Citizen",

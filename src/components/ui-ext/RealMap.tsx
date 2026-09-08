@@ -159,12 +159,6 @@ export function RealMap({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    if (typeof Map.supported === "function" && !Map.supported()) {
-      console.warn("MapLibre WebGL2 is not supported on this device/browser.");
-      setWebGlError(true);
-      return;
-    }
-
     let map: Map;
     try {
       map = new Map({
@@ -191,7 +185,7 @@ export function RealMap({
         showZoom: true,
         visualizePitch: true,
       }),
-      "top-right"
+      "top-right",
     );
 
     // Add attribution
@@ -200,7 +194,7 @@ export function RealMap({
         compact: false,
         customAttribution: `${getBasemapAttribution()} · User-submitted boundary`,
       }),
-      "bottom-right"
+      "bottom-right",
     );
 
     map.on("load", () => {
@@ -557,17 +551,17 @@ export function RealMap({
         switch (err.code) {
           case err.PERMISSION_DENIED:
             setErrorMsg(
-              "Location permission was denied. You can manually pan, zoom, or search for your property location."
+              "Location permission was denied. You can manually pan, zoom, or search for your property location.",
             );
             break;
           case err.POSITION_UNAVAILABLE:
             setErrorMsg(
-              "Location information is unavailable. Please select your property location manually on the map."
+              "Location information is unavailable. Please select your property location manually on the map.",
             );
             break;
           case err.TIMEOUT:
             setErrorMsg(
-              "The request to obtain your location timed out. Please try again or search by address."
+              "The request to obtain your location timed out. Please try again or search by address.",
             );
             break;
           default:
@@ -579,7 +573,7 @@ export function RealMap({
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 0,
-      }
+      },
     );
   };
 
@@ -595,13 +589,13 @@ export function RealMap({
       // Nominatim search API with countrycodes=in filter for India
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          query
+          query,
         )}&countrycodes=in&addressdetails=1&limit=5`,
         {
           headers: {
             Accept: "application/json",
           },
-        }
+        },
       );
 
       if (!res.ok) {
@@ -616,7 +610,9 @@ export function RealMap({
       }
     } catch (err) {
       setErrorMsg(
-        err instanceof Error ? err.message : "Failed to search location. Check your network connection."
+        err instanceof Error
+          ? err.message
+          : "Failed to search location. Check your network connection.",
       );
     } finally {
       setIsSearching(false);
@@ -666,10 +662,22 @@ export function RealMap({
     const dLat = 0.00045; // ~50m
     const dLng = 0.00045;
     const square: LatLng[] = [
-      { lat: Number((currentLocation.lat - dLat).toFixed(6)), lng: Number((currentLocation.lng - dLng).toFixed(6)) },
-      { lat: Number((currentLocation.lat + dLat).toFixed(6)), lng: Number((currentLocation.lng - dLng).toFixed(6)) },
-      { lat: Number((currentLocation.lat + dLat).toFixed(6)), lng: Number((currentLocation.lng + dLng).toFixed(6)) },
-      { lat: Number((currentLocation.lat - dLat).toFixed(6)), lng: Number((currentLocation.lng + dLng).toFixed(6)) },
+      {
+        lat: Number((currentLocation.lat - dLat).toFixed(6)),
+        lng: Number((currentLocation.lng - dLng).toFixed(6)),
+      },
+      {
+        lat: Number((currentLocation.lat + dLat).toFixed(6)),
+        lng: Number((currentLocation.lng - dLng).toFixed(6)),
+      },
+      {
+        lat: Number((currentLocation.lat + dLat).toFixed(6)),
+        lng: Number((currentLocation.lng + dLng).toFixed(6)),
+      },
+      {
+        lat: Number((currentLocation.lat - dLat).toFixed(6)),
+        lng: Number((currentLocation.lng + dLng).toFixed(6)),
+      },
     ];
     const newArea = calculatePolygonArea(square);
     onChange?.(square, newArea);
@@ -719,7 +727,7 @@ export function RealMap({
       }
 
       setSuccessMsg(
-        `Successfully imported GeoJSON: ${parsed.coords.length} vertices (${parsed.area.toLocaleString()} m²)`
+        `Successfully imported GeoJSON: ${parsed.coords.length} vertices (${parsed.area.toLocaleString()} m²)`,
       );
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Failed to parse GeoJSON file.");
@@ -755,7 +763,7 @@ export function RealMap({
       }
 
       setSuccessMsg(
-        `Successfully imported KML: ${parsed.coords.length} vertices (${parsed.area.toLocaleString()} m²)`
+        `Successfully imported KML: ${parsed.coords.length} vertices (${parsed.area.toLocaleString()} m²)`,
       );
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Failed to parse KML file.");
@@ -818,7 +826,9 @@ export function RealMap({
                     <p className="font-medium text-foreground truncate">
                       {item.display_name.split(",")[0]}
                     </p>
-                    <p className="text-[10px] text-muted-foreground truncate">{item.display_name}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {item.display_name}
+                    </p>
                   </div>
                 </button>
               ))}
@@ -858,7 +868,8 @@ export function RealMap({
             {secondaryBoundary && secondaryBoundary.length >= 3 && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                {secondaryBoundaryLabel} ({calculatePolygonArea(secondaryBoundary).toLocaleString()} m²)
+                {secondaryBoundaryLabel} ({calculatePolygonArea(secondaryBoundary).toLocaleString()}{" "}
+                m²)
               </span>
             )}
             <span className="text-[11px] font-semibold text-foreground">
@@ -867,9 +878,20 @@ export function RealMap({
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-            <span>Perimeter: <strong className="font-mono text-foreground">{perimeter.meters.toLocaleString()} m</strong> ({perimeter.feet.toLocaleString()} ft)</span>
+            <span>
+              Perimeter:{" "}
+              <strong className="font-mono text-foreground">
+                {perimeter.meters.toLocaleString()} m
+              </strong>{" "}
+              ({perimeter.feet.toLocaleString()} ft)
+            </span>
             <span>·</span>
-            <span>Centroid: <strong className="font-mono text-foreground">{centroid.lat.toFixed(4)}°N, {centroid.lng.toFixed(4)}°E</strong></span>
+            <span>
+              Centroid:{" "}
+              <strong className="font-mono text-foreground">
+                {centroid.lat.toFixed(4)}°N, {centroid.lng.toFixed(4)}°E
+              </strong>
+            </span>
           </div>
         </div>
 
@@ -901,7 +923,9 @@ export function RealMap({
                     isDrawing ? "bg-primary text-primary-foreground font-semibold" : ""
                   }`}
                   onClick={() => setIsDrawing(!isDrawing)}
-                  title={isDrawing ? "Click on map to place polygon vertices" : "Start drawing polygon"}
+                  title={
+                    isDrawing ? "Click on map to place polygon vertices" : "Start drawing polygon"
+                  }
                 >
                   <PenTool className="h-3 w-3" />
                   {isDrawing ? "Finish Drawing" : "Draw Boundary"}
@@ -1026,7 +1050,10 @@ export function RealMap({
         <div className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs text-primary font-medium">
           <div className="flex items-center gap-2">
             <PenTool className="h-3.5 w-3.5 animate-pulse" />
-            <span>Drawing Mode: Click anywhere on the real map to add polygon corners. Drag handles to reposition.</span>
+            <span>
+              Drawing Mode: Click anywhere on the real map to add polygon corners. Drag handles to
+              reposition.
+            </span>
           </div>
           <Button
             type="button"
@@ -1093,14 +1120,18 @@ export function RealMap({
               ) : (
                 <div className="text-center py-6 text-xs text-muted-foreground">
                   <p>No boundary coordinates marked yet.</p>
-                  <p className="text-[11px] mt-1">Upload a GeoJSON / KML or use Indian reference survey data.</p>
+                  <p className="text-[11px] mt-1">
+                    Upload a GeoJSON / KML or use Indian reference survey data.
+                  </p>
                 </div>
               )}
             </div>
 
             <div className="flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
-              <span className="font-mono text-[11px]">Area: {stateArea}</span>
-              <span className="font-mono text-[11px]">Perimeter: {perimeter.toLocaleString()} m</span>
+              <span className="font-mono text-[11px]">Area: {stateArea.displayText}</span>
+              <span className="font-mono text-[11px]">
+                Perimeter: {perimeter.toLocaleString()} m
+              </span>
             </div>
           </div>
         ) : (
@@ -1119,7 +1150,8 @@ export function RealMap({
               Vertex #{activeVertexIndex + 1} Selected
             </span>
             <span className="font-mono text-[10px] text-muted-foreground">
-              ({boundary[activeVertexIndex]?.lat.toFixed(5)}, {boundary[activeVertexIndex]?.lng.toFixed(5)})
+              ({boundary[activeVertexIndex]?.lat.toFixed(5)},{" "}
+              {boundary[activeVertexIndex]?.lng.toFixed(5)})
             </span>
             <Button
               type="button"
@@ -1148,12 +1180,20 @@ export function RealMap({
         <div className="flex items-center gap-2">
           <MapPin className="h-3.5 w-3.5 text-primary" />
           <span>
-            Selected Position: <strong className="font-mono text-foreground">{currentLocation.lat.toFixed(6)}° N</strong>,{" "}
-            <strong className="font-mono text-foreground">{currentLocation.lng.toFixed(6)}° E</strong> (WGS84)
+            Selected Position:{" "}
+            <strong className="font-mono text-foreground">
+              {currentLocation.lat.toFixed(6)}° N
+            </strong>
+            ,{" "}
+            <strong className="font-mono text-foreground">
+              {currentLocation.lng.toFixed(6)}° E
+            </strong>{" "}
+            (WGS84)
           </span>
         </div>
         <p className="text-[10px]">
-          Drag pin or click map to update property location. Drag vertex numbers to reshape boundary.
+          Drag pin or click map to update property location. Drag vertex numbers to reshape
+          boundary.
         </p>
       </div>
     </div>

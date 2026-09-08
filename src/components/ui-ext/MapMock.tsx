@@ -39,12 +39,6 @@ export function MapMock({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    if (typeof Map.supported === "function" && !Map.supported()) {
-      console.warn("MapLibre WebGL2 is not supported on this device/browser.");
-      setWebGlError(true);
-      return;
-    }
-
     const initialCenter =
       activeProp?.coords && activeProp.coords.lat !== 0
         ? activeProp.coords
@@ -75,7 +69,7 @@ export function MapMock({
         compact: false,
         customAttribution: getBasemapAttribution(),
       }),
-      "bottom-right"
+      "bottom-right",
     );
 
     map.on("load", () => {
@@ -133,7 +127,7 @@ export function MapMock({
     map: Map,
     propsList: Property[],
     hId?: string,
-    selectFn?: (p: Property) => void
+    selectFn?: (p: Property) => void,
   ) {
     // Clear old markers
     markersRef.current.forEach((m) => m.remove());
@@ -167,9 +161,7 @@ export function MapMock({
         selectFn?.(p);
       });
 
-      const marker = new Marker({ element: el })
-        .setLngLat([p.coords.lng, p.coords.lat])
-        .addTo(map);
+      const marker = new Marker({ element: el }).setLngLat([p.coords.lng, p.coords.lat]).addTo(map);
 
       markersRef.current.push(marker);
     });
@@ -216,7 +208,7 @@ export function MapMock({
       <div
         className={cn(
           "surface-card relative overflow-hidden rounded-xl border border-border bg-muted/20 p-6 flex flex-col justify-between",
-          className
+          className,
         )}
         style={{ height }}
       >
@@ -233,7 +225,9 @@ export function MapMock({
             </div>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface border border-border text-muted-foreground">
-            {activeProp?.coords ? `${activeProp.coords.lat.toFixed(4)}°N, ${activeProp.coords.lng.toFixed(4)}°E` : "GPS Active"}
+            {activeProp?.coords
+              ? `${activeProp.coords.lat.toFixed(4)}°N, ${activeProp.coords.lng.toFixed(4)}°E`
+              : "GPS Active"}
           </span>
         </div>
 
@@ -243,16 +237,28 @@ export function MapMock({
             <div className="absolute inset-2 border border-primary/30 rounded-lg bg-primary/10 flex items-center justify-center">
               <MapPin className="h-6 w-6 text-primary animate-bounce" />
             </div>
-            <div className="absolute top-1 left-2 text-[9px] font-mono text-primary/80">Vertex 1</div>
-            <div className="absolute top-1 right-2 text-[9px] font-mono text-primary/80">Vertex 2</div>
-            <div className="absolute bottom-1 right-2 text-[9px] font-mono text-primary/80">Vertex 3</div>
-            <div className="absolute bottom-1 left-2 text-[9px] font-mono text-primary/80">Vertex 4</div>
+            <div className="absolute top-1 left-2 text-[9px] font-mono text-primary/80">
+              Vertex 1
+            </div>
+            <div className="absolute top-1 right-2 text-[9px] font-mono text-primary/80">
+              Vertex 2
+            </div>
+            <div className="absolute bottom-1 right-2 text-[9px] font-mono text-primary/80">
+              Vertex 3
+            </div>
+            <div className="absolute bottom-1 left-2 text-[9px] font-mono text-primary/80">
+              Vertex 4
+            </div>
           </div>
           <p className="mt-3 text-xs font-medium text-foreground">
-            {activeProp?.area ? `${activeProp.area.toLocaleString()} sq ft` : "Boundary Geometry Recorded"}
+            {activeProp?.area
+              ? `${activeProp.area.toLocaleString()} sq ft`
+              : "Boundary Geometry Recorded"}
           </p>
           <p className="text-[11px] text-muted-foreground">
-            {activeProp?.boundary?.length ? `${activeProp.boundary.length} boundary coordinates saved` : "Georeferenced Polygon"}
+            {activeProp?.boundary?.length
+              ? `${activeProp.boundary.length} boundary coordinates saved`
+              : "Georeferenced Polygon"}
           </p>
         </div>
 
@@ -270,7 +276,7 @@ export function MapMock({
     <div
       className={cn(
         "surface-card relative overflow-hidden rounded-xl border border-border shadow-inner",
-        className
+        className,
       )}
       style={{ height }}
     >
