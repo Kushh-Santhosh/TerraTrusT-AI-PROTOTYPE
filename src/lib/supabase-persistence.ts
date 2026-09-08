@@ -510,40 +510,23 @@ export async function recordBankLoanApplication(input: {
     const target = await resolvePropertyId(input.propertyId);
     if (!target.id) return { error: target.error, persisted: false };
 
-    const { data: prop } = await supabase
-      .from("properties")
-      .select("location")
-      .eq("id", target.id)
-      .single();
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session?.user.id) return { error: "Bank session expired", persisted: false };
 
-    const currentLoc = prop?.location && typeof prop.location === "object" ? prop.location : {};
-    const existingLoans = Array.isArray(currentLoc.loanApplications)
-      ? currentLoc.loanApplications
-      : [];
-
-    const newLoan = {
-      id: `loan_${Date.now().toString(36)}`,
-      bankName: input.bankName,
-      requestedAmountInr: input.requestedAmountInr,
-      ltvRatio: input.ltvRatio,
-      applicantName: input.applicantName,
-      notes: input.notes || "Collateral assessed against verified Digital Property Passport",
-      status: "underwriting_approved",
-      appliedAt: new Date().toISOString(),
-    };
-
-    const updatedLocation = {
-      ...currentLoc,
-      loanApplications: [newLoan, ...existingLoans],
-    };
-
-    const { error } = await supabase
-      .from("properties")
-      .update({
-        location: updatedLocation,
-        updated_at: new Date().toISOString(),
+    const { data: newLoan, error } = await supabase
+      .from("bank_loan_applications")
+      .insert({
+        property_id: target.id,
+        created_by: session.session.user.id,
+        bank_name: input.bankName,
+        requested_amount_inr: input.requestedAmountInr,
+        ltv_ratio: input.ltvRatio,
+        applicant_name: input.applicantName,
+        notes: input.notes || "Collateral assessed against verified Digital Property Passport",
+        status: "underwriting_approved",
       })
-      .eq("id", target.id);
+      .select("id, property_id, bank_name, requested_amount_inr, ltv_ratio, applicant_name, notes, status, created_at")
+      .single();
 
     if (error) return { error: error.message, persisted: false };
     return { error: null, persisted: true, data: newLoan };

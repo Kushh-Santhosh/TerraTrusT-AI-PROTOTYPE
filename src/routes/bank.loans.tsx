@@ -1,21 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { Crumbs, DataTable, KpiRow, Pill } from "@/components/ui-ext/Scaffold";
+import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/bank/loans")({
   head: () => ({ meta: [{ title: "Loan Book — TerraTrust AI" }] }),
   component: Page,
 });
 
-const loans = [
-  { id: "LN-2241", parcel: "KA-BLR-0412", borrower: "Vikram Malhotra", principal: "₹1,45,00,000", outstanding: "₹1,32,00,000", rate: "8.75%", status: "Performing", since: "2024-04-12" },
-  { id: "LN-2238", parcel: "MH-PUN-0891", borrower: "Sunita Sharma", principal: "₹2,20,00,000", outstanding: "₹1,98,40,000", rate: "8.90%", status: "Performing", since: "2024-03-30" },
-  { id: "LN-2210", parcel: "KA-MYS-0143", borrower: "Deepak Rao", principal: "₹65,00,000", outstanding: "₹59,20,000", rate: "9.15%", status: "Performing", since: "2024-02-12" },
-  { id: "LN-2188", parcel: "DL-GUR-0518", borrower: "Rajesh Singhania", principal: "₹4,10,00,000", outstanding: "₹3,88,00,000", rate: "8.65%", status: "Watch", since: "2023-12-04" },
-  { id: "LN-2104", parcel: "KA-BLR-0992", borrower: "Anil Kulkarni", principal: "₹85,00,000", outstanding: "₹79,12,000", rate: "9.50%", status: "Default", since: "2023-08-19" },
-];
-
 function Page() {
+  const [loans, setLoans] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("bank_loan_applications")
+      .select("id, property_id, applicant_name, requested_amount_inr, ltv_ratio, status, created_at, properties(passport_id)")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setLoans((data ?? []).map((loan) => ({
+          id: loan.id,
+          parcel: loan.properties?.passport_id ?? loan.property_id,
+          borrower: loan.applicant_name,
+          principal: `₹${Number(loan.requested_amount_inr).toLocaleString("en-IN")}`,
+          outstanding: "Pending underwriting",
+          rate: `${loan.ltv_ratio}% LTV`,
+          status: loan.status === "underwriting_approved" ? "Approved" : loan.status,
+          since: loan.created_at.slice(0, 10),
+        })));
+      });
+  }, []);
+
   return (
     <AppShell
       title="Loan book"
