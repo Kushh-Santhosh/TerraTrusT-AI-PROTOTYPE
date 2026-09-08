@@ -35,6 +35,7 @@ import { Route as MobileRouteImport } from './routes/mobile'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LoadingRouteImport } from './routes/loading'
+import { Route as LandRiskSearchRouteImport } from './routes/land-risk-search'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as ImpactRouteImport } from './routes/impact'
 import { Route as HelpRouteImport } from './routes/help'
@@ -249,6 +250,11 @@ const LoginRoute = LoginRouteImport.update({
 const LoadingRoute = LoadingRouteImport.update({
   id: '/loading',
   path: '/loading',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandRiskSearchRoute = LandRiskSearchRouteImport.update({
+  id: '/land-risk-search',
+  path: '/land-risk-search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegrationsRoute = IntegrationsRouteImport.update({
@@ -717,6 +723,7 @@ export interface FileRoutesByFullPath {
   '/help': typeof HelpRoute
   '/impact': typeof ImpactRoute
   '/integrations': typeof IntegrationsRoute
+  '/land-risk-search': typeof LandRiskSearchRoute
   '/loading': typeof LoadingRoute
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
@@ -825,6 +832,7 @@ export interface FileRoutesByTo {
   '/help': typeof HelpRoute
   '/impact': typeof ImpactRoute
   '/integrations': typeof IntegrationsRoute
+  '/land-risk-search': typeof LandRiskSearchRoute
   '/loading': typeof LoadingRoute
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
@@ -934,6 +942,7 @@ export interface FileRoutesById {
   '/help': typeof HelpRoute
   '/impact': typeof ImpactRoute
   '/integrations': typeof IntegrationsRoute
+  '/land-risk-search': typeof LandRiskSearchRoute
   '/loading': typeof LoadingRoute
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
@@ -1049,6 +1058,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/impact'
     | '/integrations'
+    | '/land-risk-search'
     | '/loading'
     | '/login'
     | '/map'
@@ -1157,6 +1167,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/impact'
     | '/integrations'
+    | '/land-risk-search'
     | '/loading'
     | '/login'
     | '/map'
@@ -1265,6 +1276,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/impact'
     | '/integrations'
+    | '/land-risk-search'
     | '/loading'
     | '/login'
     | '/map'
@@ -1379,6 +1391,7 @@ export interface RootRouteChildren {
   HelpRoute: typeof HelpRoute
   ImpactRoute: typeof ImpactRoute
   IntegrationsRoute: typeof IntegrationsRoute
+  LandRiskSearchRoute: typeof LandRiskSearchRoute
   LoadingRoute: typeof LoadingRoute
   LoginRoute: typeof LoginRoute
   MapRoute: typeof MapRoute
@@ -1589,6 +1602,13 @@ declare module '@tanstack/react-router' {
       path: '/loading'
       fullPath: '/loading'
       preLoaderRoute: typeof LoadingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/land-risk-search': {
+      id: '/land-risk-search'
+      path: '/land-risk-search'
+      fullPath: '/land-risk-search'
+      preLoaderRoute: typeof LandRiskSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/integrations': {
@@ -2423,6 +2443,7 @@ const rootRouteChildren: RootRouteChildren = {
   HelpRoute: HelpRoute,
   ImpactRoute: ImpactRoute,
   IntegrationsRoute: IntegrationsRoute,
+  LandRiskSearchRoute: LandRiskSearchRoute,
   LoadingRoute: LoadingRoute,
   LoginRoute: LoginRoute,
   MapRoute: MapRoute,
