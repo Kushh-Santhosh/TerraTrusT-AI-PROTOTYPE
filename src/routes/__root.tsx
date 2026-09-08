@@ -13,7 +13,6 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { DemoModeProvider } from "@/lib/demo-mode";
 import { AuthProvider } from "@/lib/auth";
-import { AssistantProvider } from "@/context/AssistantContext";
 import AparsoftChatbot from "@/components/AparsoftChatbot";
 
 function NotFoundComponent() {
@@ -107,11 +106,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <DemoModeProvider>
-          <AssistantProvider>
-            <Outlet />
-            <AparsoftChatbot />
-            <Toaster position="top-right" />
-          </AssistantProvider>
+          <Outlet />
+          <AparsoftChatbot />
+          <Toaster position="top-right" />
         </DemoModeProvider>
       </AuthProvider>
     </QueryClientProvider>

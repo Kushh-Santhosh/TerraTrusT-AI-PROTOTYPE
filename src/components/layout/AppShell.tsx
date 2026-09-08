@@ -17,7 +17,6 @@ import {
   HelpCircle,
   LogOut,
   Search,
-  MessageSquare,
   FileText,
   Gavel,
   ShieldAlert,
@@ -35,6 +34,7 @@ import {
   FolderLock,
   Shield,
   CheckCircle2,
+  MessageSquare,
   ChevronDown,
   Menu,
   X,
@@ -82,7 +82,6 @@ export const citizenNav: NavGroup[] = [
       { to: "/ai-satellite", label: "Satellite Compare", icon: Satellite },
       { to: "/ai-land-health", label: "Land Health", icon: Leaf },
       { to: "/ai-risk", label: "Risk Analysis", icon: Activity },
-      { to: "/assistant", label: "AI Assistant", icon: MessageSquare },
     ],
   },
   {

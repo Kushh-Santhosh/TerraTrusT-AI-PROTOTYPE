@@ -26,24 +26,36 @@ interface LoaderConfig {
   welcomeMessage?: string;
 }
 
+function getAparsoftConfig(): LoaderConfig | null {
+  const apiKey = (import.meta.env.VITE_APARSOFT_WIDGET_KEY as string | undefined)?.trim();
+  const configuredWidgetUrl = (import.meta.env.VITE_APARSOFT_WIDGET_SCRIPT_URL as string | undefined)?.trim();
+
+  if (!apiKey) return null;
+
+  const resolvedScriptUrl = configuredWidgetUrl || WIDGET_SCRIPT_URL;
+
+  return {
+    apiKey,
+    position: "bottom-right",
+    showBranding: true,
+    autoOpenDelayMs: 0,
+    configEndpoint: `https://www.aparsoft.com/api/v1/chatbot/public/widget/${encodeURIComponent(apiKey)}/config/`,
+    websocketUrl: "wss://www.aparsoft.com/ws/client-chatbot/",
+    primaryColor: "#1d4ed8",
+    secondaryColor: "#0f766e",
+    widgetTitle: "TerraTrust Support",
+    title: "TerraTrust Support",
+    widgetSubtitle: "Powered by Aparsoft",
+    welcomeMessage: "Hello! How can we help with your TerraTrust property workflows today?",
+  };
+}
+
 export default function AparsoftChatbot() {
   useEffect(() => {
-    const loaderConfig: LoaderConfig = {
-      apiKey: "sha256$979682ca8ffb0a33f5840bd839f7ea513c652ff0f814d3e3b5b76f22e868e422",
-      position: "bottom-right",
-      showBranding: true,
-      autoOpenDelayMs: 0,
-      configEndpoint: "https://www.aparsoft.com/api/v1/chatbot/public/widget/{apiKey}/config/",
-      websocketUrl: "wss://www.aparsoft.com/ws/client-chatbot/",
-      primaryColor: "#1d4ed8",
-      secondaryColor: "#0f766e",
-      widgetTitle: "TerraTrust AI Assistant",
-      title: "TerraTrust AI Assistant",
-      widgetSubtitle: "Powered by Aparsoft AI",
-      welcomeMessage: "Hello! How can I assist you with TerraTrust land records and property verification today?",
-    };
-    const encodedApiKey = encodeURIComponent(loaderConfig.apiKey);
-    loaderConfig.configEndpoint = `https://www.aparsoft.com/api/v1/chatbot/public/widget/${encodedApiKey}/config/`;
+    const runtimeConfig = getAparsoftConfig();
+    if (!runtimeConfig) {
+      return undefined;
+    }
 
     const applyLoaderDataset = (script: HTMLScriptElement, runtimeConfig: LoaderConfig) => {
       script.dataset.aparsoftChatbot = "true";
@@ -78,7 +90,12 @@ export default function AparsoftChatbot() {
     const script = document.createElement("script");
     script.src = WIDGET_SCRIPT_URL;
     script.async = true;
-    applyLoaderDataset(script, loaderConfig);
+    script.dataset.aparsoftChatbot = "true";
+    script.dataset.apiKey = runtimeConfig.apiKey;
+    script.dataset.position = runtimeConfig.position || "bottom-right";
+    script.dataset.showBranding = String(runtimeConfig.showBranding ?? true);
+    script.dataset.configEndpoint = runtimeConfig.configEndpoint || "";
+    if (runtimeConfig.websocketUrl) script.dataset.websocketUrl = runtimeConfig.websocketUrl;
     document.body.appendChild(script);
 
     return () => {

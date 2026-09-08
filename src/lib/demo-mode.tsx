@@ -47,11 +47,6 @@ const STEPS: DemoStep[] = [
     body: "Verification completion, fraud heatmaps, regional trust scores, processing time — at a glance.",
   },
   {
-    to: "/assistant",
-    title: "Conversational AI",
-    body: "Ask about any property in plain English. Answers are grounded in the same engines you just saw.",
-  },
-  {
     to: "/impact",
     title: "National impact",
     body: "From 52 days to 5. From 78% less fraud to ₹1,500 Cr in annual savings — the case for a national rollout, in one page.",
