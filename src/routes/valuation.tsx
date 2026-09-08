@@ -58,7 +58,7 @@ function ValuationPage() {
     let cancelled = false;
     async function loadStoredAnalysis() {
       if (!selectedProperty) return;
-      const stored = await loadLatestPropertyAIAnalysis(selectedProperty.id);
+      const stored = await loadLatestPropertyAIAnalysis(selectedProperty.id, "valuation");
       if (cancelled || !stored.data) return;
       setAnalysis(stored.data.result as unknown as PropertyAIAnalysis);
     }

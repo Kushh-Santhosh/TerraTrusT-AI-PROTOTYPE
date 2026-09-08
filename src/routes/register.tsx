@@ -63,7 +63,14 @@ function RegisterPage() {
     <AuthLayout
       title="Create your account"
       subtitle="Register as a property owner or citizen to manage your Property Passports."
-      footer={<>Already have an account? <Link to="/login" className="font-medium text-primary">Sign in</Link></>}
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link to="/login" className="font-medium text-primary">
+            Sign in
+          </Link>
+        </>
+      }
     >
       {configError && (
         <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-400">
@@ -78,20 +85,6 @@ function RegisterPage() {
       )}
 
       <form onSubmit={handleSubmit} className="grid gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          className="h-11"
-          onClick={() => toast.info("Google sign-in will be enabled upon provider setup.")}
-        >
-          Continue with Google
-        </Button>
-
-        <div className="relative my-1 text-center text-[11px] uppercase tracking-wider text-muted-foreground">
-          <span className="bg-background px-2 relative z-10">or with email</span>
-          <span className="absolute left-0 top-1/2 h-px w-full bg-border" />
-        </div>
-
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-2">
             <Label htmlFor="reg-first-name">First name *</Label>
@@ -101,7 +94,7 @@ function RegisterPage() {
               className="h-11"
               placeholder="First name"
               value={firstName}
-              onChange={e => setFirstName(e.target.value)}
+              onChange={(e) => setFirstName(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
@@ -111,7 +104,7 @@ function RegisterPage() {
               className="h-11"
               placeholder="Last name"
               value={lastName}
-              onChange={e => setLastName(e.target.value)}
+              onChange={(e) => setLastName(e.target.value)}
             />
           </div>
         </div>
@@ -125,7 +118,7 @@ function RegisterPage() {
             className="h-11"
             placeholder="you@email.com"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
@@ -139,7 +132,7 @@ function RegisterPage() {
             className="h-11"
             placeholder="Create password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
@@ -150,20 +143,36 @@ function RegisterPage() {
             className="h-11"
             placeholder="e.g. Karnataka, India"
             value={region}
-            onChange={e => setRegion(e.target.value)}
+            onChange={(e) => setRegion(e.target.value)}
           />
         </div>
 
         <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">Note:</span> Public accounts are registered with the <span className="font-semibold text-primary">Citizen</span> role. Surveyor, Government, Bank, and Admin privileges require institutional credentialing.
+          <span className="font-medium text-foreground">Note:</span> Public accounts are registered
+          with the <span className="font-semibold text-primary">Citizen</span> role. Surveyor,
+          Government, Bank, and Admin privileges require institutional credentialing.
         </div>
 
         <Button type="submit" className="h-11" disabled={submitting}>
-          {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : "Create citizen account"}
+          {submitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...
+            </>
+          ) : (
+            "Create citizen account"
+          )}
         </Button>
 
         <p className="text-center text-xs text-muted-foreground">
-          By continuing you agree to our <Link to="/terms" className="underline">Terms</Link> and <Link to="/privacy" className="underline">Privacy Policy</Link>.
+          By continuing you agree to our{" "}
+          <Link to="/terms" className="underline">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link to="/privacy" className="underline">
+            Privacy Policy
+          </Link>
+          .
         </p>
       </form>
     </AuthLayout>

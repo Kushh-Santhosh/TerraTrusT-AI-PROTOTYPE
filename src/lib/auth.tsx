@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, supabaseConfigured } from "./supabase";
+import { signInDemoAccount } from "./demo-auth-server";
 
 export type Role = "citizen" | "surveyor" | "government" | "bank" | "admin";
 
@@ -58,6 +59,7 @@ interface AuthContextValue {
   isRecoverySession: boolean;
   configError: string | null;
   signIn: (email: string, password: string) => Promise<{ error: string | null; role: Role | null }>;
+  signInDemo: (role: Role) => Promise<{ error: string | null; role: Role | null }>;
   signUp: (input: {
     email: string;
     password: string;
@@ -202,6 +204,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { error: null, role: "citizen" };
+    },
+
+    async signInDemo(role) {
+      if (configError) return { error: configError, role: null };
+      const result = await signInDemoAccount({ data: { role } });
+      if (result.error || !result.session) return { error: result.error, role: null };
+
+      const { data, error } = await supabase.auth.setSession(result.session);
+      if (error || !data.user)
+        return { error: error?.message ?? "Demo session was not established.", role: null };
+      setSession(data.session);
+      await loadProfile(data.user);
+      const { data: profileRow } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      const resolvedRole = normalizeRole(profileRow?.role ?? data.user.user_metadata?.role);
+      if (resolvedRole !== role) {
+        await supabase.auth.signOut({ scope: "local" });
+        setSession(null);
+        setProfile(null);
+        return { error: `Demo account profile role mismatch: expected ${role}.`, role: null };
+      }
+      return { error: null, role: resolvedRole };
     },
 
     async signUp({ email, password, fullName, region }) {

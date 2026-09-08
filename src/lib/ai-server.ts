@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { Property } from "./types";
 
-const DEFAULT_MODEL = "gemini-3.8-flash";
+const DEFAULT_MODEL = "gemini-3.6-flash";
 
 export interface PropertyAIAnalysis {
+  feature?: "valuation";
   estimatedValueINR: number | null;
   valueRangeINR: { low: number | null; high: number | null };
   pricePerSqFtINR: number | null;
@@ -25,6 +26,40 @@ export interface PropertyAIAnalysis {
 
 export type PropertyAIResult =
   | { ok: true; analysis: PropertyAIAnalysis }
+  | { ok: false; error: "AI_UNAVAILABLE" | "AI_INVALID_RESPONSE"; message: string };
+
+export type PropertyFeature =
+  | "fraud"
+  | "risk"
+  | "ocr"
+  | "summary"
+  | "recommendations"
+  | "passport"
+  | "boundary"
+  | "timeline"
+  | "suggestions"
+  | "land-health"
+  | "valuation"
+  | "confidence"
+  | "satellite";
+
+export interface FeatureAIAnalysis {
+  feature: PropertyFeature;
+  title: string;
+  summary: string;
+  score: number | null;
+  band: string;
+  findings: string[];
+  evidence: string[];
+  recommendations: string[];
+  missingEvidence: string[];
+  confidence: number | null;
+  generatedAt: string;
+  model: string;
+}
+
+export type FeatureAIResult =
+  | { ok: true; analysis: FeatureAIAnalysis }
   | { ok: false; error: "AI_UNAVAILABLE" | "AI_INVALID_RESPONSE"; message: string };
 
 const responseSchema = {
@@ -77,6 +112,26 @@ function strings(value: unknown): string[] {
     : [];
 }
 
+async function requestGemini(
+  model: string,
+  apiKey: string,
+  body: Record<string, unknown>,
+): Promise<Response> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (response.ok || ![429, 500, 502, 503, 504].includes(response.status) || attempt === 2) {
+      return response;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
+  }
+  throw new Error("Gemini request retry loop ended unexpectedly");
+}
+
 function normalizeAnalysis(value: unknown, model: string): PropertyAIAnalysis | null {
   if (!value || typeof value !== "object") return null;
   const raw = value as Record<string, unknown>;
@@ -88,6 +143,7 @@ function normalizeAnalysis(value: unknown, model: string): PropertyAIAnalysis | 
     return null;
   const confidence = numberOrNull(raw.confidence);
   return {
+    feature: "valuation",
     estimatedValueINR: numberOrNull(raw.estimatedValueINR),
     valueRangeINR: {
       low: numberOrNull(raw.lowEstimateINR),
@@ -140,6 +196,120 @@ function propertyEvidence(property: Property): Record<string, unknown> {
   };
 }
 
+const featureSchema = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    summary: { type: "string" },
+    score: { type: "number", nullable: true },
+    band: { type: "string" },
+    findings: { type: "array", items: { type: "string" } },
+    evidence: { type: "array", items: { type: "string" } },
+    recommendations: { type: "array", items: { type: "string" } },
+    missingEvidence: { type: "array", items: { type: "string" } },
+    confidence: { type: "number", nullable: true },
+  },
+  required: [
+    "title",
+    "summary",
+    "score",
+    "band",
+    "findings",
+    "evidence",
+    "recommendations",
+    "missingEvidence",
+    "confidence",
+  ],
+} as const;
+
+export const analyzePropertyFeatureWithAI = createServerFn({ method: "POST" })
+  .validator((input: { property: Property; feature: PropertyFeature }) => input)
+  .handler(async ({ data }): Promise<FeatureAIResult> => {
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!apiKey || apiKey === "PASTE_YOUR_GEMINI_KEY_HERE") {
+      return {
+        ok: false,
+        error: "AI_UNAVAILABLE",
+        message: "AI analysis temporarily unavailable.",
+      };
+    }
+    const model = process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
+    const prompt = [
+      "You are TerraTrust AI. Analyze only the supplied property evidence.",
+      `Perform the ${data.feature} analysis requested. Never invent records, owners, OCR fields, coordinates, timeline events, or fraud accusations.`,
+      "When evidence is missing, say Insufficient evidence and list what is missing. AI interpretation is not legal title or government verification.",
+      `Return JSON matching the schema. Property evidence:\n${JSON.stringify(propertyEvidence(data.property))}`,
+    ].join("\n\n");
+    try {
+      const response = await requestGemini(model, apiKey, {
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: featureSchema,
+          temperature: 0.1,
+          maxOutputTokens: 2400,
+        },
+      });
+      if (!response.ok) {
+        return {
+          ok: false,
+          error: "AI_UNAVAILABLE",
+          message: `AI provider returned HTTP ${response.status}.`,
+        };
+      }
+      const payload = (await response.json()) as {
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      };
+      const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text)
+        return {
+          ok: false,
+          error: "AI_INVALID_RESPONSE",
+          message: "AI provider returned no structured analysis.",
+        };
+      const raw = JSON.parse(text) as Record<string, unknown>;
+      if (
+        typeof raw.title !== "string" ||
+        typeof raw.summary !== "string" ||
+        !Array.isArray(raw.findings)
+      ) {
+        return {
+          ok: false,
+          error: "AI_INVALID_RESPONSE",
+          message: "AI provider returned an invalid analysis shape.",
+        };
+      }
+      const confidence = numberOrNull(raw.confidence);
+      return {
+        ok: true,
+        analysis: {
+          feature: data.feature,
+          title: raw.title,
+          summary: raw.summary,
+          score: numberOrNull(raw.score),
+          band: typeof raw.band === "string" ? raw.band : "Insufficient evidence",
+          findings: strings(raw.findings),
+          evidence: strings(raw.evidence),
+          recommendations: strings(raw.recommendations),
+          missingEvidence: strings(raw.missingEvidence),
+          confidence: confidence !== null && confidence <= 1 ? confidence * 100 : confidence,
+          generatedAt: new Date().toISOString(),
+          model,
+        },
+      };
+    } catch (error) {
+      console.error(
+        "Gemini feature analysis failed",
+        error instanceof Error ? error.message : "unknown error",
+      );
+      return {
+        ok: false,
+        error: "AI_UNAVAILABLE",
+        message: "AI analysis temporarily unavailable.",
+      };
+    }
+  });
+
 export const analyzePropertyWithAI = createServerFn({ method: "POST" })
   .validator((property: Property) => property)
   .handler(async ({ data: property }): Promise<PropertyAIResult> => {
@@ -163,22 +333,15 @@ export const analyzePropertyWithAI = createServerFn({ method: "POST" })
     ].join("\n\n");
 
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              responseSchema,
-              temperature: 0.1,
-              maxOutputTokens: 1800,
-            },
-          }),
+      const response = await requestGemini(model, apiKey, {
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema,
+          temperature: 0.1,
+          maxOutputTokens: 1800,
         },
-      );
+      });
 
       if (!response.ok) {
         return {

@@ -43,7 +43,10 @@ export async function persistPropertyAIAnalysis(input: {
   }
 }
 
-export async function loadLatestPropertyAIAnalysis(propertyId: string): Promise<{
+export async function loadLatestPropertyAIAnalysis(
+  propertyId: string,
+  feature?: string,
+): Promise<{
   error: string | null;
   data?: {
     id: string;
@@ -57,13 +60,14 @@ export async function loadLatestPropertyAIAnalysis(propertyId: string): Promise<
 }> {
   if (!supabaseConfigured) return { error: "Supabase not configured" };
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("ai_property_analyses")
     .select("id, property_id, passport_id, model, confidence, result, created_at")
     .eq("property_id", propertyId)
     .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+  if (feature) query = query.eq("result->>feature", feature);
+  const { data, error } = await query.maybeSingle();
 
   return { error: error?.message ?? null, data: data ?? undefined };
 }

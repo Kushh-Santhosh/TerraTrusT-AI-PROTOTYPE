@@ -4,31 +4,17 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth, roleHome } from "@/lib/auth";
+import { useAuth, roleHome, type Role } from "@/lib/auth";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-const localTestAccounts = import.meta.env.DEV
-  ? [
-      [
-        "Demo Citizen",
-        import.meta.env.VITE_TEST_CITIZEN_EMAIL,
-        import.meta.env.VITE_TEST_CITIZEN_PASSWORD,
-      ],
-      [
-        "Demo Government",
-        import.meta.env.VITE_TEST_GOVERNMENT_EMAIL,
-        import.meta.env.VITE_TEST_GOVERNMENT_PASSWORD,
-      ],
-      [
-        "Demo Surveyor",
-        import.meta.env.VITE_TEST_SURVEYOR_EMAIL,
-        import.meta.env.VITE_TEST_SURVEYOR_PASSWORD,
-      ],
-      ["Demo Bank", import.meta.env.VITE_TEST_BANK_EMAIL, import.meta.env.VITE_TEST_BANK_PASSWORD],
-      ["Demo Admin", import.meta.env.VITE_TEST_ADMIN_EMAIL, import.meta.env.VITE_TEST_ADMIN_PASSWORD],
-    ].filter((account): account is [string, string, string] => Boolean(account[1] && account[2]))
-  : [];
+const demoAccounts: Array<[string, Role]> = [
+  ["Citizen", "citizen"],
+  ["Government", "government"],
+  ["Surveyor", "surveyor"],
+  ["Bank", "bank"],
+  ["Admin", "admin"],
+];
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — TerraTrust AI" }] }),
@@ -37,7 +23,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { signIn, configError } = useAuth();
+  const { signIn, signInDemo, configError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -67,10 +53,10 @@ function LoginPage() {
     navigate({ to: destination });
   };
 
-  const handleLocalTestSignIn = async (role: string, testEmail: string, testPassword: string) => {
+  const handleDemoSignIn = async (label: string, role: Role) => {
     setSubmitting(true);
     setErrorMsg(null);
-    const result = await signIn(testEmail, testPassword);
+    const result = await signInDemo(role);
     setSubmitting(false);
     if (result.error) {
       setErrorMsg(result.error);
@@ -78,7 +64,7 @@ function LoginPage() {
       return;
     }
     const destination = roleHome(result.role || "citizen");
-    toast.success(`Signed in as ${role} via Supabase Auth`);
+    toast.success(`Signed in as Demo ${label} via Supabase Auth`);
     navigate({ to: destination });
   };
 
@@ -108,16 +94,6 @@ function LoginPage() {
       )}
 
       <form onSubmit={handleSubmit} className="grid gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          className="h-11"
-          onClick={() =>
-            toast.info("Google OAuth will be enabled upon provider setup in Supabase.")
-          }
-        >
-          <GoogleIcon /> Continue with Google
-        </Button>
         <div className="relative my-1 text-center text-[11px] uppercase tracking-wider text-muted-foreground">
           <span className="bg-background px-2 relative z-10">or with email</span>
           <span className="absolute left-0 top-1/2 h-px w-full bg-border" />
@@ -166,59 +142,34 @@ function LoginPage() {
         </Button>
       </form>
 
-      {localTestAccounts.length > 0 && (
-        <div className="mt-6 rounded-lg border border-dashed border-primary/40 bg-muted/30 p-4 text-xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-foreground tracking-wide uppercase text-[11px]">
-              Demo / Test Access
-            </span>
-            <span className="text-[10px] text-muted-foreground">Real Supabase Auth</span>
-          </div>
-          <p className="text-[11px] text-muted-foreground mb-3">
-            Click any stakeholder below to perform real Supabase authentication and route to the
-            corresponding workspace:
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {localTestAccounts.map(([role, testEmail, testPassword]) => (
-              <Button
-                key={role}
-                id={`test-login-${role.toLowerCase().replace(/\s+/g, "-")}`}
-                type="button"
-                variant="outline"
-                size="sm"
-                className="font-medium text-xs h-8 border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors"
-                disabled={submitting}
-                onClick={() => handleLocalTestSignIn(role, testEmail, testPassword)}
-              >
-                Continue as {role}
-              </Button>
-            ))}
-          </div>
+      <div className="mt-6 rounded-lg border border-dashed border-primary/40 bg-muted/30 p-4 text-xs">
+        <div className="flex items-center justify-between mb-2">
+          <span className="font-semibold text-foreground tracking-wide uppercase text-[11px]">
+            Demo / Test Access
+          </span>
+          <span className="text-[10px] text-muted-foreground">Real Supabase Auth</span>
         </div>
-      )}
+        <p className="text-[11px] text-muted-foreground mb-3">
+          Click any stakeholder below to perform real Supabase authentication and route to the
+          corresponding workspace:
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {demoAccounts.map(([label, role]) => (
+            <Button
+              key={role}
+              id={`test-login-demo-${role}`}
+              type="button"
+              variant="outline"
+              size="sm"
+              className="font-medium text-xs h-8 border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors"
+              disabled={submitting}
+              onClick={() => handleDemoSignIn(label, role)}
+            >
+              Continue as {label}
+            </Button>
+          ))}
+        </div>
+      </div>
     </AuthLayout>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="mr-2 h-4 w-4">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.99.66-2.25 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.11A6.6 6.6 0 0 1 5.5 12c0-.73.13-1.45.34-2.11V7.05H2.18A11 11 0 0 0 1 12c0 1.78.43 3.46 1.18 4.95l3.66-2.84z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.07.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"
-      />
-    </svg>
   );
 }

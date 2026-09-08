@@ -31,8 +31,8 @@ console.log("==================================================================\
 let allPassed = true;
 
 for (const role of roles) {
-  const email = env[`VITE_TEST_${role}_EMAIL`];
-  const password = env[`VITE_TEST_${role}_PASSWORD`];
+  const email = env[`DEMO_${role}_EMAIL`];
+  const password = env[`DEMO_${role}_PASSWORD`];
   const expectedRole = role.toLowerCase();
 
   if (!email || !password) {
@@ -43,13 +43,13 @@ for (const role of roles) {
 
   // Create clean isolated client
   const client = createClient(supabaseUrl, supabaseKey, {
-    auth: { autoRefreshToken: false, persistSession: false }
+    auth: { autoRefreshToken: false, persistSession: false },
   });
 
   // 1. Sign In
   const { data: authData, error: authErr } = await client.auth.signInWithPassword({
     email,
-    password
+    password,
   });
 
   if (authErr || !authData.user) {
@@ -85,9 +85,13 @@ for (const role of roles) {
   }
 
   if (isConfirmed && roleMatches) {
-    console.log(`✅ [${role}] PASS — Auth User: ${user.id} | Email: ${email} | Confirmed: ${isConfirmed} | Profile Role: ${profile.role} | SignOut: OK`);
+    console.log(
+      `✅ [${role}] PASS — Auth User: ${user.id} | Email: ${email} | Confirmed: ${isConfirmed} | Profile Role: ${profile.role} | SignOut: OK`,
+    );
   } else {
-    console.error(`❌ [${role}] Validation Failed: Confirmed=${isConfirmed}, ProfileRole=${profile.role} (expected ${expectedRole})`);
+    console.error(
+      `❌ [${role}] Validation Failed: Confirmed=${isConfirmed}, ProfileRole=${profile.role} (expected ${expectedRole})`,
+    );
     allPassed = false;
   }
 }
