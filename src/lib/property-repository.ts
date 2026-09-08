@@ -125,6 +125,7 @@ export async function loadPropertyById(idOrPassport: string): Promise<Property |
   // Query authoritative Supabase first
   if (supabaseConfigured) {
     try {
+      await supabase.auth.getSession();
       const query = supabase
         .from("properties")
         .select(

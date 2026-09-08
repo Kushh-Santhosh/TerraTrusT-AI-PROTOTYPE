@@ -1,4 +1,5 @@
-import { createFileRoute, Link, notFound, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import type { PropertyDocument, VerificationEvent } from "@/lib/types";
 import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { TrustScore } from "@/components/ui-ext/TrustScore";
@@ -19,11 +20,6 @@ import type { Property } from "@/lib/types";
 
 export const Route = createFileRoute("/properties/$id")({
   head: ({ params }) => ({ meta: [{ title: `Property ${params.id} — TerraTrust AI` }] }),
-  loader: async ({ params }) => {
-    const p = await loadPropertyById(params.id);
-    if (!p) throw notFound();
-    return { property: p };
-  },
   notFoundComponent: () => (
     <AppShell title="Property not found"><p className="text-muted-foreground">We couldn't find that passport. <Link to="/properties" className="text-primary">Back to properties</Link>.</p></AppShell>
   ),
@@ -31,9 +27,41 @@ export const Route = createFileRoute("/properties/$id")({
 });
 
 function PassportPage() {
-  const { property: p } = Route.useLoaderData() as { property: Property };
+  const { id } = Route.useParams();
+  const [p, setProperty] = useState<Property | null>(null);
+  const [loading, setLoading] = useState(true);
   const pathname = useRouterState({ select: s => s.location.pathname });
-  if (pathname !== `/properties/${p.id}`) return <Outlet />;
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setProperty(null);
+    loadPropertyById(id).then((property) => {
+      if (!active) return;
+      setProperty(property);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  if (pathname !== `/properties/${id}`) return <Outlet />;
+  if (loading) {
+    return (
+      <AppShell title="Loading property...">
+        <p className="text-muted-foreground">Loading the persisted property record.</p>
+      </AppShell>
+    );
+  }
+  if (!p) {
+    return (
+      <AppShell title="Property not found">
+        <p className="text-muted-foreground">
+          We couldn't find that passport. <Link to="/properties" className="text-primary">Back to properties</Link>.
+        </p>
+      </AppShell>
+    );
+  }
   const confidence = computeConfidence(p);
   const encs = getEncumbrances(p);
   const infra = getNearbyInfra(p);
