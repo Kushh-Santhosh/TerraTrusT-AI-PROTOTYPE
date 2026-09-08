@@ -46,6 +46,7 @@ export interface VerificationEvent {
 
 export interface Property {
   id: string;
+  ownerId?: string;
   passportId: string; // TT-XXXX
   title: string;
   type: PropertyType;

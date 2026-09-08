@@ -23,6 +23,7 @@ import { Route as RoleSelectRouteImport } from './routes/role-select'
 import { Route as RoadmapRouteImport } from './routes/roadmap'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as QrGeneratorRouteImport } from './routes/qr-generator'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -188,6 +189,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrGeneratorRoute = QrGeneratorRouteImport.update({
+  id: '/qr-generator',
+  path: '/qr-generator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PropertiesRoute = PropertiesRouteImport.update({
@@ -722,6 +728,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/qr-generator': typeof QrGeneratorRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRouteWithChildren
   '/roadmap': typeof RoadmapRoute
@@ -828,6 +835,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/qr-generator': typeof QrGeneratorRoute
   '/register': typeof RegisterRoute
   '/roadmap': typeof RoadmapRoute
   '/role-select': typeof RoleSelectRoute
@@ -937,6 +945,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/qr-generator': typeof QrGeneratorRoute
   '/register': typeof RegisterRoute
   '/reports': typeof ReportsRouteWithChildren
   '/roadmap': typeof RoadmapRoute
@@ -1051,6 +1060,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/properties'
+    | '/qr-generator'
     | '/register'
     | '/reports'
     | '/roadmap'
@@ -1157,6 +1167,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profile'
+    | '/qr-generator'
     | '/register'
     | '/roadmap'
     | '/role-select'
@@ -1265,6 +1276,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/properties'
+    | '/qr-generator'
     | '/register'
     | '/reports'
     | '/roadmap'
@@ -1378,6 +1390,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
+  QrGeneratorRoute: typeof QrGeneratorRoute
   RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRouteWithChildren
   RoadmapRoute: typeof RoadmapRoute
@@ -1492,6 +1505,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-generator': {
+      id: '/qr-generator'
+      path: '/qr-generator'
+      fullPath: '/qr-generator'
+      preLoaderRoute: typeof QrGeneratorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/properties': {
@@ -2414,6 +2434,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
+  QrGeneratorRoute: QrGeneratorRoute,
   RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRouteWithChildren,
   RoadmapRoute: RoadmapRoute,

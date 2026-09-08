@@ -3,50 +3,14 @@ import { properties } from "@/lib/mock-data";
 import { loadPropertyById } from "@/lib/property-repository";
 import { Button } from "@/components/ui/button";
 import { Download, ShieldCheck, ArrowLeft, Printer } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 import type { Property } from "@/lib/types";
+import { passportVerificationUrl } from "@/components/property/PassportQRCode";
 
 export const Route = createFileRoute("/properties/$id/passport-pdf")({
   component: PassportPDF,
 });
-
-/* Inline QR — deterministic pseudo-QR generated from passport id, no deps */
-function PseudoQR({ value, size = 132 }: { value: string; size?: number }) {
-  const grid = 21;
-  // hash to bit grid
-  let h = 2166136261;
-  for (let i = 0; i < value.length; i++) {
-    h ^= value.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  const cells: boolean[] = [];
-  let state = h >>> 0;
-  for (let i = 0; i < grid * grid; i++) {
-    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-    cells.push((state & 1) === 1);
-  }
-  const cell = size / grid;
-  // finder squares
-  const isFinder = (r: number, c: number) =>
-    (r < 7 && c < 7) || (r < 7 && c >= grid - 7) || (r >= grid - 7 && c < 7);
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`QR code for ${value}`}>
-      <rect width={size} height={size} fill="white" />
-      {cells.map((on, i) => {
-        const r = Math.floor(i / grid), c = i % grid;
-        if (isFinder(r, c)) return null;
-        return on ? <rect key={i} x={c * cell} y={r * cell} width={cell} height={cell} fill="#0a1224" /> : null;
-      })}
-      {[[0,0],[grid-7,0],[0,grid-7]].map(([cx,cy],i) => (
-        <g key={i}>
-          <rect x={cx*cell} y={cy*cell} width={7*cell} height={7*cell} fill="#0a1224" />
-          <rect x={(cx+1)*cell} y={(cy+1)*cell} width={5*cell} height={5*cell} fill="white" />
-          <rect x={(cx+2)*cell} y={(cy+2)*cell} width={3*cell} height={3*cell} fill="#0a1224" />
-        </g>
-      ))}
-    </svg>
-  );
-}
 
 function PassportPDF() {
   const { id } = Route.useParams();
@@ -202,9 +166,12 @@ function PassportPDF() {
           {/* RIGHT — QR + signature column */}
           <aside className="space-y-6">
             <div className="rounded-lg border border-[#0a1224]/10 p-4 text-center bg-[#f8fafc]">
-              <PseudoQR value={`https://terratrust.ai/p/${p.passportId}`} />
-              <p className="mt-2 text-[10px] uppercase tracking-wider text-[#0a1224]/60 font-semibold">Scan to verify</p>
-              <p className="mt-1 break-all font-mono text-[9px] text-[#0a1224]/80">terratrust.ai/p/{p.passportId}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0a1224]/60">TerraTrust AI</p>
+              <div className="mt-3 rounded-lg bg-white p-3 ring-1 ring-[#0a1224]/10">
+                <QRCodeSVG value={passportVerificationUrl(p.id)} size={150} level="M" marginSize={4} fgColor="#0a1224" aria-label={`QR code for ${p.passportId}`} />
+              </div>
+              <p className="mt-3 text-[10px] uppercase tracking-wider text-[#0a1224]/60 font-semibold">Scan to verify this property passport</p>
+              <p className="mt-1 font-mono text-[9px] text-[#0a1224]/80">Passport ID: {p.passportId}</p>
             </div>
 
             <div className="rounded-lg border border-[#0a1224]/10 p-4 bg-[#f8fafc]">

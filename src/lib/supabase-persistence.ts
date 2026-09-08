@@ -199,6 +199,45 @@ export async function uploadPropertyDocumentBinary(input: {
   }
 }
 
+export async function deleteOwnedProperty(input: {
+  propertyId: string;
+  passportId: string;
+  ownerId: string;
+  storagePaths: (string | null | undefined)[];
+}): Promise<PersistenceOutcome> {
+  if (!supabaseConfigured) return { error: "Supabase not configured", persisted: false };
+
+  try {
+    const folder = `${input.ownerId}/${input.propertyId}`;
+    const { data: storedFiles, error: listError } = await supabase.storage
+      .from("property-documents")
+      .list(folder, { limit: 1000 });
+    if (listError) return { error: listError.message, persisted: false };
+
+    const listedPaths = (storedFiles ?? [])
+      .filter((file) => file.name)
+      .map((file) => `${folder}/${file.name}`);
+    const paths = [...new Set([...input.storagePaths.filter((path): path is string => Boolean(path)), ...listedPaths])];
+    if (paths.length > 0) {
+      const { error: removeError } = await supabase.storage
+        .from("property-documents")
+        .remove(paths);
+      if (removeError) return { error: removeError.message, persisted: false };
+    }
+
+    const { error } = await supabase.rpc("delete_owned_property", {
+      p_property_id: input.propertyId,
+      p_passport_id: input.passportId,
+    });
+    return { error: error?.message ?? null, persisted: !error };
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Failed to delete property",
+      persisted: false,
+    };
+  }
+}
+
 /**
  * Records community verification decision via RPC
  */

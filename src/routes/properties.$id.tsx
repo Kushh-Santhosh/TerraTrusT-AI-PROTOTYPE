@@ -16,7 +16,22 @@ import { ConfidenceBreakdown } from "@/components/ui-ext/ConfidenceBreakdown";
 import { EncumbrancePanel, NearbyInfraPanel, RiskIndicatorsPanel, OwnershipHistoryPanel } from "@/components/ui-ext/IntelPanels";
 import { loadPropertyById } from "@/lib/property-repository";
 import { PropertySubNav } from "@/components/property/PropertySubNav";
+import { PassportQRCode } from "@/components/property/PassportQRCode";
 import type { Property } from "@/lib/types";
+import { useAuth } from "@/lib/auth";
+import { deleteOwnedProperty } from "@/lib/supabase-persistence";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/properties/$id")({
   head: ({ params }) => ({ meta: [{ title: `Property ${params.id} — TerraTrust AI` }] }),
@@ -30,6 +45,11 @@ function PassportPage() {
   const { id } = Route.useParams();
   const [p, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteText, setDeleteText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const { user } = useAuth();
+  const navigate = Route.useNavigate();
   const pathname = useRouterState({ select: s => s.location.pathname });
   useEffect(() => {
     let active = true;
@@ -68,6 +88,26 @@ function PassportPage() {
   const risks = getRiskIndicators(p);
   const history = getOwnershipHistory(p);
   const fraud = getFraudReport(p);
+  const isOwner = Boolean(user?.id && p.ownerId === user.id);
+
+  async function handleDelete() {
+    if (!p || !user?.id || deleteText !== p.passportId) return;
+    setDeleting(true);
+    const result = await deleteOwnedProperty({
+      propertyId: p.id,
+      passportId: p.passportId,
+      ownerId: user.id,
+      storagePaths: p.documents.map((document) => document.storagePath),
+    });
+    setDeleting(false);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setDeleteOpen(false);
+    toast.success("Property deleted successfully.");
+    await navigate({ to: "/properties" });
+  }
   return (
     <AppShell
       title={p.title}
@@ -119,6 +159,41 @@ function PassportPage() {
           </div>
         </div>
       </div>
+
+      <PassportQRCode property={p} />
+
+      {isOwner && (
+        <div className="flex justify-end">
+          <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+            Delete Property
+          </Button>
+        </div>
+      )}
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this property?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the property record, uploaded documents, verification results, review cases, AI analyses, and associated passport reference from your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <label htmlFor="delete-passport-id" className="text-sm font-medium">Type the Passport ID to confirm</label>
+            <Input id="delete-passport-id" value={deleteText} onChange={(event) => setDeleteText(event.target.value)} placeholder={p.passportId} className="font-mono" />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteText("")}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteText !== p.passportId || deleting}
+              onClick={(event) => { event.preventDefault(); void handleDelete(); }}
+            >
+              {deleting ? "Deleting..." : "Delete Property"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Property Sub-Routes Toolbar */}
       <PropertySubNav propertyId={p.id} activeTab="overview" />

@@ -30,6 +30,7 @@ export function mapDocumentRow(row: {
 
 export function mapPropertyRow(row: {
   id: string;
+  owner_id?: string;
   passport_id: string;
   property_name: string;
   location: {
@@ -59,6 +60,7 @@ export function mapPropertyRow(row: {
   const loc = row.location ?? {};
   return {
     id: row.id,
+    ownerId: row.owner_id,
     passportId: row.passport_id,
     title: row.property_name,
     type: (loc.propertyType as PropertyType | undefined) ?? "residential",
@@ -108,7 +110,7 @@ export async function loadOwnedProperties(userId: string): Promise<Property[]> {
     const { data, error } = await supabase
       .from("properties")
       .select(
-        "id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
+        "id, owner_id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
       )
       .eq("owner_id", userId)
       .order("created_at", { ascending: false });
@@ -129,7 +131,7 @@ export async function loadPropertyById(idOrPassport: string): Promise<Property |
       const query = supabase
         .from("properties")
         .select(
-          "id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
+          "id, owner_id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
         );
 
       const { data, error } = isUuid(idOrPassport)
@@ -158,7 +160,7 @@ export async function loadInstitutionalProperties(
     let query = supabase
       .from("properties")
       .select(
-        "id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
+        "id, owner_id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
       )
       .order("created_at", { ascending: false });
 
