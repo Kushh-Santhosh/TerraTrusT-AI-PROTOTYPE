@@ -57,6 +57,8 @@ type AssignmentPropertyRow = {
   property_documents: PropertyDocumentRow[];
 };
 
+type RelatedProperty = AssignmentPropertyRow | AssignmentPropertyRow[] | null;
+
 export function mapDocumentRow(row: {
   id: string;
   name: string;
@@ -297,9 +299,9 @@ export async function loadGovernmentReviewQueue() {
         status: string;
         reason: string | null;
         created_at: string;
-        properties?: ReviewCasePropertyRow[] | null;
+        properties?: ReviewCasePropertyRow | ReviewCasePropertyRow[] | null;
       }>) {
-        const property = r.properties?.[0];
+        const property = Array.isArray(r.properties) ? r.properties[0] : r.properties;
         if (!property?.id) continue;
         const propId = property.id;
         seenIds.add(propId);
@@ -402,12 +404,13 @@ export async function loadSurveyorAssignments(
         created_at: string;
         updated_at: string;
         assigned_by: string;
-        properties: AssignmentPropertyRow[] | null;
+        properties: RelatedProperty;
       }>
     )
-      .filter((row) => row.properties?.[0])
+      .filter((row) => (Array.isArray(row.properties) ? row.properties[0] : row.properties))
       .map((row) => {
-        const property = row.properties![0];
+        const property = Array.isArray(row.properties) ? row.properties[0] : row.properties;
+        if (!property) throw new Error("Assigned property relation was not returned");
         return {
           ...mapPropertyRow({
             ...property,

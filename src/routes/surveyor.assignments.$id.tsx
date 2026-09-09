@@ -352,7 +352,7 @@ function SurveyorAssignmentDetail() {
           <div className="space-y-2 border-t border-border pt-3">
             <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
               <Camera className="h-3.5 w-3.5 text-primary" />
-              <span>Field Evidence Attached:</span>
+              <span>Field Evidence Attached (required):</span>
             </span>
             <div className="space-y-1.5">
               <input
@@ -362,8 +362,8 @@ function SurveyorAssignmentDetail() {
                 className="block w-full text-xs text-muted-foreground"
               />
               <p className="text-[10px] text-muted-foreground">
-                Optional field evidence is uploaded to the assigned property’s Supabase Storage
-                folder.
+                Upload field evidence before submitting the attestation. It is stored in the
+                assigned property’s Supabase Storage folder.
               </p>
             </div>
           </div>
