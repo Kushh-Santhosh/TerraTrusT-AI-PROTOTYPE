@@ -28,22 +28,30 @@ function SurveyorPage() {
     });
   }, [user?.id]);
 
+  const activeAssignments = assignments.filter((p) =>
+    ["assigned", "in_progress"].includes(p.assignmentStatus),
+  );
+  const pendingBoundaryReviews = assignments.filter(
+    (p) =>
+      ["assigned", "in_progress"].includes(p.assignmentStatus) &&
+      p.boundary.length > 0 &&
+      !p.surveyorDecision,
+  );
+
   const surveyorKpis = [
     {
       label: "Active Field Assignments",
-      value: `${assignments.length}`,
-      delta: "+1",
-      trend: "up" as const,
+      value: `${activeAssignments.length}`,
       hint: "Parcels pending field survey",
     },
     {
       label: "GPS Boundaries Captured",
-      value: `${assignments.filter((p) => p.boundary?.length).length}`,
+      value: `${assignments.filter((p) => p.boundary.length > 0).length}`,
       hint: "Persisted citizen boundaries",
     },
     {
       label: "Submitted Surveys",
-      value: `${assignments.filter((p) => p.assignmentStatus === "submitted").length}`,
+      value: `${assignments.filter((p) => ["submitted", "completed"].includes(p.assignmentStatus)).length}`,
       hint: "Persisted field submissions",
     },
     {
@@ -53,11 +61,11 @@ function SurveyorPage() {
     },
   ];
 
-  const boundaryCaptures = assignments.slice(0, 3).map((p) => ({
+  const boundaryCaptures = pendingBoundaryReviews.slice(0, 3).map((p) => ({
     key: p.assignmentId || p.id,
     id: p.id,
     title: p.title,
-    points: p.boundary?.length || 8,
+    points: p.boundary.length,
     region: `${p.region}, ${p.country}`,
   }));
 
@@ -99,7 +107,7 @@ function SurveyorPage() {
             <p className="py-6 text-center text-xs text-muted-foreground">
               Loading assigned parcels…
             </p>
-          ) : assignments.length === 0 ? (
+          ) : activeAssignments.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
               <Briefcase className="mx-auto h-8 w-8 text-muted-foreground/50 mb-2" />
               <p className="font-medium text-foreground">No assignments yet.</p>
@@ -110,10 +118,10 @@ function SurveyorPage() {
             </div>
           ) : (
             <ul className="mt-2 divide-y divide-border">
-              {assignments.slice(0, 4).map((p, i) => (
+              {activeAssignments.slice(0, 4).map((p) => (
                 <li key={p.assignmentId || p.id} className="py-2">
                   <Link
-                    to="/properties/$id"
+                    to="/surveyor/assignments/$id"
                     params={{ id: p.id }}
                     className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/40 transition group"
                   >
