@@ -1,6 +1,21 @@
 -- TerraTrust AI Property Document Storage Configuration & RLS
 -- Migration: 003_property_document_storage.sql
 
+-- Keep this migration bootstrappable for Supabase Preview databases that create
+-- storage policies before replaying the full public helper set.
+create or replace function public.get_current_user_role()
+returns text
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select coalesce(
+    (select role from public.profiles where id = auth.uid()),
+    'citizen'
+  );
+$$;
+
 -- Ensure private storage bucket exists
 insert into storage.buckets (id, name, public)
 values ('property-documents', 'property-documents', false)
