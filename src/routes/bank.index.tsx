@@ -3,10 +3,14 @@ import { AppShell } from "@/components/layout/AppShell";
 import { KpiRow, Pill, DataTable } from "@/components/ui-ext/Scaffold";
 import { Button } from "@/components/ui/button";
 import { FileCheck2, ArrowUpRight, ShieldCheck } from "lucide-react";
-import { loadBankEligibleProperties } from "@/lib/property-repository";
+import {
+  loadBankAuthorizedProperties,
+  loadBankEligibleProperties,
+} from "@/lib/property-repository";
 import type { Property } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { recordBankLoanApplication } from "@/lib/supabase-persistence";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/bank/")({
@@ -22,8 +26,12 @@ function formatInr(val: number): string {
 }
 
 function BankPage() {
-  const [verifiedProps, setVerifiedProps] = useState<Property[]>([]);
+  const [authorizedProps, setAuthorizedProps] = useState<Property[]>([]);
+  const [eligibleProps, setEligibleProps] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loanCount, setLoanCount] = useState(0);
+  const [approvedLoanCount, setApprovedLoanCount] = useState(0);
+  const [portfolioUnderwritten, setPortfolioUnderwritten] = useState(0);
 
   // Loan origination modal state
   const [selectedPropForLoan, setSelectedPropForLoan] = useState<Property | null>(null);
@@ -33,17 +41,30 @@ function BankPage() {
   const [isSubmittingLoan, setIsSubmittingLoan] = useState(false);
 
   useEffect(() => {
-    loadBankEligibleProperties().then((props) => {
-      setVerifiedProps(props);
+    Promise.all([
+      loadBankAuthorizedProperties(),
+      loadBankEligibleProperties(),
+      supabase.from("bank_loan_applications").select("requested_amount_inr, status"),
+    ]).then(([authorized, eligible, loans]) => {
+      setAuthorizedProps(authorized);
+      setEligibleProps(eligible);
+      const rows = loans.data ?? [];
+      setLoanCount(rows.length);
+      setApprovedLoanCount(rows.filter((loan) => loan.status === "underwriting_approved").length);
+      setPortfolioUnderwritten(
+        rows
+          .filter((loan) => loan.status === "underwriting_approved")
+          .reduce((sum, loan) => sum + Number(loan.requested_amount_inr || 0), 0),
+      );
       setLoading(false);
     });
   }, []);
 
-  const totalValue = verifiedProps.reduce((sum, p) => sum + p.valuation, 0);
+  const totalValue = eligibleProps.reduce((sum, p) => sum + p.valuation, 0);
 
   // Generate pipeline tied directly to real verified properties in Supabase
-  const pipeline = verifiedProps.map((p, idx) => ({
-    id: `MTG-${7820 + idx}`,
+  const pipeline = eligibleProps.map((p) => ({
+    id: null,
     propertyId: p.id,
     parcel: p.passportId,
     title: p.title,
@@ -51,8 +72,25 @@ function BankPage() {
     amount: formatInr(p.valuation),
     ltv: "65%",
     trust: p.trustScore,
-    decision: p.trustScore >= 80 ? "Approved" : "Review",
+    decision: "Eligible",
   }));
+
+  const eligibleIds = new Set(eligibleProps.map((property) => property.id));
+  const eligibilityReason = (property: Property) => {
+    if (eligibleIds.has(property.id)) return "Eligible for underwriting";
+    if (property.status === "disputed") return "Not eligible — Review case open";
+    if (property.governmentDecision !== "approved") {
+      return "Not eligible — Government verification pending";
+    }
+    if (property.surveyorDecision !== "verified") {
+      return "Not eligible — Surveyor verification pending";
+    }
+    if (!property.documents.length || !property.documents.every((document) => document.verified)) {
+      return "Not eligible — Required documents pending";
+    }
+    if (!property.valuation) return "Not eligible — Required valuation unavailable";
+    return "Not eligible — Verification requirements incomplete";
+  };
 
   return (
     <AppShell
@@ -74,12 +112,109 @@ function BankPage() {
 
       <KpiRow
         items={[
-          { label: "Eligible Passports", value: `${verifiedProps.length || 1}` },
-          { label: "Avg. underwrite time", value: "1.4d", hint: "↓ 40% vs manual" },
-          { label: "Auto-approved rate", value: "92%" },
-          { label: "Portfolio underwritten", value: formatInr(totalValue) },
+          { label: "Eligible Passports", value: `${eligibleProps.length}` },
+          {
+            label: "Avg. underwrite time",
+            value: "—",
+            hint: loanCount ? "Insufficient timestamp data" : "No completed underwriting cases yet",
+          },
+          {
+            label: "Auto-approved rate",
+            value: loanCount ? `${Math.round((approvedLoanCount / loanCount) * 100)}%` : "—",
+          },
+          { label: "Portfolio underwritten", value: formatInr(portfolioUnderwritten) },
         ]}
       />
+
+      <div className="mt-6 flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold text-foreground">Property Intelligence</h3>
+          <p className="text-xs text-muted-foreground">
+            {authorizedProps.length} authorized property records · {eligibleProps.length} currently
+            eligible for underwriting
+          </p>
+        </div>
+        <Link to="/search" className="text-sm font-medium text-primary hover:underline">
+          Search all properties
+        </Link>
+      </div>
+
+      <div className="mt-3">
+        {loading ? (
+          <p className="py-8 text-center text-xs text-muted-foreground">
+            Loading authorized Property Passports…
+          </p>
+        ) : authorizedProps.length === 0 ? (
+          <div className="surface-card p-8 text-center">
+            <ShieldCheck className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+            <p className="font-medium text-foreground">No authorized property records found.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Property intelligence appears here from the canonical Supabase registry.
+            </p>
+          </div>
+        ) : (
+          <DataTable
+            rows={authorizedProps}
+            columns={[
+              {
+                key: "property",
+                label: "Property / Passport",
+                render: (property) => (
+                  <Link
+                    to="/properties/$id"
+                    params={{ id: property.id }}
+                    className="block font-medium text-primary hover:underline"
+                  >
+                    {property.title}
+                    <span className="mt-0.5 block font-mono text-[11px] text-muted-foreground">
+                      {property.passportId}
+                    </span>
+                  </Link>
+                ),
+              },
+              {
+                key: "location",
+                label: "Location",
+                render: (property) => `${property.region}, ${property.country}`,
+              },
+              {
+                key: "area",
+                label: "Area",
+                render: (property) => `${property.area.toLocaleString()} m²`,
+              },
+              {
+                key: "verification",
+                label: "Verification",
+                render: (property) => (
+                  <Pill tone={property.status === "verified" ? "success" : "warning"}>
+                    {property.status}
+                  </Pill>
+                ),
+              },
+              {
+                key: "trust",
+                label: "Trust",
+                render: (property) => `${property.trustScore}/100`,
+              },
+              {
+                key: "valuation",
+                label: "Indicative valuation",
+                render: (property) =>
+                  property.valuation ? formatInr(property.valuation) : "Not available",
+              },
+              {
+                key: "eligibility",
+                label: "Eligibility",
+                render: (property) => (
+                  <Pill tone={eligibleIds.has(property.id) ? "success" : "warning"}>
+                    {eligibilityReason(property)}
+                  </Pill>
+                ),
+              },
+            ]}
+          />
+        )}
+      </div>
 
       <div className="mt-6 flex items-center justify-between">
         <h3 className="font-semibold text-foreground">Underwriting Pipeline</h3>
@@ -112,7 +247,9 @@ function BankPage() {
               {
                 key: "id",
                 label: "Application",
-                render: (r) => <span className="font-mono text-xs font-medium">{r.id}</span>,
+                render: (r) => (
+                  <span className="font-mono text-xs font-medium">{r.id ?? "Not originated"}</span>
+                ),
               },
               {
                 key: "p",
@@ -158,17 +295,7 @@ function BankPage() {
                 key: "d",
                 label: "Decision",
                 render: (r) => (
-                  <Pill
-                    tone={
-                      r.decision === "Approved"
-                        ? "success"
-                        : r.decision === "Review"
-                          ? "warning"
-                          : "danger"
-                    }
-                  >
-                    {r.decision}
-                  </Pill>
+                  <Pill tone={r.decision === "Eligible" ? "success" : "warning"}>{r.decision}</Pill>
                 ),
               },
               {
@@ -185,7 +312,7 @@ function BankPage() {
                       size="sm"
                       className="text-xs h-7 bg-primary text-primary-foreground"
                       onClick={() => {
-                        const target = verifiedProps.find((p) => p.id === r.propertyId);
+                        const target = eligibleProps.find((p) => p.id === r.propertyId);
                         if (target) {
                           setSelectedPropForLoan(target);
                           setLoanAmount(Math.round(target.valuation * 0.65));
@@ -312,14 +439,14 @@ function BankPage() {
                       toast.error(`Loan origination failed: ${res.error}`);
                     } else {
                       toast.success(
-                        `Loan of ${formatInr(loanAmount)} approved and recorded against ${selectedPropForLoan.passportId}.`,
+                        `Loan request of ${formatInr(loanAmount)} submitted against ${selectedPropForLoan.passportId}.`,
                       );
                       setSelectedPropForLoan(null);
                     }
                   }}
                   className="rounded-full text-xs bg-primary text-primary-foreground"
                 >
-                  {isSubmittingLoan ? "Persisting to Supabase…" : "Confirm Underwriting Approval"}
+                  {isSubmittingLoan ? "Persisting to Supabase…" : "Submit for Underwriting"}
                 </Button>
               </div>
             </div>

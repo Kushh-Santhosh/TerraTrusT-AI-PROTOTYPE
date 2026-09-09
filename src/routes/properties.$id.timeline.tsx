@@ -10,20 +10,71 @@ export const Route = createFileRoute("/properties/$id/timeline")({
 });
 
 const events = [
-  { at: "2024-09-20", role: "officer", icon: Building2, actor: "Bengaluru Urban Revenue Office", text: "Annual Bhoomi registry sync confirmed registered boundary and title." },
-  { at: "2024-08-19", role: "citizen", icon: Sparkles, actor: "Ananya Sharma", text: "Uploaded BBMP Property Tax Receipt 2024-25." },
-  { at: "2024-04-02", role: "verifier", icon: Users2, actor: "Indiranagar Ward Committee", text: "Received 5 neighborhood community attestations." },
-  { at: "2024-03-20", role: "officer", icon: ShieldCheck, actor: "Karnataka Land Revenue Department", text: "Ownership confirmed on official registry — trust score raised to 96." },
-  { at: "2024-03-15", role: "surveyor", icon: Briefcase, actor: "Surveyor Arjun Nair", text: "Cadastral boundary uploaded and verified (±0.4m tolerance)." },
-  { at: "2024-03-15", role: "admin", icon: Sparkles, actor: "TerraTrust AI", text: "Initial AI valuation generated — ₹2.15 Cr." },
-  { at: "2019-06-14", role: "citizen", icon: Sparkles, actor: "Ananya Sharma", text: "Property acquired via Registered Sale Deed and enrolled in TerraTrust." },
+  {
+    at: "2024-09-20",
+    role: "officer",
+    icon: Building2,
+    actor: "Bengaluru Urban Revenue Office",
+    text: "Annual Bhoomi registry sync confirmed registered boundary and title.",
+  },
+  {
+    at: "2024-08-19",
+    role: "citizen",
+    icon: Sparkles,
+    actor: "Ananya Sharma",
+    text: "Uploaded BBMP Property Tax Receipt 2024-25.",
+  },
+  {
+    at: "2024-04-02",
+    role: "verifier",
+    icon: Users2,
+    actor: "Indiranagar Ward Committee",
+    text: "Received 5 neighborhood community attestations.",
+  },
+  {
+    at: "2024-03-20",
+    role: "officer",
+    icon: ShieldCheck,
+    actor: "Karnataka Land Revenue Department",
+    text: "Ownership confirmed on official registry — trust score raised to 96.",
+  },
+  {
+    at: "2024-03-15",
+    role: "surveyor",
+    icon: Briefcase,
+    actor: "Surveyor Arjun Nair",
+    text: "Cadastral boundary uploaded and verified (±0.4m tolerance).",
+  },
+  {
+    at: "2024-03-15",
+    role: "admin",
+    icon: Sparkles,
+    actor: "TerraTrust AI",
+    text: "Initial AI valuation generated — ₹2.15 Cr.",
+  },
+  {
+    at: "2019-06-14",
+    role: "citizen",
+    icon: Sparkles,
+    actor: "Ananya Sharma",
+    text: "Property acquired via Registered Sale Deed and enrolled in TerraTrust.",
+  },
 ];
 
 function Page() {
   const { id } = Route.useParams();
   return (
-    <AppShell title="Property Timeline" subtitle="Immutable audit trail of registrations, surveyor audits, and revenue attestations.">
-      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: id, to: "/properties/$id" }, { label: "Timeline" }]} />
+    <AppShell
+      title="Property Timeline"
+      subtitle="Immutable audit trail of registrations, surveyor audits, and revenue attestations."
+    >
+      <Crumbs
+        items={[
+          { label: "Properties", to: "/properties" },
+          { label: id, to: "/properties/$id" },
+          { label: "Timeline" },
+        ]}
+      />
       <PropertySubNav propertyId={id} activeTab="timeline" />
 
       <div className="surface-card p-6">

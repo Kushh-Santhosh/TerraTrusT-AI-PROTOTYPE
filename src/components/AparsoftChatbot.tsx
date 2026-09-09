@@ -28,7 +28,9 @@ interface LoaderConfig {
 
 function getAparsoftConfig(): LoaderConfig | null {
   const apiKey = (import.meta.env.VITE_APARSOFT_WIDGET_KEY as string | undefined)?.trim();
-  const configuredWidgetUrl = (import.meta.env.VITE_APARSOFT_WIDGET_SCRIPT_URL as string | undefined)?.trim();
+  const configuredWidgetUrl = (
+    import.meta.env.VITE_APARSOFT_WIDGET_SCRIPT_URL as string | undefined
+  )?.trim();
 
   if (!apiKey) return null;
 
@@ -65,18 +67,22 @@ export default function AparsoftChatbot() {
         script.dataset.showBranding = String(runtimeConfig.showBranding);
       if (runtimeConfig.autoOpenDelayMs && runtimeConfig.autoOpenDelayMs > 0)
         script.dataset.autoOpenDelayMs = String(runtimeConfig.autoOpenDelayMs);
-      if (runtimeConfig.configEndpoint) script.dataset.configEndpoint = runtimeConfig.configEndpoint;
+      if (runtimeConfig.configEndpoint)
+        script.dataset.configEndpoint = runtimeConfig.configEndpoint;
       if (runtimeConfig.websocketUrl) script.dataset.websocketUrl = runtimeConfig.websocketUrl;
       if (runtimeConfig.primaryColor) script.dataset.primaryColor = runtimeConfig.primaryColor;
-      if (runtimeConfig.secondaryColor) script.dataset.secondaryColor = runtimeConfig.secondaryColor;
+      if (runtimeConfig.secondaryColor)
+        script.dataset.secondaryColor = runtimeConfig.secondaryColor;
       if (runtimeConfig.widgetTitle) script.dataset.widgetTitle = runtimeConfig.widgetTitle;
-      if (runtimeConfig.widgetSubtitle) script.dataset.widgetSubtitle = runtimeConfig.widgetSubtitle;
-      if (runtimeConfig.welcomeMessage) script.dataset.welcomeMessage = runtimeConfig.welcomeMessage;
+      if (runtimeConfig.widgetSubtitle)
+        script.dataset.widgetSubtitle = runtimeConfig.widgetSubtitle;
+      if (runtimeConfig.welcomeMessage)
+        script.dataset.welcomeMessage = runtimeConfig.welcomeMessage;
       if (runtimeConfig.title) script.dataset.title = runtimeConfig.title;
     };
 
     const existingScript = document.querySelector(
-      'script[src="' + WIDGET_SCRIPT_URL + '"][data-aparsoft-chatbot]'
+      'script[src="' + WIDGET_SCRIPT_URL + '"][data-aparsoft-chatbot]',
     );
     if (existingScript) {
       existingScript.remove();
@@ -84,7 +90,9 @@ export default function AparsoftChatbot() {
 
     try {
       window.AparsoftChatbot?.destroy?.();
-    } catch {}
+    } catch {
+      // Widget cleanup is best effort.
+    }
     window.AparsoftChatbot = null;
 
     const script = document.createElement("script");
@@ -102,7 +110,9 @@ export default function AparsoftChatbot() {
       script.remove();
       try {
         window.AparsoftChatbot?.destroy?.();
-      } catch {}
+      } catch {
+        // Widget cleanup is best effort.
+      }
       window.AparsoftChatbot = null;
     };
   }, []);

@@ -22,28 +22,47 @@ function Page() {
   };
 
   return (
-    <AppShell title="Share Property Passport" subtitle="Issue a cryptographically verifiable share link or dispatch directly to an institution.">
-      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: id, to: "/properties/$id" }, { label: "Share" }]} />
+    <AppShell
+      title="Share Property Passport"
+      subtitle="Issue a cryptographically verifiable share link or dispatch directly to an institution."
+    >
+      <Crumbs
+        items={[
+          { label: "Properties", to: "/properties" },
+          { label: id, to: "/properties/$id" },
+          { label: "Share" },
+        ]}
+      />
       <PropertySubNav propertyId={id} activeTab="share" />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="surface-card space-y-4 p-6">
-          <p className="font-display text-lg font-semibold text-foreground">Verifiable Share Link</p>
+          <p className="font-display text-lg font-semibold text-foreground">
+            Verifiable Share Link
+          </p>
           <div className="flex gap-2">
             <Input readOnly value={shareUrl} className="font-mono text-xs" />
-            <Button variant="outline" onClick={copyLink}><Copy className="h-4 w-4 mr-1" /> Copy</Button>
+            <Button variant="outline" onClick={copyLink}>
+              <Copy className="h-4 w-4 mr-1" /> Copy
+            </Button>
           </div>
-          <Field label="Expires after"><Input defaultValue="7 days (configurable)" /></Field>
-          <Field label="Access control"><Input defaultValue="View-only · redacts Aadhaar & personal contact info" /></Field>
+          <Field label="Expires after">
+            <Input defaultValue="7 days (configurable)" />
+          </Field>
+          <Field label="Access control">
+            <Input defaultValue="View-only · redacts Aadhaar & personal contact info" />
+          </Field>
         </div>
         <div className="surface-card space-y-3 p-6">
-          <p className="font-display text-lg font-semibold text-foreground">Direct Institutional Dispatch</p>
+          <p className="font-display text-lg font-semibold text-foreground">
+            Direct Institutional Dispatch
+          </p>
           {[
             { icon: Banknote, name: "State Bank of India — Home Loan Underwriting" },
             { icon: Building2, name: "Bhoomi Revenue & Sub-Registrar Office" },
             { icon: Banknote, name: "HDFC Bank — Collateral Verification" },
             { icon: Mail, name: "Custom Official Email Address" },
-          ].map(o => (
+          ].map((o) => (
             <button
               key={o.name}
               onClick={() => toast.success(`Passport package dispatched to ${o.name}`)}

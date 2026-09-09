@@ -66,8 +66,10 @@ function SurveyorToolsPage() {
         "Valid GeoJSON! Topology closed, correct WGS84 orientation, compliant with Bhoomi cadastral standard.",
       );
       toast.success("GeoJSON validated successfully");
-    } catch (err: any) {
-      setValidationResult(`Invalid GeoJSON: ${err.message}`);
+    } catch (err: unknown) {
+      setValidationResult(
+        `Invalid GeoJSON: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
       toast.error("GeoJSON validation failed");
     }
   };

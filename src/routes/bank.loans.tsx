@@ -59,10 +59,28 @@ function Page() {
       </div>
       <KpiRow
         items={[
-          { label: "Total Outstanding", value: "₹248.5 Cr" },
-          { label: "Performing", value: "94.1%" },
-          { label: "On watch", value: "4.3%" },
-          { label: "In default", value: "1.6%" },
+          {
+            label: "Total Requested",
+            value: loans
+              .reduce((sum, loan) => sum + Number(loan.principal.replace(/[^0-9.-]+/g, "")), 0)
+              .toLocaleString("en-IN", {
+                style: "currency",
+                currency: "INR",
+                maximumFractionDigits: 0,
+              }),
+          },
+          {
+            label: "Approved",
+            value: `${loans.filter((loan) => loan.status === "Approved").length}`,
+          },
+          {
+            label: "On watch",
+            value: `${loans.filter((loan) => loan.status === "submitted").length}`,
+          },
+          {
+            label: "Declined",
+            value: `${loans.filter((loan) => loan.status === "declined").length}`,
+          },
         ]}
       />
       <div className="mt-6">

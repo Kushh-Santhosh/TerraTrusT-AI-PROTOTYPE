@@ -217,7 +217,12 @@ export async function deleteOwnedProperty(input: {
     const listedPaths = (storedFiles ?? [])
       .filter((file) => file.name)
       .map((file) => `${folder}/${file.name}`);
-    const paths = [...new Set([...input.storagePaths.filter((path): path is string => Boolean(path)), ...listedPaths])];
+    const paths = [
+      ...new Set([
+        ...input.storagePaths.filter((path): path is string => Boolean(path)),
+        ...listedPaths,
+      ]),
+    ];
     if (paths.length > 0) {
       const { error: removeError } = await supabase.storage
         .from("property-documents")
@@ -306,7 +311,9 @@ export async function createSurveyorAssignment(input: {
   return { error: error?.message ?? null, persisted: !error, data };
 }
 
-export async function requestSurveyorVerification(propertyId: string): Promise<PersistenceOutcome<string>> {
+export async function requestSurveyorVerification(
+  propertyId: string,
+): Promise<PersistenceOutcome<string>> {
   if (!supabaseConfigured) return { error: "Supabase not configured", persisted: false };
   const { data, error } = await supabase.rpc("request_surveyor_verification", {
     p_property_id: propertyId,
@@ -409,17 +416,7 @@ export async function persistVerificationOutcome(input: {
         .in("status", ["open", "in_review"]);
     }
 
-    // 3. Update property status, trust score, and INR valuation
-    const newStatus =
-      input.result.status === "verified"
-        ? "verified"
-        : input.result.status === "manual_review"
-          ? "pending"
-          : "disputed";
-
     const updatePayload: Record<string, unknown> = {
-      status: newStatus,
-      trust_score: Math.max(0, Math.min(100, Math.round(input.result.confidenceScore ?? 0))),
       updated_at: new Date().toISOString(),
     };
 
@@ -447,6 +444,11 @@ export async function persistVerificationOutcome(input: {
 
     if (propErr) return { error: propErr.message, persisted: false };
 
+    const { error: scoreErr } = await supabase.rpc("recalculate_property_verification", {
+      p_property_id: actualPropertyId,
+    });
+    if (scoreErr) return { error: scoreErr.message, persisted: false };
+
     return { error: null, persisted: true };
   } catch (err) {
     return {
@@ -461,6 +463,7 @@ export async function persistVerificationOutcome(input: {
  */
 export async function recordSurveyorDecision(input: {
   propertyId: string;
+  assignmentId: string;
   surveyorBoundary?: PropertyBoundary[];
   decision: "verified" | "correction_required";
   notes?: string;
@@ -472,57 +475,14 @@ export async function recordSurveyorDecision(input: {
     const target = await resolvePropertyId(input.propertyId);
     if (!target.id) return { error: target.error, persisted: false };
 
-    const { data: prop } = await supabase
-      .from("properties")
-      .select("location, trust_score")
-      .eq("id", target.id)
-      .single();
-
-    const currentLoc = prop?.location && typeof prop.location === "object" ? prop.location : {};
-    const updatedLocation = {
-      ...currentLoc,
-      surveyorBoundary:
-        input.surveyorBoundary ?? currentLoc.surveyorBoundary ?? currentLoc.boundary,
-      surveyorDecision: input.decision,
-      surveyorNotes: input.notes ?? "Field survey boundary validated",
-      surveyorFieldPhotos: input.fieldPhotos ?? [],
-      surveyorSubmittedAt: new Date().toISOString(),
-    };
-
-    const baseScore = prop?.trust_score ?? 0;
-    const newScore = input.decision === "verified"
-      ? Math.min(99, baseScore + 20)
-      : Math.max(0, baseScore - 20);
-
-    const { error: updateErr } = await supabase
-      .from("properties")
-      .update({
-        location: updatedLocation,
-        trust_score: newScore,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", target.id);
-
-    if (updateErr) return { error: updateErr.message, persisted: false };
-
-    const { error: assignmentErr } = await supabase
-      .from("surveyor_assignments")
-      .update({ status: "submitted", updated_at: new Date().toISOString() })
-      .eq("property_id", target.id)
-      .in("status", ["assigned", "in_progress"]);
-    if (assignmentErr) return { error: assignmentErr.message, persisted: false };
-
-    const { error: caseErr } = await supabase.from("review_cases").insert({
-      property_id: target.id,
-      status: "open",
-      reason:
-        input.decision === "correction_required"
-          ? `Surveyor flagged boundary discrepancy: ${input.notes || "Correction required"}`
-          : `Surveyor submitted field evidence: ${input.notes || "Field verification completed"}`,
+    const { error } = await supabase.rpc("submit_surveyor_verification", {
+      p_assignment_id: input.assignmentId,
+      p_decision: input.decision,
+      p_field_notes: input.notes ?? "",
+      p_evidence_paths: input.fieldPhotos ?? [],
+      p_surveyor_boundary: input.surveyorBoundary ?? null,
     });
-    if (caseErr) return { error: caseErr.message, persisted: false };
-
-    return { error: null, persisted: true };
+    return { error: error?.message ?? null, persisted: !error };
   } catch (err) {
     return {
       error: err instanceof Error ? err.message : "Failed to record surveyor decision",
@@ -545,59 +505,12 @@ export async function recordGovernmentDecision(input: {
     const target = await resolvePropertyId(input.propertyId);
     if (!target.id) return { error: target.error, persisted: false };
 
-    const { data: prop } = await supabase
-      .from("properties")
-      .select("location, trust_score")
-      .eq("id", target.id)
-      .single();
-
-    const currentLoc = prop?.location && typeof prop.location === "object" ? prop.location : {};
-    const updatedLocation = {
-      ...currentLoc,
-      governmentDecision: input.resolution,
-      governmentOfficerNotes: input.officerNotes ?? "Official administrative review complete",
-      governmentDecidedAt: new Date().toISOString(),
-    };
-
-    const propertyStatus =
-      input.resolution === "approved"
-        ? "verified"
-        : input.resolution === "rejected"
-          ? "disputed"
-          : "pending";
-
-    const newScore =
-      input.resolution === "approved"
-        ? currentLoc.surveyorDecision === "verified"
-          ? 100
-          : Math.max(prop?.trust_score ?? 70, 95)
-        : input.resolution === "rejected"
-          ? 25
-          : 55;
-
-    const { error: propErr } = await supabase
-      .from("properties")
-      .update({
-        status: propertyStatus,
-        trust_score: newScore,
-        location: updatedLocation,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", target.id);
-
-    if (propErr) return { error: propErr.message, persisted: false };
-
-    // Update open review cases
-    await supabase
-      .from("review_cases")
-      .update({
-        status: input.resolution === "approved" ? "resolved" : "open",
-        reason: input.officerNotes || `Government decision: ${input.resolution}`,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("property_id", target.id);
-
-    return { error: null, persisted: true };
+    const { error } = await supabase.rpc("record_government_verification", {
+      p_property_id: target.id,
+      p_resolution: input.resolution,
+      p_officer_notes: input.officerNotes ?? "",
+    });
+    return { error: error?.message ?? null, persisted: !error };
   } catch (err) {
     return {
       error: err instanceof Error ? err.message : "Failed to record government decision",
@@ -636,7 +549,7 @@ export async function recordBankLoanApplication(input: {
         ltv_ratio: input.ltvRatio,
         applicant_name: input.applicantName,
         notes: input.notes || "Collateral assessed against verified Digital Property Passport",
-        status: "underwriting_approved",
+        status: "submitted",
       })
       .select(
         "id, property_id, bank_name, requested_amount_inr, ltv_ratio, applicant_name, notes, status, created_at",

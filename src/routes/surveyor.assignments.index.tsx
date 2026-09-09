@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { DataTable, Pill, KpiRow } from "@/components/ui-ext/Scaffold";
-import { loadSurveyorAssignments } from "@/lib/property-repository";
-import type { Property } from "@/lib/types";
+import {
+  loadSurveyorAssignments,
+  type SurveyorAssignmentProperty,
+} from "@/lib/property-repository";
 import { useState, useEffect } from "react";
 import { Briefcase, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -13,7 +15,7 @@ export const Route = createFileRoute("/surveyor/assignments/")({
 });
 
 function SurveyorAssignmentsPage() {
-  const [assignments, setAssignments] = useState<Property[]>([]);
+  const [assignments, setAssignments] = useState<SurveyorAssignmentProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -36,7 +38,7 @@ function SurveyorAssignmentsPage() {
           { label: "Active assignments", value: `${assignments.length}` },
           {
             label: "Submitted",
-            value: `${assignments.filter((p) => (p as any).assignmentStatus === "submitted").length}`,
+            value: `${assignments.filter((p) => p.assignmentStatus === "submitted").length}`,
           },
           {
             label: "Boundary reviews",
@@ -69,7 +71,7 @@ function SurveyorAssignmentsPage() {
               {
                 key: "passportId",
                 label: "Parcel Passport",
-                render: (r: Property) => (
+                render: (r: SurveyorAssignmentProperty) => (
                   <Link
                     to="/surveyor/assignments/$id"
                     params={{ id: r.id }}
@@ -82,12 +84,14 @@ function SurveyorAssignmentsPage() {
               {
                 key: "title",
                 label: "Property Title",
-                render: (r: Property) => <span className="font-medium">{r.title}</span>,
+                render: (r: SurveyorAssignmentProperty) => (
+                  <span className="font-medium">{r.title}</span>
+                ),
               },
               {
                 key: "region",
                 label: "Location",
-                render: (r: Property) => (
+                render: (r: SurveyorAssignmentProperty) => (
                   <span className="text-muted-foreground text-xs">
                     {r.address}, {r.region}
                   </span>
@@ -96,14 +100,14 @@ function SurveyorAssignmentsPage() {
               {
                 key: "area",
                 label: "Claimed Area",
-                render: (r: Property) => (
+                render: (r: SurveyorAssignmentProperty) => (
                   <span className="font-mono text-xs">{r.area?.toLocaleString()} m²</span>
                 ),
               },
               {
                 key: "status",
                 label: "Survey Status",
-                render: (r: Property) => (
+                render: (r: SurveyorAssignmentProperty) => (
                   <Pill
                     tone={
                       r.surveyorDecision === "verified"

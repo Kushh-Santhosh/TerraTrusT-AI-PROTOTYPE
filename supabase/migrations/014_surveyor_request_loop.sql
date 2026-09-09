@@ -19,7 +19,7 @@ begin
   select id into existing_assignment
     from public.surveyor_assignments
    where property_id = p_property_id
-     and status in ('assigned', 'in_progress')
+    and status in ('assigned', 'in_progress', 'submitted')
    order by created_at desc
    limit 1;
   if existing_assignment is not null then

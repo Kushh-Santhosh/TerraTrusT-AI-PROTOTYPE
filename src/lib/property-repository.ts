@@ -5,6 +5,58 @@ function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+type PropertyLocation = {
+  address?: string;
+  region?: string;
+  country?: string;
+  propertyType?: PropertyType;
+  estimatedValueInr?: number;
+  description?: string;
+  latitude?: number;
+  longitude?: number;
+  boundary?: PropertyBoundary[];
+  cadastralIdentifiers?: Record<string, unknown>;
+  sourceChecks?: Record<string, unknown>;
+  stateCode?: string;
+  surveyorBoundary?: PropertyBoundary[];
+  governmentBoundary?: PropertyBoundary[];
+  surveyorDecision?: Property["surveyorDecision"];
+  surveyorNotes?: string;
+  surveyorFieldPhotos?: string[];
+  governmentDecision?: Property["governmentDecision"];
+  governmentOfficerNotes?: string;
+  governmentDecidedAt?: string;
+};
+
+type PropertyDocumentRow = {
+  id: string;
+  name: string;
+  kind: string;
+  storage_path?: string | null;
+  verified: boolean;
+  created_at: string;
+};
+
+type ReviewCasePropertyRow = {
+  id: string;
+  passport_id: string;
+  property_name: string;
+  status: Property["status"];
+  trust_score: number;
+  location: PropertyLocation | null;
+};
+
+type AssignmentPropertyRow = {
+  id: string;
+  passport_id: string;
+  property_name: string;
+  location: PropertyLocation | null;
+  area: number;
+  status: Property["status"];
+  trust_score: number;
+  property_documents: PropertyDocumentRow[];
+};
+
 export function mapDocumentRow(row: {
   id: string;
   name: string;
@@ -33,29 +85,11 @@ export function mapPropertyRow(row: {
   owner_id?: string;
   passport_id: string;
   property_name: string;
-  location: {
-    address?: string;
-    region?: string;
-    country?: string;
-    propertyType?: PropertyType;
-    estimatedValueInr?: number;
-    description?: string;
-    latitude?: number;
-    longitude?: number;
-    boundary?: PropertyBoundary[];
-    [key: string]: any;
-  } | null;
+  location: PropertyLocation | null;
   area: number;
   status: Property["status"];
   trust_score: number;
-  documents?: {
-    id: string;
-    name: string;
-    kind: string;
-    storage_path?: string | null;
-    verified: boolean;
-    created_at: string;
-  }[];
+  documents?: PropertyDocumentRow[];
 }): Property {
   const loc = row.location ?? {};
   return {
@@ -71,8 +105,8 @@ export function mapPropertyRow(row: {
     region: loc.region ?? "Karnataka",
     country: loc.country ?? "India",
     description: loc.description,
-    owner: "Authenticated Property Owner",
-    ownerSince: new Date().toISOString().slice(0, 10),
+    owner: row.owner_id ? "Authorized owner association" : "Owner association restricted",
+    ownerSince: "",
     valuation: Number(loc.estimatedValueInr ?? 0),
     aiConfidence: row.trust_score,
     coords: {
@@ -87,8 +121,8 @@ export function mapPropertyRow(row: {
       ? (loc.governmentBoundary as PropertyBoundary[])
       : undefined,
     stateCode: loc.stateCode ?? (loc.region?.toLowerCase().includes("maharashtra") ? "MH" : "KA"),
-    cadastralIdentifiers: loc.cadastralIdentifiers ?? {},
-    sourceChecks: loc.sourceChecks ?? {},
+    cadastralIdentifiers: loc.cadastralIdentifiers ?? ({} as Record<string, unknown>),
+    sourceChecks: loc.sourceChecks ?? ({} as Record<string, unknown>),
     surveyorDecision: loc.surveyorDecision,
     surveyorNotes: loc.surveyorNotes,
     surveyorFieldPhotos: loc.surveyorFieldPhotos,
@@ -127,7 +161,6 @@ export async function loadPropertyById(idOrPassport: string): Promise<Property |
   // Query authoritative Supabase first
   if (supabaseConfigured) {
     try {
-      await supabase.auth.getSession();
       const query = supabase
         .from("properties")
         .select(
@@ -141,7 +174,9 @@ export async function loadPropertyById(idOrPassport: string): Promise<Property |
       if (data && !error) {
         return mapPropertyRow({ ...data, documents: data.property_documents });
       }
-    } catch {}
+    } catch {
+      return null;
+    }
   }
   return null;
 }
@@ -257,17 +292,25 @@ export async function loadGovernmentReviewQueue() {
     const seenIds = new Set<string>();
 
     if (reviewCases) {
-      for (const r of reviewCases as any[]) {
-        const propId = r.properties?.id;
-        if (propId) seenIds.add(propId);
+      for (const r of reviewCases as unknown as Array<{
+        id: string;
+        status: string;
+        reason: string | null;
+        created_at: string;
+        properties?: ReviewCasePropertyRow[] | null;
+      }>) {
+        const property = r.properties?.[0];
+        if (!property?.id) continue;
+        const propId = property.id;
+        seenIds.add(propId);
         queue.push({
           caseId: r.id,
           propertyId: propId,
-          passportId: r.properties?.passport_id || "TT-PENDING",
-          title: r.properties?.property_name || "Untitled Parcel",
-          status: r.properties?.status || "pending",
-          trustScore: r.properties?.trust_score ?? 68,
-          region: r.properties?.location?.region || "Karnataka",
+          passportId: property.passport_id,
+          title: property.property_name,
+          status: property.status,
+          trustScore: property.trust_score,
+          region: property.location?.region || "Region unavailable",
           reason: r.reason || "Manual review required",
           createdAt: r.created_at,
         });
@@ -293,12 +336,12 @@ export async function loadGovernmentReviewQueue() {
             title: p.property_name,
             status: p.status,
             trustScore: p.trust_score ?? 70,
-            region: p.location?.region || "Karnataka",
+            region: p.location?.region || "Region unavailable",
             reason:
               p.location?.surveyorDecision === "verified"
                 ? "Surveyor field verification complete. Awaiting government final decision."
                 : "Awaiting field survey & official registry review.",
-            createdAt: p.created_at || new Date().toISOString(),
+            createdAt: p.created_at || "",
           });
         }
       }
@@ -312,11 +355,34 @@ export async function loadGovernmentReviewQueue() {
 
 /** Loads verified properties for bank underwriting */
 export async function loadBankEligibleProperties(): Promise<Property[]> {
-  return loadInstitutionalProperties("verified");
+  const verifiedProperties = await loadInstitutionalProperties("verified");
+  return verifiedProperties.filter(
+    (property) =>
+      property.valuation > 0 &&
+      property.governmentDecision === "approved" &&
+      property.surveyorDecision === "verified" &&
+      property.documents.length > 0 &&
+      property.documents.every((document) => document.verified),
+  );
+}
+
+/** Loads the canonical non-draft property intelligence records visible to Bank. */
+export async function loadBankAuthorizedProperties(): Promise<Property[]> {
+  return loadInstitutionalProperties();
 }
 
 /** Loads properties assigned to surveyors for field work */
-export async function loadSurveyorAssignments(userId?: string): Promise<Property[]> {
+export interface SurveyorAssignmentProperty extends Property {
+  assignmentId: string;
+  assignmentStatus: string;
+  assignmentNotes: string | null;
+  assignmentCreatedAt: string;
+  assignedBy: string;
+}
+
+export async function loadSurveyorAssignments(
+  userId?: string,
+): Promise<SurveyorAssignmentProperty[]> {
   if (!supabaseConfigured || !userId) return [];
   try {
     const { data, error } = await supabase
@@ -328,35 +394,57 @@ export async function loadSurveyorAssignments(userId?: string): Promise<Property
       .neq("status", "cancelled")
       .order("created_at", { ascending: false });
     if (error || !data) return [];
-    return (data as any[])
-      .filter((row) => row.properties)
-      .map(
-        (row) =>
-          ({
-            ...mapPropertyRow({ ...row.properties, documents: row.properties.property_documents }),
-            assignmentId: row.id,
-            assignmentStatus: row.status,
-            assignmentNotes: row.notes,
-            assignmentCreatedAt: row.created_at,
-            assignedBy: row.assigned_by,
-          }) as Property & Record<string, unknown>,
-      );
+    return (
+      data as unknown as Array<{
+        id: string;
+        status: string;
+        notes: string | null;
+        created_at: string;
+        updated_at: string;
+        assigned_by: string;
+        properties: AssignmentPropertyRow[] | null;
+      }>
+    )
+      .filter((row) => row.properties?.[0])
+      .map((row) => {
+        const property = row.properties![0];
+        return {
+          ...mapPropertyRow({
+            ...property,
+            owner_id: undefined,
+            documents: property.property_documents,
+          }),
+          assignmentId: row.id,
+          assignmentStatus: row.status,
+          assignmentNotes: row.notes,
+          assignmentCreatedAt: row.created_at,
+          assignedBy: row.assigned_by,
+        } as SurveyorAssignmentProperty;
+      });
   } catch {
     return [];
   }
 }
 
+/** Loads the latest active surveyor assignment for a property. */
 export async function loadPropertySurveyorAssignment(propertyId: string) {
-  if (!supabaseConfigured) return null;
-  const { data } = await supabase
-    .from("surveyor_assignments")
-    .select("id, status, created_at, updated_at")
-    .eq("property_id", propertyId)
-    .in("status", ["assigned", "in_progress", "submitted"])
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return data ?? null;
+  if (!supabaseConfigured || !isUuid(propertyId)) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from("surveyor_assignments")
+      .select("id, status, created_at, updated_at")
+      .eq("property_id", propertyId)
+      .in("status", ["assigned", "in_progress", "submitted"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) return null;
+    return data ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** Loads the latest verification result for a property */

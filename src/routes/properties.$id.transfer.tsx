@@ -15,11 +15,23 @@ export const Route = createFileRoute("/properties/$id/transfer")({
 function Page() {
   const { id } = Route.useParams();
   return (
-    <AppShell title="Transfer Ownership" subtitle="Initiate title conveyance or partition with registry verification.">
-      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: id, to: "/properties/$id" }, { label: "Transfer" }]} />
+    <AppShell
+      title="Transfer Ownership"
+      subtitle="Initiate title conveyance or partition with registry verification."
+    >
+      <Crumbs
+        items={[
+          { label: "Properties", to: "/properties" },
+          { label: id, to: "/properties/$id" },
+          { label: "Transfer" },
+        ]}
+      />
       <PropertySubNav propertyId={id} activeTab="transfer" />
 
-      <Stepper steps={["Recipient", "Terms & Stamp Duty", "E-Sign", "Sub-Registrar Sync"]} current={1} />
+      <Stepper
+        steps={["Recipient", "Terms & Stamp Duty", "E-Sign", "Sub-Registrar Sync"]}
+        current={1}
+      />
       <div className="surface-card grid gap-4 p-6 md:grid-cols-2 mt-4">
         <Field label="Recipient registered email / phone">
           <Input placeholder="buyer@terratrust.ai" />
@@ -35,14 +47,21 @@ function Page() {
         </Field>
         <div className="md:col-span-2">
           <Field label="Conveyance notes & stamp duty details">
-            <Textarea rows={3} placeholder="Sub-registrar jurisdiction, token advance, stamp duty challan number…" />
+            <Textarea
+              rows={3}
+              placeholder="Sub-registrar jurisdiction, token advance, stamp duty challan number…"
+            />
           </Field>
         </div>
         <div className="md:col-span-2 flex justify-end gap-2 mt-2">
           <Link to="/properties/$id" params={{ id }}>
             <Button variant="outline">Cancel</Button>
           </Link>
-          <Button onClick={() => toast.success("Draft conveyance initiated. Recipient notified for e-KYC.")}>
+          <Button
+            onClick={() =>
+              toast.success("Draft conveyance initiated. Recipient notified for e-KYC.")
+            }
+          >
             Send for Recipient Signature
           </Button>
         </div>

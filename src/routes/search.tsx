@@ -2,7 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Filter, Sparkles, Hash, User2, Navigation, FileBadge, Building2 } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Filter,
+  Sparkles,
+  Hash,
+  User2,
+  Navigation,
+  FileBadge,
+  Building2,
+} from "lucide-react";
 import { loadInstitutionalProperties } from "@/lib/property-repository";
 import type { Property } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
@@ -14,17 +24,28 @@ export const Route = createFileRoute("/search")({
   component: SearchPage,
 });
 
-const filters = ["All", "Residential", "Commercial", "Agricultural", "Verified", "Disputed", "Bengaluru", "Mysuru", "Pune", "Gurugram"];
+const filters = [
+  "All",
+  "Residential",
+  "Commercial",
+  "Agricultural",
+  "Verified",
+  "Disputed",
+  "Bengaluru",
+  "Mysuru",
+  "Pune",
+  "Gurugram",
+];
 
 type SearchMode = "auto" | "passport" | "gps" | "owner" | "survey" | "address";
 
 const MODES: { id: SearchMode; label: string; icon: typeof Hash; hint: string }[] = [
-  { id: "auto",     label: "Auto",      icon: Sparkles, hint: "AI detects intent" },
-  { id: "passport", label: "Passport",  icon: FileBadge, hint: "e.g. TT-8421-KA" },
-  { id: "gps",      label: "GPS",       icon: Navigation, hint: "lat, lng" },
-  { id: "owner",    label: "Owner",     icon: User2, hint: "Full name" },
-  { id: "survey",   label: "Survey #",  icon: Hash, hint: "e.g. KA/SUR/2024/8421" },
-  { id: "address",  label: "Address",   icon: Building2, hint: "Street or locality" },
+  { id: "auto", label: "Auto", icon: Sparkles, hint: "AI detects intent" },
+  { id: "passport", label: "Passport", icon: FileBadge, hint: "e.g. TT-8421-KA" },
+  { id: "gps", label: "GPS", icon: Navigation, hint: "lat, lng" },
+  { id: "owner", label: "Owner", icon: User2, hint: "Full name" },
+  { id: "survey", label: "Survey #", icon: Hash, hint: "e.g. KA/SUR/2024/8421" },
+  { id: "address", label: "Address", icon: Building2, hint: "Street or locality" },
 ];
 
 function detectMode(q: string): SearchMode {
@@ -43,10 +64,18 @@ function scoreMatch(p: Property, q: string, mode: SearchMode): number {
   if (!lo) return 1;
   let s = 0;
   if (p.passportId.toLowerCase().includes(lo)) s += mode === "passport" ? 6 : 4;
+  if (p.id.toLowerCase().includes(lo)) s += mode === "passport" ? 5 : 3;
   if (p.title.toLowerCase().includes(lo)) s += 3;
   if (p.address.toLowerCase().includes(lo)) s += mode === "address" ? 5 : 2;
   if (p.region.toLowerCase().includes(lo)) s += 1;
   if (p.owner.toLowerCase().includes(lo)) s += mode === "owner" ? 5 : 2;
+  if (
+    Object.values(p.cadastralIdentifiers ?? {}).some((value) =>
+      String(value).toLowerCase().includes(lo),
+    )
+  ) {
+    s += mode === "survey" ? 6 : 3;
+  }
   if (mode === "gps") {
     const m = lo.match(/^([-+]?\d+\.\d+)\s*,\s*([-+]?\d+\.\d+)/);
     if (m) {
@@ -70,46 +99,61 @@ function SearchPage() {
   }, []);
 
   const effectiveMode = mode === "auto" ? detectMode(q) : mode;
-  const modeMeta = MODES.find(m => m.id === (mode === "auto" ? effectiveMode : mode)) ?? MODES[0];
+  const modeMeta = MODES.find((m) => m.id === (mode === "auto" ? effectiveMode : mode)) ?? MODES[0];
   const ModeIcon = modeMeta.icon;
 
   const results = useMemo(() => {
     return properties
-      .filter(p => {
+      .filter((p) => {
         if (f === "All") return true;
         if (f === "Verified") return p.status === "verified";
         if (f === "Disputed") return p.status === "disputed";
-        if (f === "Residential" || f === "Commercial" || f === "Agricultural") return p.type.toLowerCase() === f.toLowerCase();
+        if (f === "Residential" || f === "Commercial" || f === "Agricultural")
+          return p.type.toLowerCase() === f.toLowerCase();
         return p.region.toLowerCase() === f.toLowerCase();
       })
-      .map(p => ({ property: p, score: scoreMatch(p, q, effectiveMode) }))
-      .filter(x => x.score > 0)
+      .map((p) => ({ property: p, score: scoreMatch(p, q, effectiveMode) }))
+      .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)
-      .map(x => x.property);
-  }, [q, f, effectiveMode]);
+      .map((x) => x.property);
+  }, [properties, q, f, effectiveMode]);
+
+  const isBank = profile?.role === "bank";
 
   return (
-    <AppShell title="Property Search" subtitle="Inspect available property records, verification, risk, and land details." requiredRole={["government", "admin"]}>
+    <AppShell
+      title="Property Search"
+      subtitle={
+        isBank
+          ? "Search authorized property records for institutional review and underwriting."
+          : "Inspect available property records, verification, risk, and land details."
+      }
+      requiredRole={["government", "bank", "admin"]}
+    >
       <div className="surface-card p-6">
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={q}
-              onChange={e => setQ(e.target.value)}
+              onChange={(e) => setQ(e.target.value)}
               className="h-12 pl-10 pr-32 text-sm"
-              placeholder="Try TT-8421-KA · 12.9567, 77.6200 · Ananya Sharma · KA/SUR/2024/8421"
+              placeholder="Search passport ID, property ID, survey number, name or location"
             />
             <span className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] text-primary ring-1 ring-primary/20">
               <ModeIcon className="h-3 w-3" /> {modeMeta.label}
             </span>
           </div>
-          <Button className="h-12"><Sparkles className="h-4 w-4 mr-1" /> Search Registry</Button>
-          <Button variant="outline" className="h-12"><Filter className="h-4 w-4" /></Button>
+          <Button className="h-12">
+            <Sparkles className="h-4 w-4 mr-1" /> Search {isBank ? "Properties" : "Registry"}
+          </Button>
+          <Button variant="outline" className="h-12">
+            <Filter className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {MODES.map(m => {
+          {MODES.map((m) => {
             const I = m.icon;
             return (
               <button
@@ -125,38 +169,64 @@ function SearchPage() {
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {filters.map(x => (
-            <button key={x} onClick={() => setF(x)} className={`rounded-full px-3 py-1 text-xs ring-1 transition cursor-pointer ${f === x ? "bg-primary text-primary-foreground ring-primary" : "bg-surface text-muted-foreground ring-border hover:bg-muted"}`}>{x}</button>
+          {filters.map((x) => (
+            <button
+              key={x}
+              onClick={() => setF(x)}
+              className={`rounded-full px-3 py-1 text-xs ring-1 transition cursor-pointer ${f === x ? "bg-primary text-primary-foreground ring-primary" : "bg-surface text-muted-foreground ring-border hover:bg-muted"}`}
+            >
+              {x}
+            </button>
           ))}
         </div>
       </div>
 
       <p className="mt-5 text-xs text-muted-foreground">
-        Showing {results.length} matching parcels — {q.trim() ? "ranked by relevance" : "all records"} · mode <span className="font-semibold text-foreground">{modeMeta.label.toLowerCase()}</span>
+        Showing {results.length} matching parcels —{" "}
+        {q.trim() ? "ranked by relevance" : "all records"} · mode{" "}
+        <span className="font-semibold text-foreground">{modeMeta.label.toLowerCase()}</span>
       </p>
 
       <div className="mt-3 space-y-3">
-        {results.map(p => (
-          <Link key={p.id} to="/properties/$id" params={{ id: p.id }} className="surface-card flex items-center gap-4 p-4 hover:border-primary/40 transition">
-            <div className="grid h-16 w-20 place-items-center rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 font-mono text-[10px] text-muted-foreground font-semibold">{p.passportId}</div>
+        {results.map((p) => (
+          <Link
+            key={p.id}
+            to="/properties/$id"
+            params={{ id: p.id }}
+            className="surface-card flex items-center gap-4 p-4 hover:border-primary/40 transition"
+          >
+            <div className="grid h-16 w-20 place-items-center rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 font-mono text-[10px] text-muted-foreground font-semibold">
+              {p.passportId}
+            </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold text-sm text-foreground">{p.title}</p>
                 <StatusBadge status={p.status} />
                 <Pill tone="primary">Trust {p.trustScore}</Pill>
               </div>
-              <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> {p.address} · {p.region}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{p.coords.lat.toFixed(4)}° N, {p.coords.lng.toFixed(4)}° E · {p.area.toLocaleString()} m²</p>
+              <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3" /> {p.address} · {p.region}
+              </p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {p.coords.lat.toFixed(4)}° N, {p.coords.lng.toFixed(4)}° E ·{" "}
+                {p.area.toLocaleString()} m²
+              </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] uppercase text-muted-foreground font-semibold">AI Valuation</p>
-              <p className="font-display text-base font-bold text-foreground font-mono">₹{(p.valuation/10000000).toFixed(2)} Cr</p>
+              <p className="text-[10px] uppercase text-muted-foreground font-semibold">
+                AI Valuation
+              </p>
+              <p className="font-display text-base font-bold text-foreground font-mono">
+                ₹{(p.valuation / 10000000).toFixed(2)} Cr
+              </p>
             </div>
           </Link>
         ))}
         {results.length === 0 && (
           <div className="surface-card p-10 text-center text-sm text-muted-foreground">
-            No parcels matched. Try a different search mode or filter.
+            {isBank
+              ? "No authorized property records found."
+              : "No parcels matched. Try a different search mode or filter."}
           </div>
         )}
       </div>

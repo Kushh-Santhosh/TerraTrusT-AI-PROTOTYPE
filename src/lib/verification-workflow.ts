@@ -47,9 +47,9 @@ export interface VerificationResult {
   completedAt: string;
   steps: WorkflowStep[];
   stateCode?: string;
-  cadastralIdentifiers?: Record<string, any>;
-  stateSources?: Record<string, any>;
-  normalizedEvidence?: any[];
+  cadastralIdentifiers?: Record<string, unknown>;
+  stateSources?: Record<string, unknown>;
+  normalizedEvidence?: unknown[];
 }
 
 export interface VerificationPayload {
@@ -60,8 +60,8 @@ export interface VerificationPayload {
   actorRole?: string;
   recipientRole?: string;
   stateCode?: string;
-  cadastralIdentifiers?: Record<string, any>;
-  stateSources?: Record<string, any>;
+  cadastralIdentifiers?: Record<string, unknown>;
+  stateSources?: Record<string, unknown>;
   property: {
     title: string;
     address: string;
@@ -78,7 +78,7 @@ export interface VerificationPayload {
     longitude?: number;
     boundary: { lat: number; lng: number }[];
     stateCode?: string;
-    cadastralIdentifiers?: Record<string, any>;
+    cadastralIdentifiers?: Record<string, unknown>;
   };
   documents: { id: string; name: string; kind: string; verified: boolean }[];
   existingScores: {
@@ -111,7 +111,10 @@ export function activeProvider(): WorkflowProvider {
   return "n8n";
 }
 
-export function buildPayload(p: Property, extra?: { userId?: string; propertyUuid?: string }): VerificationPayload {
+export function buildPayload(
+  p: Property,
+  extra?: { userId?: string; propertyUuid?: string },
+): VerificationPayload {
   const stateCode = p.stateCode || (p.region.toLowerCase().includes("maharashtra") ? "MH" : "KA");
   return {
     propertyId: p.id,
@@ -391,7 +394,7 @@ export interface RunOutcome {
 export async function runVerification(
   p: Property,
   signal?: AbortSignal,
-  extra?: { userId?: string; propertyUuid?: string }
+  extra?: { userId?: string; propertyUuid?: string },
 ): Promise<RunOutcome> {
   const url = getWebhookUrl();
   if (!url) {

@@ -45,31 +45,51 @@ function Page() {
       subtitle="Multi-temporal optical earth observation & vegetative change detection."
       actions={
         <>
-          <Button variant="outline"><Calendar className="h-4 w-4 mr-1" /> Compare Dates</Button>
-          <Button><Maximize2 className="h-4 w-4 mr-1" /> Full Screen</Button>
+          <Button variant="outline">
+            <Calendar className="h-4 w-4 mr-1" /> Compare Dates
+          </Button>
+          <Button>
+            <Maximize2 className="h-4 w-4 mr-1" /> Full Screen
+          </Button>
         </>
       }
     >
-      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: p.title || id, to: `/properties/${id}` }, { label: "Satellite" }]} />
+      <Crumbs
+        items={[
+          { label: "Properties", to: "/properties" },
+          { label: p.title || id, to: `/properties/${id}` },
+          { label: "Satellite" },
+        ]}
+      />
       <PropertySubNav propertyId={id} activeTab="satellite" />
 
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">SATELLITE COMPARISON:</strong> Multi-epoch satellite scans for ground boundary alignment and encroachment monitoring.
+        <strong className="text-foreground">SATELLITE COMPARISON:</strong> Multi-epoch satellite
+        scans for ground boundary alignment and encroachment monitoring.
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
         <div className="surface-card relative h-[60vh] overflow-hidden rounded-xl border border-border">
           <MapMock properties={[p]} highlightId={p.id} height={500} />
           <div className="absolute right-4 top-4 z-10 flex gap-2 pointer-events-none">
-            <Pill tone="info"><Layers className="h-3 w-3 inline mr-1" /> Sentinel-2 · 2024-09-01</Pill>
+            <Pill tone="info">
+              <Layers className="h-3 w-3 inline mr-1" /> Sentinel-2 · 2024-09-01
+            </Pill>
           </div>
         </div>
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Available Snapshots</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Available Snapshots
+          </p>
           {snapshots.map((s) => (
-            <button key={s.date} className="surface-card w-full p-3 text-left transition hover:border-primary/50 cursor-pointer">
+            <button
+              key={s.date}
+              className="surface-card w-full p-3 text-left transition hover:border-primary/50 cursor-pointer"
+            >
               <p className="text-sm font-medium text-foreground">{s.date}</p>
-              <p className="text-xs text-muted-foreground">{s.source} · cloud {s.cloud}</p>
+              <p className="text-xs text-muted-foreground">
+                {s.source} · cloud {s.cloud}
+              </p>
             </button>
           ))}
         </div>

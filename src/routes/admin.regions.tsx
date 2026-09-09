@@ -171,12 +171,17 @@ function Page() {
                   <h2 className="text-lg font-bold text-foreground">
                     {selectedProfile.stateName} ({selectedProfile.stateCode})
                   </h2>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
+                  <Badge
+                    variant="outline"
+                    className="bg-primary/10 text-primary border-primary/30 text-xs"
+                  >
                     State Land Profile
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Primary Area Unit: <strong>{selectedProfile.unitConversion.primaryLocalUnit}</strong> ({selectedProfile.unitConversion.label})
+                  Primary Area Unit:{" "}
+                  <strong>{selectedProfile.unitConversion.primaryLocalUnit}</strong> (
+                  {selectedProfile.unitConversion.label})
                 </p>
               </div>
 
@@ -191,23 +196,39 @@ function Page() {
             {/* Terminology Grid */}
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-xs">
               <div className="rounded-lg border border-border/70 bg-background/50 p-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Survey Label</p>
-                <p className="mt-1 font-semibold text-foreground">{selectedProfile.localTerminology.surveyNumberLabel}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Survey Label
+                </p>
+                <p className="mt-1 font-semibold text-foreground">
+                  {selectedProfile.localTerminology.surveyNumberLabel}
+                </p>
               </div>
 
               <div className="rounded-lg border border-border/70 bg-background/50 p-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Subdivision / Hissa</p>
-                <p className="mt-1 font-semibold text-foreground">{selectedProfile.localTerminology.subdivisionLabel}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Subdivision / Hissa
+                </p>
+                <p className="mt-1 font-semibold text-foreground">
+                  {selectedProfile.localTerminology.subdivisionLabel}
+                </p>
               </div>
 
               <div className="rounded-lg border border-border/70 bg-background/50 p-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Khata / Urban ID</p>
-                <p className="mt-1 font-semibold text-foreground">{selectedProfile.localTerminology.khataOrAccountLabel}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Khata / Urban ID
+                </p>
+                <p className="mt-1 font-semibold text-foreground">
+                  {selectedProfile.localTerminology.khataOrAccountLabel}
+                </p>
               </div>
 
               <div className="rounded-lg border border-border/70 bg-background/50 p-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Deed Registry System</p>
-                <p className="mt-1 font-semibold text-foreground">{selectedProfile.localTerminology.deedRegistrationSystemName}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Deed Registry System
+                </p>
+                <p className="mt-1 font-semibold text-foreground">
+                  {selectedProfile.localTerminology.deedRegistrationSystemName}
+                </p>
               </div>
             </div>
           </div>
@@ -217,10 +238,12 @@ function Page() {
             <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">
               <div>
                 <h3 className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                  <ShieldCheck className="h-4 w-4 text-primary" /> Official Government Systems ({selectedProfile.officialSystems.length})
+                  <ShieldCheck className="h-4 w-4 text-primary" /> Official Government Systems (
+                  {selectedProfile.officialSystems.length})
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Verified public portals and evidentiary connectors for {selectedProfile.stateName}.
+                  Verified public portals and evidentiary connectors for {selectedProfile.stateName}
+                  .
                 </p>
               </div>
               <span className="text-xs text-muted-foreground">Zero mock connections</span>
@@ -241,10 +264,10 @@ function Page() {
                           sys.adapterStatus === "DOCUMENT_EVIDENCE"
                             ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
                             : sys.adapterStatus === "AUTHORIZED_CONNECTOR"
-                            ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
-                            : sys.adapterStatus === "MANUAL_REVIEW"
-                            ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
-                            : "bg-muted text-muted-foreground"
+                              ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
+                              : sys.adapterStatus === "MANUAL_REVIEW"
+                                ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+                                : "bg-muted text-muted-foreground"
                         }`}
                       >
                         {sys.adapterStatus.replace("_", " ")}

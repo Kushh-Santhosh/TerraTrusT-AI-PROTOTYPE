@@ -28,7 +28,10 @@ function Dashboard() {
   const [userProperties, setUserProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const userName = profile?.full_name || user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Citizen");
+  const userName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    (user?.email ? user.email.split("@")[0] : "Citizen");
 
   useEffect(() => {
     if (user?.id) {
@@ -41,22 +44,55 @@ function Dashboard() {
     }
   }, [user?.id]);
 
-  const verifiedCount = userProperties.filter(p => p.status === "verified").length;
-  const pendingCount = userProperties.filter(p => p.status === "pending").length;
-  const disputedCount = userProperties.filter(p => p.status === "disputed").length;
+  const verifiedCount = userProperties.filter((p) => p.status === "verified").length;
+  const pendingCount = userProperties.filter((p) => p.status === "pending").length;
+  const disputedCount = userProperties.filter((p) => p.status === "disputed").length;
   const avgTrust = userProperties.length
-    ? Math.round(userProperties.reduce((acc, p) => acc + (p.trustScore || 0), 0) / userProperties.length)
+    ? Math.round(
+        userProperties.reduce((acc, p) => acc + (p.trustScore || 0), 0) / userProperties.length,
+      )
     : 0;
 
-  const actionItems = userProperties.length > 0 ? [
-    { title: "Review Verification Status", desc: `${userProperties[0].title} · Score: ${userProperties[0].trustScore}/100`, to: `/properties/${userProperties[0].id}/verify` },
-    ...(userProperties[1] ? [{ title: "Inspect Property Boundaries", desc: `${userProperties[1].title} · Cadastral polygon`, to: `/properties/${userProperties[1].id}/boundary` }] : []),
-    { title: "Run Instant AI Valuation", desc: `${userProperties[0].title} · ${formatInr(userProperties[0].valuation || 24000000)}`, to: `/valuation` },
-  ] : [
-    { title: "Register Your First Property", desc: "Mint tamper-evident Property Passport with AI OCR", to: "/properties/new" },
-    { title: "Explore Cadastral Map", desc: "View national land parcels and high-resolution satellite layers", to: "/map" },
-    { title: "AI Intelligence Suite", desc: "Document OCR, boundary detection, and risk analysis", to: "/ai" },
-  ];
+  const actionItems =
+    userProperties.length > 0
+      ? [
+          {
+            title: "Review Verification Status",
+            desc: `${userProperties[0].title} · Score: ${userProperties[0].trustScore}/100`,
+            to: `/properties/${userProperties[0].id}/verify`,
+          },
+          ...(userProperties[1]
+            ? [
+                {
+                  title: "Inspect Property Boundaries",
+                  desc: `${userProperties[1].title} · Cadastral polygon`,
+                  to: `/properties/${userProperties[1].id}/boundary`,
+                },
+              ]
+            : []),
+          {
+            title: "Run Instant AI Valuation",
+            desc: `${userProperties[0].title} · ${formatInr(userProperties[0].valuation || 24000000)}`,
+            to: `/valuation`,
+          },
+        ]
+      : [
+          {
+            title: "Register Your First Property",
+            desc: "Mint tamper-evident Property Passport with AI OCR",
+            to: "/properties/new",
+          },
+          {
+            title: "Explore Cadastral Map",
+            desc: "View national land parcels and high-resolution satellite layers",
+            to: "/map",
+          },
+          {
+            title: "AI Intelligence Suite",
+            desc: "Document OCR, boundary detection, and risk analysis",
+            to: "/ai",
+          },
+        ];
 
   return (
     <AppShell
@@ -78,10 +114,42 @@ function Dashboard() {
       }
     >
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard kpi={{ label: "Properties", value: `${userProperties.length}`, delta: "+1", trend: "up", hint: "registered in portfolio" }} />
-        <StatCard kpi={{ label: "Avg. trust score", value: `${avgTrust}`, delta: "+4", trend: "up", hint: "rolling 30 days" }} />
-        <StatCard kpi={{ label: "Portfolio value", value: formatInr(userProperties.reduce((sum, p) => sum + (p.valuation || 0), 0)), delta: "+4.2%", trend: "up", hint: "AI valuation estimate" }} />
-        <StatCard kpi={{ label: "Open actions", value: `${disputedCount + pendingCount}`, delta: "-1", trend: "down", hint: "pending verifications" }} />
+        <StatCard
+          kpi={{
+            label: "Properties",
+            value: `${userProperties.length}`,
+            delta: "+1",
+            trend: "up",
+            hint: "registered in portfolio",
+          }}
+        />
+        <StatCard
+          kpi={{
+            label: "Avg. trust score",
+            value: `${avgTrust}`,
+            delta: "+4",
+            trend: "up",
+            hint: "rolling 30 days",
+          }}
+        />
+        <StatCard
+          kpi={{
+            label: "Portfolio value",
+            value: formatInr(userProperties.reduce((sum, p) => sum + (p.valuation || 0), 0)),
+            delta: "+4.2%",
+            trend: "up",
+            hint: "AI valuation estimate",
+          }}
+        />
+        <StatCard
+          kpi={{
+            label: "Open actions",
+            value: `${disputedCount + pendingCount}`,
+            delta: "-1",
+            trend: "down",
+            hint: "pending verifications",
+          }}
+        />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -89,28 +157,72 @@ function Dashboard() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-medium">Land Property Evaluation</p>
-              <p className="text-xs text-muted-foreground">Current estimated value and verification outlook from your persisted property records</p>
+              <p className="text-xs text-muted-foreground">
+                Current estimated value and verification outlook from your persisted property
+                records
+              </p>
             </div>
             <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
           {userProperties[0] ? (
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-lg bg-muted/40 p-4"><p className="text-xs text-muted-foreground">Current estimated value</p><p className="mt-1 font-display text-2xl">{userProperties[0].valuation ? formatInr(userProperties[0].valuation) : "Valuation pending"}</p></div>
-              <div className="rounded-lg bg-muted/40 p-4"><p className="text-xs text-muted-foreground">Verification</p><p className="mt-1 font-display text-2xl">{userProperties[0].trustScore} / 100</p><p className="text-xs text-muted-foreground">{userProperties[0].surveyorDecision === "verified" ? "Surveyor field verification complete" : "Surveyor verification pending"}</p></div>
-              <div className="rounded-lg bg-muted/40 p-4"><p className="text-xs text-muted-foreground">Future outlook</p><p className="mt-1 text-sm font-medium">Projection unavailable</p><p className="text-xs text-muted-foreground">More market/property data is required.</p></div>
+              <div className="rounded-lg bg-muted/40 p-4">
+                <p className="text-xs text-muted-foreground">Current estimated value</p>
+                <p className="mt-1 font-display text-2xl">
+                  {userProperties[0].valuation
+                    ? formatInr(userProperties[0].valuation)
+                    : "Valuation pending"}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/40 p-4">
+                <p className="text-xs text-muted-foreground">Verification</p>
+                <p className="mt-1 font-display text-2xl">{userProperties[0].trustScore} / 100</p>
+                <p className="text-xs text-muted-foreground">
+                  {userProperties[0].surveyorDecision === "verified"
+                    ? "Surveyor field verification complete"
+                    : "Surveyor verification pending"}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/40 p-4">
+                <p className="text-xs text-muted-foreground">Future outlook</p>
+                <p className="mt-1 text-sm font-medium">Projection unavailable</p>
+                <p className="text-xs text-muted-foreground">
+                  More market/property data is required.
+                </p>
+              </div>
             </div>
-          ) : <p className="mt-6 rounded-lg border border-border p-5 text-sm text-muted-foreground">Valuation pending. Register a property to run AI valuation.</p>}
+          ) : (
+            <p className="mt-6 rounded-lg border border-border p-5 text-sm text-muted-foreground">
+              Valuation pending. Register a property to run AI valuation.
+            </p>
+          )}
           <div className="mt-5 flex flex-wrap gap-2">
-            {userProperties[0] && <Link to="/properties/$id" params={{ id: userProperties[0].id }}><Button variant="outline" size="sm"><ClipboardCheck className="mr-1.5 h-4 w-4" /> View verification</Button></Link>}
-            <Link to="/valuation"><Button size="sm"><Sparkles className="mr-1.5 h-4 w-4" /> Run AI valuation</Button></Link>
+            {userProperties[0] && (
+              <Link to="/properties/$id" params={{ id: userProperties[0].id }}>
+                <Button variant="outline" size="sm">
+                  <ClipboardCheck className="mr-1.5 h-4 w-4" /> View verification
+                </Button>
+              </Link>
+            )}
+            <Link to="/valuation">
+              <Button size="sm">
+                <Sparkles className="mr-1.5 h-4 w-4" /> Run AI valuation
+              </Button>
+            </Link>
           </div>
-          <p className="mt-4 text-[11px] text-muted-foreground">AI-estimated scenario — not a guaranteed market return.</p>
+          <p className="mt-4 text-[11px] text-muted-foreground">
+            AI-estimated scenario — not a guaranteed market return.
+          </p>
         </div>
 
         <div className="surface-card flex flex-col p-5">
           <p className="font-medium">Portfolio Trust Score</p>
-          <p className="text-xs text-muted-foreground">Weighted trust metric across your registered properties</p>
-          <div className="my-6 flex justify-center"><TrustScore value={avgTrust} size={150} /></div>
+          <p className="text-xs text-muted-foreground">
+            Weighted trust metric across your registered properties
+          </p>
+          <div className="my-6 flex justify-center">
+            <TrustScore value={avgTrust} size={150} />
+          </div>
           <div className="space-y-2 text-sm">
             <Row label="Verified" value={String(verifiedCount)} color="bg-success" />
             <Row label="Pending" value={String(pendingCount)} color="bg-warning" />
@@ -123,7 +235,10 @@ function Dashboard() {
         <div className="surface-card p-5 lg:col-span-2 min-w-0 overflow-hidden">
           <div className="mb-3 flex items-center justify-between">
             <p className="font-medium">My properties</p>
-            <Link to="/properties" className="text-xs text-primary inline-flex items-center gap-1 hover:underline">
+            <Link
+              to="/properties"
+              className="text-xs text-primary inline-flex items-center gap-1 hover:underline"
+            >
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -142,21 +257,38 @@ function Dashboard() {
                 {userProperties.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-3 py-8 text-center text-xs text-muted-foreground">
-                      No registered properties in your portfolio yet. Click <Link to="/properties/new" className="text-primary font-medium hover:underline">&quot;New Property Passport&quot;</Link> to register your first parcel.
+                      No registered properties in your portfolio yet. Click{" "}
+                      <Link
+                        to="/properties/new"
+                        className="text-primary font-medium hover:underline"
+                      >
+                        &quot;New Property Passport&quot;
+                      </Link>{" "}
+                      to register your first parcel.
                     </td>
                   </tr>
                 )}
-                {userProperties.map(p => (
+                {userProperties.map((p) => (
                   <tr key={p.id} className="hover:bg-muted/40 transition">
                     <td className="px-3 py-3">
-                      <Link to="/properties/$id" params={{ id: p.id }} className="font-medium text-foreground hover:text-primary transition">
+                      <Link
+                        to="/properties/$id"
+                        params={{ id: p.id }}
+                        className="font-medium text-foreground hover:text-primary transition"
+                      >
                         {p.title}
                       </Link>
                       <p className="text-xs text-muted-foreground">{p.address}</p>
                     </td>
-                    <td className="px-3 py-3 font-mono text-xs text-primary font-medium">{p.passportId}</td>
-                    <td className="px-3 py-3"><StatusBadge status={p.status} /></td>
-                    <td className="px-3 py-3"><TrustPill v={p.trustScore} /></td>
+                    <td className="px-3 py-3 font-mono text-xs text-primary font-medium">
+                      {p.passportId}
+                    </td>
+                    <td className="px-3 py-3">
+                      <StatusBadge status={p.status} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <TrustPill v={p.trustScore} />
+                    </td>
                     <td className="px-3 py-3 text-right font-medium">{formatInr(p.valuation)}</td>
                   </tr>
                 ))}
@@ -168,12 +300,19 @@ function Dashboard() {
         <div className="surface-card p-5">
           <div className="mb-3 flex items-center justify-between">
             <p className="font-medium">Recent Notifications</p>
-            <Link to="/notifications" className="text-xs text-primary hover:underline">All notifications</Link>
+            <Link to="/notifications" className="text-xs text-primary hover:underline">
+              All notifications
+            </Link>
           </div>
           <ul className="space-y-3">
-            {notifications.slice(0, 4).map(n => (
-              <li key={n.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/30 transition">
-                <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${n.kind === "success" ? "bg-success" : n.kind === "warning" ? "bg-warning" : n.kind === "alert" ? "bg-destructive" : "bg-primary"}`} />
+            {notifications.slice(0, 4).map((n) => (
+              <li
+                key={n.id}
+                className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/30 transition"
+              >
+                <span
+                  className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${n.kind === "success" ? "bg-success" : n.kind === "warning" ? "bg-warning" : n.kind === "alert" ? "bg-destructive" : "bg-primary"}`}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
                   <p className="text-xs text-muted-foreground">{n.body}</p>
@@ -195,7 +334,9 @@ function Dashboard() {
             <Bell className="h-4 w-4 text-primary" />
             <p className="font-medium">Actions for you</p>
           </div>
-          <p className="text-xs text-muted-foreground">Pending verification tasks requiring your documentation or confirmation.</p>
+          <p className="text-xs text-muted-foreground">
+            Pending verification tasks requiring your documentation or confirmation.
+          </p>
           <div className="mt-1 space-y-2">
             {actionItems.map((item) => (
               <Link
@@ -204,7 +345,9 @@ function Dashboard() {
                 className="flex items-center justify-between rounded-lg border border-border p-3 text-left hover:bg-muted/50 hover:border-primary/40 transition group"
               >
                 <div>
-                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition">{item.title}</p>
+                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition">
+                    {item.title}
+                  </p>
                   <p className="text-xs text-muted-foreground">{item.desc}</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition shrink-0 ml-2" />
@@ -230,6 +373,19 @@ function Row({ label, value, color }: { label: string; value: string; color: str
 }
 
 function TrustPill({ v }: { v: number }) {
-  const tone = v >= 85 ? "text-success bg-success/10" : v >= 65 ? "text-primary bg-primary/10" : v >= 45 ? "text-warning bg-warning/15" : "text-destructive bg-destructive/10";
-  return <span className={`inline-flex w-12 justify-center rounded-md px-2 py-0.5 text-xs font-semibold ${tone}`}>{v}</span>;
+  const tone =
+    v >= 85
+      ? "text-success bg-success/10"
+      : v >= 65
+        ? "text-primary bg-primary/10"
+        : v >= 45
+          ? "text-warning bg-warning/15"
+          : "text-destructive bg-destructive/10";
+  return (
+    <span
+      className={`inline-flex w-12 justify-center rounded-md px-2 py-0.5 text-xs font-semibold ${tone}`}
+    >
+      {v}
+    </span>
+  );
 }

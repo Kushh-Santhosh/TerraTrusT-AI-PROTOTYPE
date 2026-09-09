@@ -20,7 +20,13 @@ export type VerificationCheckResult =
 export interface StateLandSystem {
   id: string;
   name: string;
-  category: "land_records" | "cadastral" | "registration" | "mutation" | "urban_municipal" | "planning_authority";
+  category:
+    | "land_records"
+    | "cadastral"
+    | "registration"
+    | "mutation"
+    | "urban_municipal"
+    | "planning_authority";
   officialPortalUrl: string;
   department: string;
   adapterStatus: SourceAdapterStatus;
@@ -35,7 +41,14 @@ export interface StateCadastralFieldDefinition {
   placeholder?: string;
   hint?: string;
   required: boolean;
-  applicableTo?: ("residential" | "agricultural" | "commercial" | "industrial" | "vacant" | "forest")[];
+  applicableTo?: (
+    | "residential"
+    | "agricultural"
+    | "commercial"
+    | "industrial"
+    | "vacant"
+    | "forest"
+  )[];
   isUrbanOnly?: boolean;
   isRuralOnly?: boolean;
 }

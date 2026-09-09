@@ -15,19 +15,41 @@ export function PropertyCardMiniMap({
   title,
   className = "h-36 w-full",
 }: PropertyCardMiniMapProps) {
-  const validBoundary = Array.isArray(boundary) && boundary.length >= 3 && boundary.every(p => typeof p.lat === "number" && typeof p.lng === "number" && !isNaN(p.lat) && !isNaN(p.lng));
-  const hasValidCoords = Boolean(coords && typeof coords.lat === "number" && typeof coords.lng === "number" && !isNaN(coords.lat) && !isNaN(coords.lng) && coords.lat !== 0 && coords.lng !== 0);
+  const validBoundary =
+    Array.isArray(boundary) &&
+    boundary.length >= 3 &&
+    boundary.every(
+      (p) =>
+        typeof p.lat === "number" && typeof p.lng === "number" && !isNaN(p.lat) && !isNaN(p.lng),
+    );
+  const hasValidCoords = Boolean(
+    coords &&
+    typeof coords.lat === "number" &&
+    typeof coords.lng === "number" &&
+    !isNaN(coords.lat) &&
+    !isNaN(coords.lng) &&
+    coords.lat !== 0 &&
+    coords.lng !== 0,
+  );
 
-  const centerLat = hasValidCoords ? coords!.lat : (validBoundary ? boundary.reduce((acc, p) => acc + p.lat, 0) / boundary.length : null);
-  const centerLng = hasValidCoords ? coords!.lng : (validBoundary ? boundary.reduce((acc, p) => acc + p.lng, 0) / boundary.length : null);
+  const centerLat = hasValidCoords
+    ? coords!.lat
+    : validBoundary
+      ? boundary.reduce((acc, p) => acc + p.lat, 0) / boundary.length
+      : null;
+  const centerLng = hasValidCoords
+    ? coords!.lng
+    : validBoundary
+      ? boundary.reduce((acc, p) => acc + p.lng, 0) / boundary.length
+      : null;
 
   const { svgPoints, centroidSvg } = useMemo(() => {
     if (!validBoundary) {
       return { svgPoints: "", centroidSvg: null };
     }
 
-    const lats = boundary.map(p => p.lat);
-    const lngs = boundary.map(p => p.lng);
+    const lats = boundary.map((p) => p.lat);
+    const lngs = boundary.map((p) => p.lng);
     let minLat = Math.min(...lats);
     let maxLat = Math.max(...lats);
     let minLng = Math.min(...lngs);
@@ -47,7 +69,7 @@ export function PropertyCardMiniMap({
     const width = 300;
     const height = 180;
 
-    const pts = boundary.map(p => {
+    const pts = boundary.map((p) => {
       const x = ((p.lng - minLng) / (maxLng - minLng)) * width;
       const y = height - ((p.lat - minLat) / (maxLat - minLat)) * height;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
@@ -65,12 +87,20 @@ export function PropertyCardMiniMap({
   }, [boundary, validBoundary, centerLat, centerLng]);
 
   return (
-    <div className={`relative overflow-hidden bg-slate-900 border-b border-border/40 select-none ${className}`}>
+    <div
+      className={`relative overflow-hidden bg-slate-900 border-b border-border/40 select-none ${className}`}
+    >
       {/* Cartographic background grid */}
       <svg className="absolute inset-0 h-full w-full opacity-20" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="cadastral-grid" width="24" height="24" patternUnits="userSpaceOnUse">
-            <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-primary/50" />
+            <path
+              d="M 24 0 L 0 0 0 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="0.5"
+              className="text-primary/50"
+            />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#cadastral-grid)" />

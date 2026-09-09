@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { Crumbs, Pill, SectionTitle } from "@/components/ui-ext/Scaffold";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,7 @@ import { RealMap } from "@/components/ui-ext/RealMap";
 import { calculatePolygonArea } from "@/lib/gis-utils";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import type { Property } from "@/lib/types";
 
 export const Route = createFileRoute("/properties/$id/verify")({
   head: () => ({
@@ -59,15 +60,15 @@ export const Route = createFileRoute("/properties/$id/verify")({
     ],
   }),
   loader: async ({ params }) => {
-    const p = await loadPropertyById(params.id);
-    if (!p) throw notFound();
-    return { property: p };
+    return { property: await loadPropertyById(params.id) };
   },
   component: Page,
 });
 
 function Page() {
-  const { property } = Route.useLoaderData();
+  const { property: loaderProperty } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const [property, setProperty] = useState<Property | null>(loaderProperty);
   const { user, profile } = useAuth();
   const isGovOrAdmin = profile?.role === "government" || profile?.role === "admin";
 
@@ -79,19 +80,19 @@ function Page() {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // State profile
-  const stateProfile = getStateProfile(property.stateCode || property.region);
+  const stateProfile = getStateProfile(property?.stateCode || property?.region || "Karnataka");
 
   // Government Decision state
   const [govDecision, setGovDecision] = useState<
     "approved" | "rejected" | "clarification_requested" | null
   >(
-    property.governmentDecision && property.governmentDecision !== "pending"
+    property?.governmentDecision && property.governmentDecision !== "pending"
       ? property.governmentDecision
       : null,
   );
-  const [officerNotes, setOfficerNotes] = useState(property.governmentOfficerNotes || "");
+  const [officerNotes, setOfficerNotes] = useState(property?.governmentOfficerNotes || "");
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
-  const [propertyStatus, setPropertyStatus] = useState(property.status);
+  const [propertyStatus, setPropertyStatus] = useState(property?.status || "pending");
   const [surveyors, setSurveyors] = useState<Awaited<ReturnType<typeof loadGovernmentSurveyors>>>(
     [],
   );
@@ -105,8 +106,12 @@ function Page() {
     if (isGovOrAdmin) loadGovernmentSurveyors().then(setSurveyors);
   }, [isGovOrAdmin]);
 
+  useEffect(() => {
+    if (!property) loadPropertyById(id).then(setProperty);
+  }, [id, property]);
+
   const assignSurveyor = async () => {
-    if (!user?.id || !selectedSurveyor) return;
+    if (!user?.id || !selectedSurveyor || !property) return;
     setAssigning(true);
     const outcome = await createSurveyorAssignment({
       propertyId: property.id,
@@ -123,6 +128,7 @@ function Page() {
   };
 
   const run = useCallback(async () => {
+    if (!property) return;
     timers.current.forEach(clearTimeout);
     timers.current = [];
     setRunning(true);
@@ -157,6 +163,14 @@ function Page() {
       );
     });
   }, [property]);
+
+  if (!property) {
+    return (
+      <AppShell title="Loading property...">
+        <p className="text-muted-foreground">Loading the persisted property record.</p>
+      </AppShell>
+    );
+  }
 
   const handleGovernmentDecisionSubmit = async (
     decision: "approved" | "rejected" | "clarification_requested",
@@ -288,8 +302,8 @@ function Page() {
               District / Taluk
             </p>
             <p className="mt-1 font-medium text-foreground">
-              {property.cadastralIdentifiers?.district || property.region} ·{" "}
-              {property.cadastralIdentifiers?.taluk || "Jurisdiction Taluk"}
+              {String(property.cadastralIdentifiers?.district || property.region)} ·{" "}
+              {String(property.cadastralIdentifiers?.taluk || "Jurisdiction Taluk")}
             </p>
           </div>
 
@@ -298,9 +312,11 @@ function Page() {
               {stateProfile.localTerminology.surveyNumberLabel}
             </p>
             <p className="mt-1 font-mono font-medium text-foreground">
-              {property.cadastralIdentifiers?.surveyNumber ||
-                property.cadastralIdentifiers?.gatNumber ||
-                "Survey Ref Attached"}
+              {String(
+                property.cadastralIdentifiers?.surveyNumber ||
+                  property.cadastralIdentifiers?.gatNumber ||
+                  "Survey Ref Attached",
+              )}
               {property.cadastralIdentifiers?.hissa
                 ? ` / Hissa ${property.cadastralIdentifiers.hissa}`
                 : ""}
@@ -312,10 +328,12 @@ function Page() {
               {stateProfile.localTerminology.khataOrAccountLabel}
             </p>
             <p className="mt-1 font-mono text-foreground">
-              {property.cadastralIdentifiers?.khataNumber ||
-                property.cadastralIdentifiers?.epidOrSas ||
-                property.cadastralIdentifiers?.propertyCardNumber ||
-                "Municipal / RoR Record"}
+              {String(
+                property.cadastralIdentifiers?.khataNumber ||
+                  property.cadastralIdentifiers?.epidOrSas ||
+                  property.cadastralIdentifiers?.propertyCardNumber ||
+                  "Municipal / RoR Record",
+              )}
             </p>
           </div>
 
@@ -324,10 +342,12 @@ function Page() {
               Registration Ref ({stateProfile.localTerminology.deedRegistrationSystemName})
             </p>
             <p className="mt-1 font-mono text-foreground">
-              {property.cadastralIdentifiers?.kaveriRegRef ||
-                property.cadastralIdentifiers?.ecReference ||
-                property.cadastralIdentifiers?.igrDocNumber ||
-                "Title Deed Attached"}
+              {String(
+                property.cadastralIdentifiers?.kaveriRegRef ||
+                  property.cadastralIdentifiers?.ecReference ||
+                  property.cadastralIdentifiers?.igrDocNumber ||
+                  "Title Deed Attached",
+              )}
             </p>
           </div>
         </div>
@@ -470,6 +490,20 @@ function Page() {
                   "Licensed cadastral surveyor completed boundary vertex inspection and field marker verification."}
               </p>
             </div>
+          </div>
+        )}
+        {property.surveyorFieldPhotos && property.surveyorFieldPhotos.length > 0 && (
+          <div className="mt-3 rounded-xl border border-border/80 bg-muted/20 p-3.5 text-xs">
+            <p className="font-semibold text-foreground">Surveyor evidence submitted</p>
+            <p className="mt-1 text-muted-foreground">
+              Inspection evidence is stored in the private property-document bucket and is visible
+              to authorized reviewers.
+            </p>
+            <ul className="mt-2 space-y-1 font-mono text-[11px] text-foreground">
+              {property.surveyorFieldPhotos.map((path) => (
+                <li key={path}>{path}</li>
+              ))}
+            </ul>
           </div>
         )}
       </div>

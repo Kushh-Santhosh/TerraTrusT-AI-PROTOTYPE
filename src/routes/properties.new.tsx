@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { BoundaryEditor } from "@/components/ui-ext/BoundaryEditor";
+import type { NominatimResult } from "@/components/ui-ext/RealMap";
 import { DocumentUploader, type QueuedDocument } from "@/components/ui-ext/DocumentUploader";
 import {
   type LatLng,
@@ -312,7 +313,9 @@ function RegisterPropertyWizard() {
     setSubmissionProgress("Creating property record in Supabase…");
 
     if (!user?.id) {
-      setSubmissionError("Your authenticated user session is unavailable. Sign in again before registering a property.");
+      setSubmissionError(
+        "Your authenticated user session is unavailable. Sign in again before registering a property.",
+      );
       return;
     }
 
@@ -321,7 +324,7 @@ function RegisterPropertyWizard() {
 
     try {
       // Generate state source checks
-      const sourceChecks: Record<string, any> = {};
+      const sourceChecks: Record<string, unknown> = {};
       if (currentProfile.stateCode === "KA") {
         sourceChecks.bhoomi = {
           sourceName: "Bhoomi Land Records",
@@ -590,6 +593,7 @@ function RegisterPropertyWizard() {
     <AppShell
       title="Register a new property"
       subtitle="Register an Indian land parcel, establish GIS boundary, upload legal evidence, and trigger live n8n verification."
+      requiredRole={["citizen", "admin"]}
     >
       <Crumbs
         items={[{ label: "Properties", to: "/properties" }, { label: "Register New Property" }]}
@@ -966,7 +970,7 @@ function RegisterPropertyWizard() {
                     setErrors((prev) => ({ ...prev, latitude: "", longitude: "" }));
                   }
                 }}
-                onAddressSelect={(res) => {
+                onAddressSelect={(res: NominatimResult) => {
                   if (res.address) {
                     if (res.address.city || res.address.town) {
                       setCity(res.address.city || res.address.town || city);

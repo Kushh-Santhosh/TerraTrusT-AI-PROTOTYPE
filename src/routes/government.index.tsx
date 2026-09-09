@@ -117,37 +117,43 @@ function GovernmentPage() {
             <span className="text-xs text-muted-foreground">Updated in real-time</span>
           </div>
           <div className="mt-3 h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={regions}>
-                <CartesianGrid stroke="oklch(0.92 0.008 250)" vertical={false} />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11, fill: "oklch(0.5 0.018 255)" }}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11, fill: "oklch(0.5 0.018 255)" }}
-                />
-                <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
-                <Bar
-                  dataKey="verified"
-                  stackId="a"
-                  fill="oklch(0.45 0.08 195)"
-                  radius={[6, 6, 0, 0]}
-                  name="Verified"
-                />
-                <Bar
-                  dataKey="pending"
-                  stackId="a"
-                  fill="oklch(0.78 0.13 75)"
-                  radius={[6, 6, 0, 0]}
-                  name="In Review"
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {regions.length === 0 ? (
+              <div className="grid h-full place-items-center text-sm text-muted-foreground">
+                No cadastral-verified parcels yet.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={regions}>
+                  <CartesianGrid stroke="oklch(0.92 0.008 250)" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11, fill: "oklch(0.5 0.018 255)" }}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11, fill: "oklch(0.5 0.018 255)" }}
+                  />
+                  <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
+                  <Bar
+                    dataKey="verified"
+                    stackId="a"
+                    fill="oklch(0.45 0.08 195)"
+                    radius={[6, 6, 0, 0]}
+                    name="Verified"
+                  />
+                  <Bar
+                    dataKey="pending"
+                    stackId="a"
+                    fill="oklch(0.78 0.13 75)"
+                    radius={[6, 6, 0, 0]}
+                    name="In Review"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -168,6 +174,9 @@ function GovernmentPage() {
                     <p className="text-sm font-medium text-foreground">{p.title}</p>
                     <p className="text-xs text-muted-foreground font-mono mt-0.5">
                       {p.passportId} · {p.region}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Review case {p.caseId.slice(0, 8)} · {p.reason}
                     </p>
                   </div>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning-foreground font-medium">

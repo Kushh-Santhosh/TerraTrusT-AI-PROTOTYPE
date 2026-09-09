@@ -59,7 +59,10 @@ export function coordsToGeoJson(coords: LatLng[]): GeoJsonGeometry {
   }
   const ring = coords.map((c) => [c.lng, c.lat]);
   // GeoJSON linear rings must close
-  if (ring.length > 0 && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) {
+  if (
+    ring.length > 0 &&
+    (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])
+  ) {
     ring.push([...ring[0]]);
   }
   return {
@@ -71,7 +74,10 @@ export function coordsToGeoJson(coords: LatLng[]): GeoJsonGeometry {
 /**
  * Parses and validates raw GeoJSON text or object. Returns array of LatLng vertices or throws error.
  */
-export function parseAndValidateGeoJson(input: string | object): { coords: LatLng[]; area: number } {
+export function parseAndValidateGeoJson(input: string | object): {
+  coords: LatLng[];
+  area: number;
+} {
   let parsed: unknown;
   if (typeof input === "string") {
     try {
@@ -92,9 +98,15 @@ export function parseAndValidateGeoJson(input: string | object): { coords: LatLn
   let coordinates: number[][][] | undefined;
 
   if (obj.type === "FeatureCollection" && Array.isArray(obj.features)) {
-    const polygonFeature = obj.features.find((f: any) => f?.geometry?.type === "Polygon" || f?.geometry?.type === "MultiPolygon");
+    const polygonFeature = obj.features.find((f: unknown) => {
+      if (!f || typeof f !== "object") return false;
+      const geometry = (f as { geometry?: { type?: unknown } }).geometry;
+      return geometry?.type === "Polygon" || geometry?.type === "MultiPolygon";
+    });
     if (!polygonFeature || !polygonFeature.geometry) {
-      throw new Error("GeoJSON FeatureCollection does not contain any Polygon or MultiPolygon features.");
+      throw new Error(
+        "GeoJSON FeatureCollection does not contain any Polygon or MultiPolygon features.",
+      );
     }
     coordinates = polygonFeature.geometry.coordinates;
   } else if (obj.type === "Feature" && obj.geometry && typeof obj.geometry === "object") {
@@ -102,7 +114,9 @@ export function parseAndValidateGeoJson(input: string | object): { coords: LatLn
     if (geom.type === "Polygon" || geom.type === "MultiPolygon") {
       coordinates = geom.coordinates as number[][][];
     } else {
-      throw new Error(`Unsupported geometry type: ${geom.type}. Only Polygon/MultiPolygon are supported.`);
+      throw new Error(
+        `Unsupported geometry type: ${geom.type}. Only Polygon/MultiPolygon are supported.`,
+      );
     }
   } else if (obj.type === "Polygon") {
     coordinates = obj.coordinates as number[][][];
@@ -112,7 +126,9 @@ export function parseAndValidateGeoJson(input: string | object): { coords: LatLn
       coordinates = multi[0];
     }
   } else {
-    throw new Error(`Invalid GeoJSON type: "${obj.type}". Expected Polygon, MultiPolygon, Feature, or FeatureCollection.`);
+    throw new Error(
+      `Invalid GeoJSON type: "${obj.type}". Expected Polygon, MultiPolygon, Feature, or FeatureCollection.`,
+    );
   }
 
   if (!Array.isArray(coordinates) || coordinates.length === 0 || !Array.isArray(coordinates[0])) {
@@ -139,7 +155,12 @@ export function parseAndValidateGeoJson(input: string | object): { coords: LatLn
     }
 
     // Skip the closing redundant point if identical to first
-    if (i === ring.length - 1 && coords.length > 0 && Math.abs(coords[0].lat - lat) < 1e-7 && Math.abs(coords[0].lng - lng) < 1e-7) {
+    if (
+      i === ring.length - 1 &&
+      coords.length > 0 &&
+      Math.abs(coords[0].lat - lat) < 1e-7 &&
+      Math.abs(coords[0].lng - lng) < 1e-7
+    ) {
       continue;
     }
 
@@ -168,7 +189,9 @@ export function parseAndValidateKml(kmlString: string): { coords: LatLng[]; area
   const matches = [...kmlString.matchAll(coordRegex)];
 
   if (matches.length === 0) {
-    throw new Error("No <coordinates> block found in KML file. Ensure this is a valid KML polygon export.");
+    throw new Error(
+      "No <coordinates> block found in KML file. Ensure this is a valid KML polygon export.",
+    );
   }
 
   // Find the coordinate block with polygon coordinates
@@ -262,7 +285,10 @@ export function calculateCentroid(coords: LatLng[]): LatLng {
 /**
  * Serializes coordinates to downloadable GeoJSON string
  */
-export function coordsToGeoJsonString(coords: LatLng[], properties?: Record<string, any>): string {
+export function coordsToGeoJsonString(
+  coords: LatLng[],
+  properties?: Record<string, unknown>,
+): string {
   const geojson = {
     type: "FeatureCollection",
     features: [

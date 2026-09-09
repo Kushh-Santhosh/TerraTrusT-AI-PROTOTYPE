@@ -1,8 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import {
-  FileBadge, Workflow, Sparkles, FileText, Compass,
-  Layers, History, Satellite, Clock, Share2, ArrowRightLeft, Download
+  FileBadge,
+  Workflow,
+  Sparkles,
+  FileText,
+  Compass,
+  Layers,
+  History,
+  Satellite,
+  Clock,
+  Share2,
+  ArrowRightLeft,
+  Download,
 } from "lucide-react";
 
 interface PropertySubNavProps {
@@ -37,13 +47,18 @@ export function PropertySubNav({ propertyId, activeTab }: PropertySubNavProps) {
     { id: "timeline", label: "Timeline", to: "/properties/$id/timeline", icon: Clock },
     { id: "share", label: "Share", to: "/properties/$id/share", icon: Share2 },
     { id: "transfer", label: "Transfer", to: "/properties/$id/transfer", icon: ArrowRightLeft },
-    { id: "passport-pdf", label: "Passport PDF", to: "/properties/$id/passport-pdf", icon: Download },
+    {
+      id: "passport-pdf",
+      label: "Passport PDF",
+      to: "/properties/$id/passport-pdf",
+      icon: Download,
+    },
   ];
 
   return (
     <div className="my-4 overflow-x-auto pb-1">
       <div className="flex items-center gap-1.5 min-w-max border-b border-border/70 pb-2">
-        {tabs.map(tab => {
+        {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <Link
@@ -54,10 +69,12 @@ export function PropertySubNav({ propertyId, activeTab }: PropertySubNavProps) {
                 "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition font-medium",
                 isActive
                   ? "bg-primary/15 text-primary font-semibold ring-1 ring-primary/30"
-                  : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  : "text-muted-foreground hover:bg-muted/80 hover:text-foreground",
               )}
             >
-              <tab.icon className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground")} />
+              <tab.icon
+                className={cn("h-3.5 w-3.5", isActive ? "text-primary" : "text-muted-foreground")}
+              />
               <span>{tab.label}</span>
             </Link>
           );

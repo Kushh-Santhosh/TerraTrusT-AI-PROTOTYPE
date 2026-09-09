@@ -16,14 +16,17 @@ import {
   Loader2,
   Compass,
 } from "lucide-react";
-import { loadSurveyorAssignments } from "@/lib/property-repository";
+import {
+  loadSurveyorAssignments,
+  type SurveyorAssignmentProperty,
+} from "@/lib/property-repository";
 import {
   recordSurveyorDecision,
   savePropertyDocument,
   uploadPropertyDocumentBinary,
 } from "@/lib/supabase-persistence";
 import { formatStateArea } from "@/lib/state-registry";
-import type { Property, PropertyBoundary } from "@/lib/types";
+import type { PropertyBoundary } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 
@@ -37,7 +40,7 @@ function SurveyorAssignmentDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [property, setProperty] = useState<Property | null>(null);
+  const [property, setProperty] = useState<SurveyorAssignmentProperty | null>(null);
   const [loading, setLoading] = useState(true);
   const [surveyorBoundary, setSurveyorBoundary] = useState<PropertyBoundary[]>([]);
   const [fieldNotes, setFieldNotes] = useState("");
@@ -49,8 +52,7 @@ function SurveyorAssignmentDetail() {
   useEffect(() => {
     if (!user?.id) return;
     loadSurveyorAssignments(user.id).then((assigned) => {
-      const p =
-        assigned.find((item) => item.id === id || (item as any).assignmentId === id) ?? null;
+      const p = assigned.find((item) => item.id === id || item.assignmentId === id) ?? null;
       if (p) {
         setProperty(p);
         setSurveyorBoundary(p.surveyorBoundary || p.boundary || []);
@@ -67,7 +69,9 @@ function SurveyorAssignmentDetail() {
   const handleSubmitDecision = async () => {
     if (!property) return;
     if (!fieldNotes.trim() || !evidenceFile) {
-      setOutcomeMessage("Add field notes and upload evidence before submitting a surveyor decision.");
+      setOutcomeMessage(
+        "Add field notes and upload evidence before submitting a surveyor decision.",
+      );
       return;
     }
     setSubmitting(true);
@@ -103,6 +107,7 @@ function SurveyorAssignmentDetail() {
 
     const res = await recordSurveyorDecision({
       propertyId: property.id,
+      assignmentId: property.assignmentId,
       surveyorBoundary,
       decision,
       notes:
@@ -220,18 +225,14 @@ function SurveyorAssignmentDetail() {
           <span>
             Assignment ID:{" "}
             <strong className="font-mono text-foreground">
-              {String((property as any).assignmentId || "Unavailable")}
+              {property.assignmentId || "Unavailable"}
             </strong>
           </span>
           <span className="ml-4">
             Status:{" "}
-            <strong className="text-foreground">
-              {String((property as any).assignmentStatus || "assigned")}
-            </strong>
+            <strong className="text-foreground">{property.assignmentStatus || "assigned"}</strong>
           </span>
-          <span className="ml-4">
-            Assigned: {String((property as any).assignmentCreatedAt || "Unavailable")}
-          </span>
+          <span className="ml-4">Assigned: {property.assignmentCreatedAt || "Unavailable"}</span>
         </div>
 
         {property.cadastralIdentifiers && Object.keys(property.cadastralIdentifiers).length > 0 && (

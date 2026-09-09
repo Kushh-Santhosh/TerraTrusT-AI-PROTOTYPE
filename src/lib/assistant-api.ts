@@ -12,9 +12,9 @@ export interface AssistantRequest {
     selectedPropertyUuid?: string;
     property?: Property | null;
     properties?: Property[];
-    verificationRun?: any;
-    valuation?: any;
-    [key: string]: any;
+    verificationRun?: unknown;
+    valuation?: unknown;
+    [key: string]: unknown;
   };
 }
 
@@ -33,7 +33,7 @@ export interface AssistantResponse {
     area?: number;
     valuationInr?: number;
     currency?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   citations?: { label: string; passportId?: string }[];
   suggestions?: string[];
@@ -96,7 +96,9 @@ export async function askTerraAssistant(
         if (errJson && (errJson.message || errJson.hint || errJson.error)) {
           errorMsg = errJson.hint || errJson.message || errJson.error;
         }
-      } catch {}
+      } catch {
+        // Some error responses are not JSON.
+      }
       return {
         success: false,
         conversationId: req.conversationId || "",
@@ -109,7 +111,9 @@ export async function askTerraAssistant(
     if (typeof raw === "string") {
       try {
         raw = JSON.parse(raw);
-      } catch {}
+      } catch {
+        return raw;
+      }
     }
 
     const payload = Array.isArray(raw) ? raw[0] : raw;
@@ -140,7 +144,11 @@ export async function askTerraAssistant(
   } catch (err) {
     clearTimeout(timeoutId);
     const isAborted = controller.signal.aborted;
-    const msg = isAborted ? "Request timed out after 20s" : err instanceof Error ? err.message : "Network error";
+    const msg = isAborted
+      ? "Request timed out after 20s"
+      : err instanceof Error
+        ? err.message
+        : "Network error";
     return {
       success: false,
       conversationId: req.conversationId || "",

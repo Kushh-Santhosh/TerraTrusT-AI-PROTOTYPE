@@ -66,8 +66,8 @@ export interface Property {
   surveyorBoundary?: PropertyBoundary[]; // Licensed surveyor field verified boundary
   governmentBoundary?: PropertyBoundary[]; // Authoritative cadastral registry boundary
   stateCode?: string; // e.g. "KA", "MH", "AP", "TS", "UP"
-  cadastralIdentifiers?: Record<string, any>; // District, Taluk, Hobli, Survey, Hissa, Gat, 7/12, ePID, etc.
-  sourceChecks?: Record<string, any>; // Bhoomi, Kaveri, e-Aasthi, Mahabhumi, 7/12, etc.
+  cadastralIdentifiers?: Record<string, unknown>; // District, Taluk, Hobli, Survey, Hissa, Gat, 7/12, ePID, etc.
+  sourceChecks?: Record<string, unknown>; // Bhoomi, Kaveri, e-Aasthi, Mahabhumi, 7/12, etc.
   surveyorDecision?: "verified" | "correction_required" | "pending";
   surveyorNotes?: string;
   surveyorFieldPhotos?: string[];

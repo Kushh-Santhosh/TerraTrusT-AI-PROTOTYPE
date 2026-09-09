@@ -39,7 +39,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { notifications } from "@/lib/mock-data";
@@ -51,7 +51,7 @@ import { useAuth, roleLabels, normalizeRole, type Role } from "@/lib/auth";
 export interface NavItem {
   to: string;
   label: string;
-  icon: any;
+  icon: ComponentType<{ className?: string }>;
   params?: Record<string, string>;
   badge?: string | number;
 }
@@ -67,7 +67,6 @@ export const citizenNav: NavGroup[] = [
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/properties", label: "My Properties", icon: FileBadge },
-      { to: "/land-risk-search", label: "Land Risk Search", icon: ShieldAlert },
       { to: "/properties/new", label: "Add Property", icon: PlusCircle },
       { to: "/map", label: "GIS Cadastral Map", icon: Map },
       { to: "/ai-passport", label: "Digital Passport", icon: FileBadge },
@@ -76,7 +75,6 @@ export const citizenNav: NavGroup[] = [
   {
     group: "AI Intelligence Suite",
     items: [
-      { to: "/ai", label: "AI Intelligence Hub", icon: Brain },
       { to: "/valuation", label: "AI Valuation", icon: Sparkles },
       { to: "/ai-ocr", label: "Document OCR", icon: ScanLine },
       { to: "/ai-boundary", label: "Boundary Detection", icon: Compass },
@@ -152,7 +150,6 @@ export const surveyorNav: NavGroup[] = [
       { to: "/surveyor", label: "Surveyor Dashboard", icon: LayoutDashboard },
       { to: "/surveyor/assignments", label: "My Assignments", icon: Briefcase },
       { to: "/surveyor/tools", label: "Field Tools", icon: Compass },
-      { to: "/ai-boundary", label: "Boundary Capture", icon: Map },
     ],
   },
   {
@@ -160,7 +157,6 @@ export const surveyorNav: NavGroup[] = [
     items: [
       { to: "/surveyor/assignments", label: "Assigned Properties", icon: FileBadge },
       { to: "/map", label: "GIS / Boundary Inspection", icon: Map },
-      { to: "/ai-satellite", label: "Satellite Compare", icon: Satellite },
       { to: "/surveyor/documents", label: "Document Review", icon: ScanLine },
       { to: "/verification", label: "Verification / Evidence", icon: ShieldCheck },
     ],
@@ -563,7 +559,7 @@ export function AppShell({
                 <span className="font-semibold text-primary">{roleLabel}</span>.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Button onClick={() => navigate({ to: getWorkspaceForRole(currentRole) as any })}>
+                <Button onClick={() => navigate({ to: getWorkspaceForRole(currentRole) as never })}>
                   Return to my workspace
                 </Button>
               </div>

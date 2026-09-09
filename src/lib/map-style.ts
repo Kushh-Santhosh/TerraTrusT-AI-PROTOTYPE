@@ -56,9 +56,7 @@ export function getBasemapStyle(): StyleSpecification {
     sources: {
       "osm-standard": {
         type: "raster",
-        tiles: [
-          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-        ],
+        tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
         tileSize: 256,
         maxzoom: 19,
         attribution:
@@ -95,7 +93,9 @@ export function getBasemapProviderInfo() {
       : "";
 
   return {
-    provider: cartoKey ? ("CARTO Voyager (authenticated)" as const) : ("OpenStreetMap Standard" as const),
+    provider: cartoKey
+      ? ("CARTO Voyager (authenticated)" as const)
+      : ("OpenStreetMap Standard" as const),
     keyConfigured: !!cartoKey,
     tilePattern: cartoKey
       ? "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?api_key=***"

@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loadOwnedProperties } from "@/lib/property-repository";
-import { useAuth } from "@/lib/auth";
+import { loadBankEligibleProperties, loadOwnedProperties } from "@/lib/property-repository";
+import { normalizeRole, useAuth } from "@/lib/auth";
 import { Filter, Grid3x3, List, Plus, Search, MapPin, Building2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,8 @@ function formatInr(val: number): string {
 }
 
 function PropertiesPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const isBank = normalizeRole(profile?.role ?? user?.user_metadata?.role) === "bank";
   const [view, setView] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [propertiesList, setPropertiesList] = useState<Property[]>([]);
@@ -31,7 +32,7 @@ function PropertiesPage() {
 
   useEffect(() => {
     if (user?.id) {
-      loadOwnedProperties(user.id).then((data) => {
+      (isBank ? loadBankEligibleProperties() : loadOwnedProperties(user.id)).then((data) => {
         setPropertiesList(data);
         setLoading(false);
       });
@@ -39,7 +40,7 @@ function PropertiesPage() {
       setPropertiesList([]);
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, isBank]);
 
   const filteredProperties = propertiesList.filter((p) => {
     const q = searchQuery.toLowerCase();
@@ -56,11 +57,13 @@ function PropertiesPage() {
       title="Properties"
       subtitle="Your Property Passports across Indian states, urban parcels, and agricultural holdings."
       actions={
-        <Link to="/properties/new">
-          <Button className="rounded-full gap-1.5">
-            <Plus className="h-4 w-4" /> Register Property
-          </Button>
-        </Link>
+        !isBank ? (
+          <Link to="/properties/new">
+            <Button className="rounded-full gap-1.5">
+              <Plus className="h-4 w-4" /> Register Property
+            </Button>
+          </Link>
+        ) : undefined
       }
     >
       <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -108,7 +111,8 @@ function PropertiesPage() {
             No properties registered yet
           </h3>
           <p className="mt-1 text-sm text-muted-foreground max-w-md">
-            You haven't registered any land parcels or property passports yet. Register your first parcel to establish GIS boundary and AI verification.
+            You haven't registered any land parcels or property passports yet. Register your first
+            parcel to establish GIS boundary and AI verification.
           </p>
           <div className="mt-6">
             <Link to="/properties/new">
@@ -128,11 +132,7 @@ function PropertiesPage() {
               className="surface-card group overflow-hidden transition hover:shadow-[var(--shadow-elev)]"
             >
               <div className="relative h-36 overflow-hidden">
-                <PropertyCardMiniMap
-                  coords={p.coords}
-                  boundary={p.boundary}
-                  title={p.title}
-                />
+                <PropertyCardMiniMap coords={p.coords} boundary={p.boundary} title={p.title} />
                 <div className="absolute right-3 top-3 z-20">
                   <StatusBadge status={p.status} />
                 </div>

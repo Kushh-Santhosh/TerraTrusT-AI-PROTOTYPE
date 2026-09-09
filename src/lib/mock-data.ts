@@ -10,7 +10,6 @@ export const currentUser: User = {
   joinedAt: "2024-03-12",
 };
 
-
 export const properties: Property[] = [
   {
     id: "p_001",
@@ -27,7 +26,7 @@ export const properties: Property[] = [
     ownerSince: "2019-06-14",
     valuation: 24000000,
     aiConfidence: 92,
-    coords: { lat: 12.9567, lng: 77.6200 },
+    coords: { lat: 12.9567, lng: 77.62 },
     boundary: [
       { lat: 12.9568, lng: 77.6198 },
       { lat: 12.9569, lng: 77.6203 },

@@ -103,7 +103,11 @@ function AdminPage() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast.success("User invitation modal active. Dispatching magic signup link via Supabase Auth.")}
+              onClick={() =>
+                toast.success(
+                  "User invitation modal active. Dispatching magic signup link via Supabase Auth.",
+                )
+              }
             >
               <UserPlus className="h-3.5 w-3.5 mr-1" /> Invite user
             </Button>

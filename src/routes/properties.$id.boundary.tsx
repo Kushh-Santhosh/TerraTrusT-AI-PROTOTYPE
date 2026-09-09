@@ -38,11 +38,18 @@ function Page() {
       subtitle="Compare claimed GIS polygon, revenue survey boundaries, and high-resolution satellite imagery."
       actions={<Button variant="outline">Download GeoJSON</Button>}
     >
-      <Crumbs items={[{ label: "Properties", to: "/properties" }, { label: p.title || id, to: `/properties/${id}` }, { label: "Boundary" }]} />
+      <Crumbs
+        items={[
+          { label: "Properties", to: "/properties" },
+          { label: p.title || id, to: `/properties/${id}` },
+          { label: "Boundary" },
+        ]}
+      />
       <PropertySubNav propertyId={id} activeTab="boundary" />
 
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">GIS CADASTRAL COMPARISON:</strong> Real vertex geofencing calibrated for Indian Survey Numbers and Bhoomi cadastral boundaries.
+        <strong className="text-foreground">GIS CADASTRAL COMPARISON:</strong> Real vertex
+        geofencing calibrated for Indian Survey Numbers and Bhoomi cadastral boundaries.
       </div>
 
       <KpiRow
@@ -56,7 +63,9 @@ function Page() {
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="surface-card p-4">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Claimed boundary (GPS/KML)</p>
+          <p className="text-xs font-medium text-muted-foreground mb-2">
+            Claimed boundary (GPS/KML)
+          </p>
           <PropertyCardMiniMap
             coords={p.coords}
             boundary={p.boundary}
@@ -68,7 +77,9 @@ function Page() {
           <p className="text-xs font-medium text-muted-foreground mb-2">Survey registry boundary</p>
           <PropertyCardMiniMap
             coords={p.coords}
-            boundary={p.surveyorBoundary && p.surveyorBoundary.length >= 3 ? p.surveyorBoundary : p.boundary}
+            boundary={
+              p.surveyorBoundary && p.surveyorBoundary.length >= 3 ? p.surveyorBoundary : p.boundary
+            }
             title={`${p.title} - Cadastral`}
             className="h-44 w-full rounded-lg"
           />
@@ -77,7 +88,11 @@ function Page() {
           <p className="text-xs font-medium text-muted-foreground mb-2">Satellite-derived parcel</p>
           <PropertyCardMiniMap
             coords={p.coords}
-            boundary={p.governmentBoundary && p.governmentBoundary.length >= 3 ? p.governmentBoundary : p.boundary}
+            boundary={
+              p.governmentBoundary && p.governmentBoundary.length >= 3
+                ? p.governmentBoundary
+                : p.boundary
+            }
             title={`${p.title} - Satellite`}
             className="h-44 w-full rounded-lg"
           />
@@ -99,7 +114,8 @@ function Page() {
           />
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          Boundaries align within revenue tolerance (0.4m drift). Coordinate centroid: ({p.coords?.lat?.toFixed(5) || "12.9716"}, {p.coords?.lng?.toFixed(5) || "77.5946"}).
+          Boundaries align within revenue tolerance (0.4m drift). Coordinate centroid: (
+          {p.coords?.lat?.toFixed(5) || "12.9716"}, {p.coords?.lng?.toFixed(5) || "77.5946"}).
         </p>
       </div>
     </AppShell>

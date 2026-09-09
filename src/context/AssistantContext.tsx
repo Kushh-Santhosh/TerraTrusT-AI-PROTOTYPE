@@ -10,7 +10,7 @@ export interface AssistantChatMessage {
   role: "user" | "assistant";
   text: string;
   sources?: string[];
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   citations?: { label: string; passportId?: string }[];
   suggestions?: string[];
   timestamp: string;
@@ -46,11 +46,15 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     try {
       const stored = localStorage.getItem("terratrust_assistant_conv_id");
       if (stored) return stored;
-    } catch {}
+    } catch {
+      // Continue with a fresh conversation when local storage is unavailable.
+    }
     const fresh = `CONV-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     try {
       localStorage.setItem("terratrust_assistant_conv_id", fresh);
-    } catch {}
+    } catch {
+      // Local storage is optional in restricted browser contexts.
+    }
     return fresh;
   });
 
@@ -203,7 +207,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     setConversationId(freshId);
     try {
       localStorage.setItem("terratrust_assistant_conv_id", freshId);
-    } catch {}
+    } catch {
+      // Local storage is optional in restricted browser contexts.
+    }
     setMessages([
       {
         id: "msg_seed",

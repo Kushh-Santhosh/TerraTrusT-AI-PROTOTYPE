@@ -27,12 +27,14 @@ function Page() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadAdminPlatformData().then((res) => {
-      setData({
-        totalUsers: res.totalUsers,
-        usersList: res.usersList,
-      });
-    }).finally(() => setLoading(false));
+    loadAdminPlatformData()
+      .then((res) => {
+        setData({
+          totalUsers: res.totalUsers,
+          usersList: res.usersList,
+        });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const rows = data.usersList.map((u) => ({
@@ -52,61 +54,95 @@ function Page() {
       actions={
         <Button
           className="rounded-full"
-          onClick={() => toast.success("User invitation modal active. Dispatching magic signup link.")}
+          onClick={() =>
+            toast.success("User invitation modal active. Dispatching magic signup link.")
+          }
         >
           <Plus className="h-4 w-4 mr-1" /> Invite User
         </Button>
       }
     >
       <div className="mb-4 rounded-lg border border-border/80 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <strong className="text-foreground">USER DIRECTORY:</strong> Real-time user management showcasing multi-role access control (RBAC) across Citizen, Surveyor, Government, Bank, and Admin roles.
+        <strong className="text-foreground">USER DIRECTORY:</strong> Real-time user management
+        showcasing multi-role access control (RBAC) across Citizen, Surveyor, Government, Bank, and
+        Admin roles.
       </div>
 
       <KpiRow
         items={[
           { label: "Active Users", value: `${data.totalUsers}`, hint: "Authenticated accounts" },
-          { label: "Empanelled Surveyors", value: `${data.usersList.filter((x) => x.role.toLowerCase().includes("survey")).length || 1}` },
-          { label: "Revenue Officers", value: `${data.usersList.filter((x) => x.role.toLowerCase().includes("gov")).length || 1}` },
-          { label: "Institutional Lenders", value: `${data.usersList.filter((x) => x.role.toLowerCase().includes("bank")).length || 1}` },
+          {
+            label: "Empanelled Surveyors",
+            value: `${data.usersList.filter((x) => x.role.toLowerCase().includes("survey")).length || 1}`,
+          },
+          {
+            label: "Revenue Officers",
+            value: `${data.usersList.filter((x) => x.role.toLowerCase().includes("gov")).length || 1}`,
+          },
+          {
+            label: "Institutional Lenders",
+            value: `${data.usersList.filter((x) => x.role.toLowerCase().includes("bank")).length || 1}`,
+          },
         ]}
       />
       <div className="mt-6">
-        {loading ? <p className="surface-card p-10 text-center text-sm text-muted-foreground">Loading user directory...</p> : rows.length === 0 ? <div className="surface-card p-10 text-center"><p className="font-medium text-foreground">No user records available</p><p className="mt-1 text-sm text-muted-foreground">The authenticated profile directory returned no records.</p></div> : <DataTable
-          rows={rows}
-          columns={[
-            {
-              key: "u",
-              label: "User",
-              render: (r) => (
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                      {r.name
-                        .split(" ")
-                        .map((x: string) => x[0])
-                        .join("")
-                        .slice(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold text-xs text-foreground">{r.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{r.email}</p>
+        {loading ? (
+          <p className="surface-card p-10 text-center text-sm text-muted-foreground">
+            Loading user directory...
+          </p>
+        ) : rows.length === 0 ? (
+          <div className="surface-card p-10 text-center">
+            <p className="font-medium text-foreground">No user records available</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              The authenticated profile directory returned no records.
+            </p>
+          </div>
+        ) : (
+          <DataTable
+            rows={rows}
+            columns={[
+              {
+                key: "u",
+                label: "User",
+                render: (r) => (
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                        {r.name
+                          .split(" ")
+                          .map((x: string) => x[0])
+                          .join("")
+                          .slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-xs text-foreground">{r.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{r.email}</p>
+                    </div>
                   </div>
-                </div>
-              ),
-            },
-            { key: "role", label: "Role", render: (r) => <Pill tone="info">{r.role}</Pill> },
-            { key: "region", label: "Jurisdiction", render: (r) => <span className="text-muted-foreground text-xs">{r.region}</span> },
-            { key: "joined", label: "Joined", render: (r) => <span className="text-muted-foreground text-xs">{r.joined}</span> },
-            {
-              key: "s",
-              label: "Status",
-              render: (r) => (
-                <Pill tone={r.status === "Active" ? "success" : "danger"}>{r.status}</Pill>
-              ),
-            },
-          ]}
-        />}
+                ),
+              },
+              { key: "role", label: "Role", render: (r) => <Pill tone="info">{r.role}</Pill> },
+              {
+                key: "region",
+                label: "Jurisdiction",
+                render: (r) => <span className="text-muted-foreground text-xs">{r.region}</span>,
+              },
+              {
+                key: "joined",
+                label: "Joined",
+                render: (r) => <span className="text-muted-foreground text-xs">{r.joined}</span>,
+              },
+              {
+                key: "s",
+                label: "Status",
+                render: (r) => (
+                  <Pill tone={r.status === "Active" ? "success" : "danger"}>{r.status}</Pill>
+                ),
+              },
+            ]}
+          />
+        )}
       </div>
     </AppShell>
   );

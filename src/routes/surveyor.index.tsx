@@ -3,8 +3,10 @@ import { AppShell } from "@/components/layout/AppShell";
 import { StatCard } from "@/components/ui-ext/StatCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, ChevronRight, Briefcase, Compass } from "lucide-react";
-import { loadSurveyorAssignments } from "@/lib/property-repository";
-import type { Property } from "@/lib/types";
+import {
+  loadSurveyorAssignments,
+  type SurveyorAssignmentProperty,
+} from "@/lib/property-repository";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 
@@ -14,7 +16,7 @@ export const Route = createFileRoute("/surveyor/")({
 });
 
 function SurveyorPage() {
-  const [assignments, setAssignments] = useState<Property[]>([]);
+  const [assignments, setAssignments] = useState<SurveyorAssignmentProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -41,7 +43,7 @@ function SurveyorPage() {
     },
     {
       label: "Submitted Surveys",
-      value: `${assignments.filter((p) => (p as any).assignmentStatus === "submitted").length}`,
+      value: `${assignments.filter((p) => p.assignmentStatus === "submitted").length}`,
       hint: "Persisted field submissions",
     },
     {
@@ -52,6 +54,7 @@ function SurveyorPage() {
   ];
 
   const boundaryCaptures = assignments.slice(0, 3).map((p) => ({
+    key: p.assignmentId || p.id,
     id: p.id,
     title: p.title,
     points: p.boundary?.length || 8,
@@ -108,7 +111,7 @@ function SurveyorPage() {
           ) : (
             <ul className="mt-2 divide-y divide-border">
               {assignments.slice(0, 4).map((p, i) => (
-                <li key={p.id} className="py-2">
+                <li key={p.assignmentId || p.id} className="py-2">
                   <Link
                     to="/properties/$id"
                     params={{ id: p.id }}
@@ -121,7 +124,7 @@ function SurveyorPage() {
                       <p className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
                         <MapPin className="h-3 w-3 text-primary" />
                         {p.region} · <Calendar className="h-3 w-3" />{" "}
-                        {String((p as any).assignmentStatus || "assigned")}
+                        {p.assignmentStatus || "assigned"}
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition" />
@@ -147,7 +150,7 @@ function SurveyorPage() {
             <ul className="mt-2 space-y-2">
               {boundaryCaptures.map((x) => (
                 <li
-                  key={x.id}
+                  key={x.key}
                   className="flex items-center justify-between rounded-lg border border-border p-3 text-sm hover:border-primary/40 transition"
                 >
                   <div>

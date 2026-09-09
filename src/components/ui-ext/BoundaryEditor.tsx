@@ -1,12 +1,13 @@
 import { RealMap } from "./RealMap";
 import type { LatLng } from "@/lib/gis-utils";
+import type { NominatimResult } from "./RealMap";
 
 export interface BoundaryEditorProps {
   initialCenter: LatLng;
   boundary: LatLng[];
   onChange: (boundary: LatLng[], areaSqm: number) => void;
   onLocationChange?: (center: LatLng) => void;
-  onAddressSelect?: (res: any) => void;
+  onAddressSelect?: (res: NominatimResult) => void;
   className?: string;
   readOnly?: boolean;
   stateCode?: string;

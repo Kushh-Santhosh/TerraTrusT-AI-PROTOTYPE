@@ -32,12 +32,7 @@ const KIND_LABELS: Record<DocumentKind, string> = {
   other: "Supporting Evidence / Encumbrance Cert",
 };
 
-const ALLOWED_MIME_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-];
+const ALLOWED_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB limit
 
@@ -47,11 +42,7 @@ interface DocumentUploaderProps {
   disabled?: boolean;
 }
 
-export function DocumentUploader({
-  documents,
-  onChange,
-  disabled = false,
-}: DocumentUploaderProps) {
+export function DocumentUploader({ documents, onChange, disabled = false }: DocumentUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -89,13 +80,33 @@ export function DocumentUploader({
       // Infer default document kind based on filename
       let inferredKind: DocumentKind = "other";
       const lower = file.name.toLowerCase();
-      if (lower.includes("deed") || lower.includes("title") || lower.includes("conveyance") || lower.includes("sale")) {
+      if (
+        lower.includes("deed") ||
+        lower.includes("title") ||
+        lower.includes("conveyance") ||
+        lower.includes("sale")
+      ) {
         inferredKind = "deed";
-      } else if (lower.includes("survey") || lower.includes("map") || lower.includes("sketch") || lower.includes("cadastral")) {
+      } else if (
+        lower.includes("survey") ||
+        lower.includes("map") ||
+        lower.includes("sketch") ||
+        lower.includes("cadastral")
+      ) {
         inferredKind = "survey";
-      } else if (lower.includes("tax") || lower.includes("receipt") || lower.includes("khata") || lower.includes("patta")) {
+      } else if (
+        lower.includes("tax") ||
+        lower.includes("receipt") ||
+        lower.includes("khata") ||
+        lower.includes("patta")
+      ) {
         inferredKind = "tax";
-      } else if (lower.includes("id") || lower.includes("aadhaar") || lower.includes("pan") || lower.includes("passport")) {
+      } else if (
+        lower.includes("id") ||
+        lower.includes("aadhaar") ||
+        lower.includes("pan") ||
+        lower.includes("passport")
+      ) {
         inferredKind = "id";
       }
 
@@ -152,9 +163,7 @@ export function DocumentUploader({
 
   const updateKind = (id: string, kind: DocumentKind) => {
     if (disabled) return;
-    onChange(
-      documents.map((d) => (d.id === id ? { ...d, kind } : d)),
-    );
+    onChange(documents.map((d) => (d.id === id ? { ...d, kind } : d)));
   };
 
   return (
@@ -189,11 +198,10 @@ export function DocumentUploader({
           <UploadCloud className="h-6 w-6" />
         </div>
 
-        <p className="font-medium text-foreground">
-          Click to upload or drag & drop documents
-        </p>
+        <p className="font-medium text-foreground">Click to upload or drag & drop documents</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Supports Registered Deed, Cadastral Survey Plan, Tax Receipts, and ID proofs (PDF, JPG, PNG up to 15MB)
+          Supports Registered Deed, Cadastral Survey Plan, Tax Receipts, and ID proofs (PDF, JPG,
+          PNG up to 15MB)
         </p>
 
         <div className="mt-4 flex items-center gap-3 text-[11px] text-muted-foreground">
@@ -242,7 +250,8 @@ export function DocumentUploader({
                         {doc.name}
                       </p>
                       <p className="text-xs text-muted-foreground font-mono">
-                        {formatFileSize(doc.size)} · {doc.type.split("/")[1]?.toUpperCase() || "FILE"}
+                        {formatFileSize(doc.size)} ·{" "}
+                        {doc.type.split("/")[1]?.toUpperCase() || "FILE"}
                       </p>
                     </div>
                   </div>
@@ -265,7 +274,9 @@ export function DocumentUploader({
 
                     {/* Status badge */}
                     {doc.status === "uploading" && (
-                      <span className="text-xs text-primary animate-pulse font-medium">Uploading…</span>
+                      <span className="text-xs text-primary animate-pulse font-medium">
+                        Uploading…
+                      </span>
                     )}
                     {doc.status === "success" && (
                       <span className="inline-flex items-center gap-1 text-xs text-success font-medium">
@@ -273,7 +284,10 @@ export function DocumentUploader({
                       </span>
                     )}
                     {doc.status === "error" && (
-                      <span className="inline-flex items-center gap-1 text-xs text-destructive font-medium" title={doc.error}>
+                      <span
+                        className="inline-flex items-center gap-1 text-xs text-destructive font-medium"
+                        title={doc.error}
+                      >
                         <AlertCircle className="h-3.5 w-3.5" /> Failed
                       </span>
                     )}

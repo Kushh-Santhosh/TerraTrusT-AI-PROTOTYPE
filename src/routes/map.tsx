@@ -32,7 +32,7 @@ function MapPage() {
     (p) =>
       p.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
       p.region.toLowerCase().includes(filterQuery.toLowerCase()) ||
-      p.passportId.toLowerCase().includes(filterQuery.toLowerCase())
+      p.passportId.toLowerCase().includes(filterQuery.toLowerCase()),
   );
 
   return (
@@ -105,8 +105,9 @@ function MapPage() {
               </p>
               <p className="font-display text-xl font-bold">{sel.title}</p>
               <p className="text-xs text-muted-foreground">
-                Centroid: {sel.coords?.lat?.toFixed(5) ?? "12.9716"}, {sel.coords?.lng?.toFixed(5) ?? "77.5946"} · Area:{" "}
-                {sel.area?.toLocaleString() ?? 0} m²
+                Centroid: {sel.coords?.lat?.toFixed(5) ?? "12.9716"},{" "}
+                {sel.coords?.lng?.toFixed(5) ?? "77.5946"} · Area: {sel.area?.toLocaleString() ?? 0}{" "}
+                m²
               </p>
             </div>
             <Link to="/properties/$id" params={{ id: sel.id }}>
