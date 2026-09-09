@@ -9,7 +9,7 @@ import {
 import { CheckCircle2, Users2, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ComponentType } from "react";
-import { useAuth } from "@/lib/auth";
+import { normalizeRole, useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/verification")({
   head: () => ({ meta: [{ title: "Verification — TerraTrust AI" }] }),
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/verification")({
 
 function VerificationPage() {
   const { profile, user } = useAuth();
+  const currentRole = normalizeRole(profile?.role || user?.user_metadata?.role);
   const [queue, setQueue] = useState<Awaited<ReturnType<typeof loadGovernmentReviewQueue>>>([]);
   const [ownedProperties, setOwnedProperties] = useState<
     Awaited<ReturnType<typeof loadOwnedProperties>>
@@ -28,7 +29,7 @@ function VerificationPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (profile?.role === "citizen" && user?.id) {
+    if (currentRole === "citizen" && user?.id) {
       loadOwnedProperties(user.id).then(async (properties) => {
         setOwnedProperties(properties);
         const results = await Promise.all(
@@ -41,33 +42,29 @@ function VerificationPage() {
       });
       return;
     }
-    if (
-      profile?.role === "surveyor" ||
-      profile?.role === "government" ||
-      profile?.role === "bank"
-    ) {
+    if (currentRole === "surveyor" || currentRole === "government" || currentRole === "bank") {
       loadGovernmentReviewQueue().then((data) => {
         setQueue(data);
         setLoading(false);
       });
     }
-  }, [profile?.role, user?.id]);
+  }, [currentRole, user?.id]);
 
-  const isCitizen = profile?.role === "citizen";
+  const isCitizen = currentRole === "citizen";
 
   return (
     <AppShell
       title={
         isCitizen
           ? "Verification Status"
-          : profile?.role === "government"
+          : currentRole === "government"
             ? "Government Verification Queue"
             : "Surveyor Verification Evidence"
       }
       subtitle={
         isCitizen
           ? "Track the persisted verification state of your own Property Passports."
-          : profile?.role === "government"
+          : currentRole === "government"
             ? "Persisted manual-review cases and n8n verification outcomes for Government action."
             : "Persisted manual-review cases and n8n verification outcomes for field action."
       }
