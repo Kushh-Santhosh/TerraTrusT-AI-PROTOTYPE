@@ -2210,8 +2210,6 @@
   "n8nStatus": null,
   "createdPropertyId": null,
   "createdPassportId": "TT-2814-KA",
-  "failures": [
-    "Waiting failed: 8000ms exceeded"
-  ],
+  "failures": ["Waiting failed: 8000ms exceeded"],
   "completedAt": "2026-09-06T06:11:55.302Z"
 }

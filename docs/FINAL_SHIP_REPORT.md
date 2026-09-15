@@ -8,34 +8,34 @@ The repository builds and the production citizen session can authenticate, load 
 
 ## Evidence
 
-| Area | Status | Evidence |
-|---|---|---|
-| Citizen | PASS | Production `/login` demo auth routed to `/dashboard`; fresh QA property and passport were visible. |
-| Government | NOT PROVEN | Existing routes are present, but no fresh authorized browser decision was completed in this pass. |
-| Surveyor | NOT PROVEN | Existing assignment/evidence routes are present, but no fresh authorized submission was completed in this pass. |
-| Bank | NOT PROVEN | Production/local route authorization was observed, but no fresh persisted assessment was completed in this pass. |
-| Admin | NOT PROVEN | `/admin` rendered, but the shared production session showed zero live records and no full control audit was completed. |
-| Gemini | PARTIAL | Server-side Gemini service and feature routes exist; fresh browser valuation returned no visible result during this pass. |
-| n8n | PARTIAL | Canonical workflow editor was reachable but reported 401/502 and store-loading errors; Gemini node execution was not proven. |
-| Supabase | PASS/PARTIAL | Fresh property, passport, document, verification, and review-case IDs exist in prior QA evidence; full fresh mutation audit was not repeated. |
-| GIS | PASS/PARTIAL | Fresh property has persisted boundary evidence in prior QA evidence; cross-role reload was not repeated in this pass. |
-| Storage | NOT PROVEN | Prior report records a storage upload, but unauthorized/authorized access checks were not repeated here. |
-| Aparsoft | PASS/PARTIAL | Production page showed the Aparsoft iframe and live chat UI; a fresh message/response was not completed in this pass. |
-| Vercel | PARTIAL | Production URL loaded and authenticated; this source change was not deployed during this pass. |
-| Chrome | PARTIAL | Real shared browser exercised production citizen login/dashboard and local valuation property loading. |
+| Area       | Status       | Evidence                                                                                                                                      |
+| ---------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Citizen    | PASS         | Production `/login` demo auth routed to `/dashboard`; fresh QA property and passport were visible.                                            |
+| Government | NOT PROVEN   | Existing routes are present, but no fresh authorized browser decision was completed in this pass.                                             |
+| Surveyor   | NOT PROVEN   | Existing assignment/evidence routes are present, but no fresh authorized submission was completed in this pass.                               |
+| Bank       | NOT PROVEN   | Production/local route authorization was observed, but no fresh persisted assessment was completed in this pass.                              |
+| Admin      | NOT PROVEN   | `/admin` rendered, but the shared production session showed zero live records and no full control audit was completed.                        |
+| Gemini     | PARTIAL      | Server-side Gemini service and feature routes exist; fresh browser valuation returned no visible result during this pass.                     |
+| n8n        | PARTIAL      | Canonical workflow editor was reachable but reported 401/502 and store-loading errors; Gemini node execution was not proven.                  |
+| Supabase   | PASS/PARTIAL | Fresh property, passport, document, verification, and review-case IDs exist in prior QA evidence; full fresh mutation audit was not repeated. |
+| GIS        | PASS/PARTIAL | Fresh property has persisted boundary evidence in prior QA evidence; cross-role reload was not repeated in this pass.                         |
+| Storage    | NOT PROVEN   | Prior report records a storage upload, but unauthorized/authorized access checks were not repeated here.                                      |
+| Aparsoft   | PASS/PARTIAL | Production page showed the Aparsoft iframe and live chat UI; a fresh message/response was not completed in this pass.                         |
+| Vercel     | PARTIAL      | Production URL loaded and authenticated; this source change was not deployed during this pass.                                                |
+| Chrome     | PARTIAL      | Real shared browser exercised production citizen login/dashboard and local valuation property loading.                                        |
 
 ## Acceptance Matrix
 
-| Route/feature group | Role | Backend dependency | AI | Current evidence |
-|---|---|---|---|---|
-| Dashboard, properties, add property, map | Citizen | Supabase Auth/DB/Storage | Optional | Fresh QA property visible in production dashboard. |
-| Valuation and AI feature routes | Citizen/institutional | Supabase property + AI analysis persistence | Gemini server function | Local valuation property now loads; fresh result not returned in browser. |
-| Verification | Citizen/Government | n8n + Supabase | Workflow-dependent | Prior webhook evidence exists; fresh Gemini-in-n8n execution not proven. |
-| Assignments and field evidence | Surveyor | Supabase assignments/evidence | Optional | Routes and persistence code exist; fresh browser submission not proven. |
-| Review queue and legal decision | Government | Supabase review cases/properties | Optional | Route exists; fresh authorized decision not proven. |
-| Underwriting and loan book | Bank | Supabase verified properties/loan records | Optional | Authorization observed; fresh assessment not proven. |
-| Administration | Admin | Supabase profiles/audit/system data | No | Route exists; full control audit not proven. |
-| Support chatbot | All authenticated roles | Aparsoft provider | Provider-owned | Iframe/UI present; fresh conversational response not proven. |
+| Route/feature group                      | Role                    | Backend dependency                          | AI                     | Current evidence                                                          |
+| ---------------------------------------- | ----------------------- | ------------------------------------------- | ---------------------- | ------------------------------------------------------------------------- |
+| Dashboard, properties, add property, map | Citizen                 | Supabase Auth/DB/Storage                    | Optional               | Fresh QA property visible in production dashboard.                        |
+| Valuation and AI feature routes          | Citizen/institutional   | Supabase property + AI analysis persistence | Gemini server function | Local valuation property now loads; fresh result not returned in browser. |
+| Verification                             | Citizen/Government      | n8n + Supabase                              | Workflow-dependent     | Prior webhook evidence exists; fresh Gemini-in-n8n execution not proven.  |
+| Assignments and field evidence           | Surveyor                | Supabase assignments/evidence               | Optional               | Routes and persistence code exist; fresh browser submission not proven.   |
+| Review queue and legal decision          | Government              | Supabase review cases/properties            | Optional               | Route exists; fresh authorized decision not proven.                       |
+| Underwriting and loan book               | Bank                    | Supabase verified properties/loan records   | Optional               | Authorization observed; fresh assessment not proven.                      |
+| Administration                           | Admin                   | Supabase profiles/audit/system data         | No                     | Route exists; full control audit not proven.                              |
+| Support chatbot                          | All authenticated roles | Aparsoft provider                           | Provider-owned         | Iframe/UI present; fresh conversational response not proven.              |
 
 ## Fresh QA IDs
 
@@ -104,6 +104,7 @@ The repository builds and the production citizen session can authenticate, load 
 - Touched-file ESLint: PASS for the four changed source files
 - `git diff --check`: PASS
 - Full end-to-end acceptance: NOT PROVEN
+
 # TerraTrust AI Final Ship Report
 
 ## Executive Status
@@ -114,21 +115,21 @@ The core property, GIS, document, deterministic verification, server-side Gemini
 
 ## Evidence
 
-| Area | Status | Evidence |
-|---|---|---|
-| Citizen | NOT PROVEN | Authenticated QA property creation and document persistence succeeded; complete Chrome flow was not completed. |
-| Government | NOT PROVEN | Existing government decision path exists, but final fresh-property browser acceptance was not completed. |
-| Surveyor | NOT PROVEN | Existing assignment/evidence persistence code exists; fresh-property browser acceptance was not completed. |
-| Bank | NOT PROVEN | Existing bank loan persistence path exists; fresh-property collateral acceptance was not completed. |
-| Admin | NOT PROVEN | Existing admin routes were previously checked; this final pass did not repeat every route in Chrome. |
-| Gemini | PASS | Real `gemini-3.8-flash` request returned HTTP 200 and structured JSON for the earlier authenticated QA property. |
-| n8n | PARTIAL | Canonical workflow executed successfully for a fresh property, but its graph contains deterministic Code nodes and no Gemini provider node. |
-| Supabase | PASS/PARTIAL | AI migration `011` is applied; prior AI row was persisted and reread. Fresh-property AI row was not created by n8n. |
-| GIS | PASS | Fresh QA property carried persisted four-point boundary geometry and area. |
-| Storage | PASS | Fresh QA document metadata and Storage upload path were created by the QA seed script. |
-| Aparsoft | NOT PROVEN | External iframe request was observed; complete chatbot interaction was not completed. |
-| Vercel | PARTIAL | Production was redeployed and returned HTTP 200; production Gemini/browser execution was not completed. |
-| Chrome | NOT PROVEN | Shared browser sessions were not authenticated as the required QA role for the full acceptance flow. |
+| Area       | Status       | Evidence                                                                                                                                    |
+| ---------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Citizen    | NOT PROVEN   | Authenticated QA property creation and document persistence succeeded; complete Chrome flow was not completed.                              |
+| Government | NOT PROVEN   | Existing government decision path exists, but final fresh-property browser acceptance was not completed.                                    |
+| Surveyor   | NOT PROVEN   | Existing assignment/evidence persistence code exists; fresh-property browser acceptance was not completed.                                  |
+| Bank       | NOT PROVEN   | Existing bank loan persistence path exists; fresh-property collateral acceptance was not completed.                                         |
+| Admin      | NOT PROVEN   | Existing admin routes were previously checked; this final pass did not repeat every route in Chrome.                                        |
+| Gemini     | PASS         | Real `gemini-3.8-flash` request returned HTTP 200 and structured JSON for the earlier authenticated QA property.                            |
+| n8n        | PARTIAL      | Canonical workflow executed successfully for a fresh property, but its graph contains deterministic Code nodes and no Gemini provider node. |
+| Supabase   | PASS/PARTIAL | AI migration `011` is applied; prior AI row was persisted and reread. Fresh-property AI row was not created by n8n.                         |
+| GIS        | PASS         | Fresh QA property carried persisted four-point boundary geometry and area.                                                                  |
+| Storage    | PASS         | Fresh QA document metadata and Storage upload path were created by the QA seed script.                                                      |
+| Aparsoft   | NOT PROVEN   | External iframe request was observed; complete chatbot interaction was not completed.                                                       |
+| Vercel     | PARTIAL      | Production was redeployed and returned HTTP 200; production Gemini/browser execution was not completed.                                     |
+| Chrome     | NOT PROVEN   | Shared browser sessions were not authenticated as the required QA role for the full acceptance flow.                                        |
 
 ## Fresh QA IDs
 
@@ -155,6 +156,7 @@ Prior real Gemini persistence evidence:
 ## Failed Items
 
 ### Gemini inside n8n
+
 - Route: canonical `/webhook/terratrust/verify`
 - Action: inspect workflow graph and execute fresh verification
 - Result: deterministic verification succeeded, but no Gemini provider node exists
@@ -163,6 +165,7 @@ Prior real Gemini persistence evidence:
 - External access required: n8n workflow editor/API access and a Gemini credential configured in n8n
 
 ### Full Chrome acceptance
+
 - Route: authenticated role workflows and `/valuation`
 - Action: complete login, property selection, AI action, reload, logout/login, and role handoff
 - Result: not completed because the shared browser was in a different session/user and the n8n editor session was not usable for configuration
@@ -170,6 +173,7 @@ Prior real Gemini persistence evidence:
 - External access required: authenticated QA browser sessions at 1440x900
 
 ### Static AI feature routes
+
 - Routes: fraud, risk, OCR, recommendations, suggestions, timeline, passport, land health
 - Result: source audit found imports from `src/lib/ai-mock.ts`
 - Current state: these routes are not proven Gemini-backed and must not be described as fully real AI

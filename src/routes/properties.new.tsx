@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { BoundaryEditor } from "@/components/ui-ext/BoundaryEditor";
 import type { NominatimResult } from "@/components/ui-ext/RealMap";
 import { DocumentUploader, type QueuedDocument } from "@/components/ui-ext/DocumentUploader";
@@ -17,7 +18,7 @@ import {
   INDIAN_STATES_AND_UTS,
   type IndianStateOrUT,
 } from "@/lib/gis-utils";
-import { getStateProfile, formatStateArea } from "@/lib/state-registry";
+import { getStateProfile, formatStateArea, getStateIdentifierTypes } from "@/lib/state-registry";
 import {
   createProperty,
   uploadPropertyDocumentBinary,
@@ -37,6 +38,7 @@ import {
   ArrowLeft,
   XCircle,
   ShieldCheck,
+  ShieldAlert,
   IndianRupee,
   Crosshair,
 } from "lucide-react";
@@ -44,10 +46,24 @@ import type { Property, PropertyType } from "@/lib/types";
 
 export const Route = createFileRoute("/properties/new")({
   head: () => ({ meta: [{ title: "Register Property — TerraTrust AI" }] }),
-  component: RegisterPropertyWizard,
+  component: ProtectedRegisterPropertyRoute,
 });
 
-const STEPS = ["Property Details", "Location", "Boundary & GIS", "Documents", "Review & Submit"];
+function ProtectedRegisterPropertyRoute() {
+  return (
+    <ProtectedRoute allowedRoles={["citizen", "admin"]}>
+      <RegisterPropertyWizard />
+    </ProtectedRoute>
+  );
+}
+
+const STEPS = [
+  "State & Land Record",
+  "Property Details",
+  "Boundary & GIS",
+  "Documents",
+  "Review & Submit",
+];
 
 const PROPERTY_TYPES: { label: string; value: PropertyType }[] = [
   { label: "Residential", value: "residential" },
@@ -70,21 +86,23 @@ function generatePassportId(state: string): string {
 }
 
 function RegisterPropertyWizard() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Form State - Step 1: Property Details
+  // Form State - Step 0: State & Land Record Identification
+  const [country] = useState("India");
+  const [state, setState] = useState<IndianStateOrUT>("Karnataka");
+  const [recordIdentifierType, setRecordIdentifierType] = useState<string>("e-Khata / PID");
+  const [recordIdentifierValue, setRecordIdentifierValue] = useState<string>("1502001002003004");
+
+  // Form State - Step 1: Property Details & Location
   const [title, setTitle] = useState("");
   const [propertyType, setPropertyType] = useState<PropertyType>("residential");
   const [estimatedValue, setEstimatedValue] = useState<number>(2500000);
   const [valueDisplay, setValueDisplay] = useState("25,00,000");
   const [description, setDescription] = useState("");
-
-  // Form State - Step 2: Location & State Land Profile
-  const [country] = useState("India");
-  const [state, setState] = useState<IndianStateOrUT>("Karnataka");
   const [city, setCity] = useState("Bengaluru");
   const [address, setAddress] = useState("14/2, Outer Ring Road, Bellandur");
   const [latitude, setLatitude] = useState<number>(12.9279);
@@ -110,6 +128,14 @@ function RegisterPropertyWizard() {
   const handleStateChange = (newState: IndianStateOrUT) => {
     setState(newState);
     const p = getStateProfile(newState);
+    const idTypes = getStateIdentifierTypes(newState);
+    if (idTypes.length > 0) {
+      setRecordIdentifierType(idTypes[0].id);
+      const defaultVal = idTypes[0].placeholder.startsWith("e.g. ")
+        ? idTypes[0].placeholder.slice(5).split(" or ")[0]
+        : idTypes[0].placeholder;
+      setRecordIdentifierValue(defaultVal);
+    }
     if (p.stateCode === "MH") {
       setCity("Pune");
       setAddress("Survey 241, Phase 1, Hinjawadi Rajiv Gandhi Infotech Park");
@@ -264,12 +290,24 @@ function RegisterPropertyWizard() {
     const newErrors: Record<string, string> = {};
 
     if (step === 0) {
+      if (!state) newErrors.state = "Indian state/UT is required.";
+      if (!recordIdentifierType)
+        newErrors.recordIdentifierType = "Record identifier type is required.";
+      if (!recordIdentifierValue.trim())
+        newErrors.recordIdentifierValue = "Property record identifier value is required.";
+      if (!cadastralValues.district?.trim()) newErrors.district = "District is required.";
+      if (
+        !cadastralValues.taluk?.trim() &&
+        !cadastralValues.taluka?.trim() &&
+        !cadastralValues.mandal?.trim()
+      ) {
+        newErrors.taluk = "Taluk / Tahsil / Mandal is required.";
+      }
+    } else if (step === 1) {
       if (!title.trim()) newErrors.title = "Property title is required.";
       if (!propertyType) newErrors.propertyType = "Please select a property type.";
       if (!estimatedValue || estimatedValue <= 0)
         newErrors.estimatedValue = "Estimated value must be greater than zero.";
-    } else if (step === 1) {
-      if (!state) newErrors.state = "Indian state/UT is required.";
       if (!city.trim()) newErrors.city = "City is required.";
       if (!address.trim()) newErrors.address = "Address is required.";
       if (isNaN(latitude) || latitude < -90 || latitude > 90)
@@ -418,6 +456,9 @@ function RegisterPropertyWizard() {
         ownerId,
         propertyName: title.trim(),
         passportId,
+        propertyState: state,
+        recordIdentifierType,
+        recordIdentifierValue: recordIdentifierValue.trim(),
         location: {
           address: address.trim(),
           region: state,
@@ -431,7 +472,11 @@ function RegisterPropertyWizard() {
           claimed_boundary: boundary, // boundary versioning
           boundary_geojson: coordsToGeoJson(boundary),
           stateCode: currentProfile.stateCode,
-          cadastralIdentifiers: cadastralValues,
+          cadastralIdentifiers: {
+            ...cadastralValues,
+            recordIdentifierType,
+            recordIdentifierValue: recordIdentifierValue.trim(),
+          },
           sourceChecks,
         },
         area: areaSqm,
@@ -690,21 +735,173 @@ function RegisterPropertyWizard() {
             </div>
           )}
 
-          {/* STEP 1: Basic Property Information */}
+          {/* STEP 1: State & Land Record Identification */}
           {currentStep === 0 && (
             <div className="space-y-6">
               <div>
                 <h3 className="font-display text-xl font-semibold text-foreground">
-                  Step 1: Basic Property Information
+                  Step 1: State & Official Land Record
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Specify the property title, cadastral land use category, and estimated valuation
-                  in Indian Rupees (₹).
+                  Select the Indian State / Union Territory and specify the official land record
+                  identifier (e.g., Karnataka e-Khata / PID, Maharashtra 7/12 Gat No., or State
+                  Property Record ID).
                 </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Property Title" hint="E.g., Whitefield Villa, Mysuru Farmstead">
+                <Field label="Country">
+                  <Input
+                    id="property-country-input"
+                    value={country}
+                    disabled
+                    className="bg-muted/50 cursor-not-allowed font-medium"
+                  />
+                </Field>
+
+                <Field label="Property State / Union Territory" hint="Select jurisdiction">
+                  <select
+                    id="property-state-select"
+                    value={state}
+                    onChange={(e) => handleStateChange(e.target.value as IndianStateOrUT)}
+                    className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {INDIAN_STATES_AND_UTS.map((st) => (
+                      <option key={st} value={st}>
+                        {st}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.state && (
+                    <p className="text-[11px] text-destructive mt-1">{errors.state}</p>
+                  )}
+                </Field>
+
+                <Field
+                  label="Official Record Identifier Type"
+                  hint={`Researched official registry systems for ${state}`}
+                >
+                  <select
+                    id="property-identifier-type-select"
+                    value={recordIdentifierType}
+                    onChange={(e) => {
+                      setRecordIdentifierType(e.target.value);
+                      const opt = getStateIdentifierTypes(state).find(
+                        (t) => t.id === e.target.value,
+                      );
+                      if (opt) {
+                        const defaultVal = opt.placeholder.startsWith("e.g. ")
+                          ? opt.placeholder.slice(5).split(" or ")[0]
+                          : opt.placeholder;
+                        setRecordIdentifierValue(defaultVal);
+                      }
+                    }}
+                    className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {getStateIdentifierTypes(state).map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.recordIdentifierType && (
+                    <p className="text-[11px] text-destructive mt-1">
+                      {errors.recordIdentifierType}
+                    </p>
+                  )}
+                </Field>
+
+                <Field
+                  label="Official Record Identifier Value"
+                  hint="Primary record reference (e.g. 10-digit PID, Survey No, Gat No)"
+                >
+                  <Input
+                    id="property-identifier-value-input"
+                    value={recordIdentifierValue}
+                    onChange={(e) => setRecordIdentifierValue(e.target.value)}
+                    placeholder={
+                      getStateIdentifierTypes(state).find((t) => t.id === recordIdentifierType)
+                        ?.placeholder || "Enter record identifier value"
+                    }
+                    className={`font-mono ${errors.recordIdentifierValue ? "border-destructive" : ""}`}
+                  />
+                  {errors.recordIdentifierValue && (
+                    <p className="text-[11px] text-destructive mt-1">
+                      {errors.recordIdentifierValue}
+                    </p>
+                  )}
+                </Field>
+
+                {/* State Cadastral Context Card */}
+                <div className="md:col-span-2 rounded-xl border border-primary/25 bg-primary/5 p-4 mt-2 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-primary/20 pb-2">
+                    <div>
+                      <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
+                        <span>{currentProfile.stateName} Official Registry Attributes</span>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] font-mono border-primary/30 text-primary"
+                        >
+                          {currentProfile.stateCode} REGISTRY PROFILE
+                        </Badge>
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {getStateIdentifierTypes(state).find((t) => t.id === recordIdentifierType)
+                          ?.description ||
+                          `Official ${currentProfile.localTerminology.recordOfRightsName} revenue references.`}
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-medium text-primary">
+                      Local Units: {currentProfile.unitConversion.label}
+                    </span>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                    {currentProfile.cadastralFields.map((field) => (
+                      <Field
+                        key={field.key}
+                        label={field.label}
+                        hint={field.hint || (field.required ? "Required" : "Optional")}
+                      >
+                        <Input
+                          id={`cadastral-${field.key}`}
+                          value={cadastralValues[field.key] || ""}
+                          onChange={(e) =>
+                            setCadastralValues((prev) => ({
+                              ...prev,
+                              [field.key]: e.target.value,
+                            }))
+                          }
+                          placeholder={field.placeholder || `Enter ${field.label}`}
+                          className="text-xs h-9 bg-surface"
+                        />
+                      </Field>
+                    ))}
+                  </div>
+                  {errors.district && (
+                    <p className="text-[11px] text-destructive">{errors.district}</p>
+                  )}
+                  {errors.taluk && <p className="text-[11px] text-destructive">{errors.taluk}</p>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: Property Details & Location */}
+          {currentStep === 1 && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-display text-xl font-semibold text-foreground">
+                  Step 2: Property Details & Location
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Specify the formal property title, cadastral land use type, estimated valuation,
+                  and geographic coordinates.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Property Title" hint="E.g., Whitefield Villa, Hinjawadi Commercial">
                   <Input
                     id="property-title-input"
                     value={title}
@@ -757,65 +954,12 @@ function RegisterPropertyWizard() {
                   </p>
                 </Field>
 
-                <Field label="Description" hint="Optional background or landmarks">
-                  <Textarea
-                    id="property-description-input"
-                    rows={3}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Provide details on occupancy, road access, or encumbrances…"
-                  />
-                </Field>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: Location */}
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-display text-xl font-semibold text-foreground">
-                  Step 2: Indian Geography & Location
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Specify State / Union Territory, City, street address, and GPS coordinates.
-                </p>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Country">
-                  <Input
-                    id="property-country-input"
-                    value={country}
-                    disabled
-                    className="bg-muted/50 cursor-not-allowed font-medium"
-                  />
-                </Field>
-
-                <Field label="State / Union Territory" hint="Select from all Indian states/UTs">
-                  <select
-                    id="property-state-select"
-                    value={state}
-                    onChange={(e) => handleStateChange(e.target.value as IndianStateOrUT)}
-                    className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {INDIAN_STATES_AND_UTS.map((st) => (
-                      <option key={st} value={st}>
-                        {st}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.state && (
-                    <p className="text-[11px] text-destructive mt-1">{errors.state}</p>
-                  )}
-                </Field>
-
-                <Field label="City / Taluk / District">
+                <Field label="City / Municipality">
                   <Input
                     id="property-city-input"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="E.g. Bengaluru, Mysuru, Hyderabad, Pune"
+                    placeholder="E.g. Bengaluru, Pune, Hyderabad"
                     className={errors.city ? "border-destructive" : ""}
                   />
                   {errors.city && (
@@ -834,6 +978,16 @@ function RegisterPropertyWizard() {
                   {errors.address && (
                     <p className="text-[11px] text-destructive mt-1">{errors.address}</p>
                   )}
+                </Field>
+
+                <Field label="Description" hint="Optional background or landmarks">
+                  <Textarea
+                    id="property-description-input"
+                    rows={3}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Provide details on occupancy, road access, or encumbrances…"
+                  />
                 </Field>
 
                 <Field label="Latitude (Decimal Degrees)" hint="Range: -90.0 to 90.0">
@@ -883,53 +1037,6 @@ function RegisterPropertyWizard() {
                   {locationStatusStep2 && (
                     <p className="w-full text-xs text-primary font-medium">{locationStatusStep2}</p>
                   )}
-                </div>
-
-                {/* State-Specific Cadastral & Land Registry Identifiers */}
-                <div className="md:col-span-2 rounded-xl border border-primary/25 bg-primary/5 p-4 mt-2 space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-primary/20 pb-2">
-                    <div>
-                      <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
-                        <span>
-                          {currentProfile.stateName} Cadastral & Land Registry Identifiers
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] font-mono border-primary/30 text-primary"
-                        >
-                          {currentProfile.stateCode} PROFILE
-                        </Badge>
-                      </h4>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Official {currentProfile.localTerminology.recordOfRightsName} &{" "}
-                        {currentProfile.localTerminology.deedRegistrationSystemName} cadastral
-                        references.
-                      </p>
-                    </div>
-                    <span className="text-[10px] font-medium text-primary">
-                      Units: {currentProfile.unitConversion.label}
-                    </span>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-                    {currentProfile.cadastralFields.map((field) => (
-                      <Field
-                        key={field.key}
-                        label={field.label}
-                        hint={field.hint || (field.required ? "Required" : "Optional")}
-                      >
-                        <Input
-                          id={`cadastral-${field.key}`}
-                          value={cadastralValues[field.key] || ""}
-                          onChange={(e) =>
-                            setCadastralValues((prev) => ({ ...prev, [field.key]: e.target.value }))
-                          }
-                          placeholder={field.placeholder || `Enter ${field.label}`}
-                          className="text-xs h-9 bg-surface"
-                        />
-                      </Field>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
@@ -1088,6 +1195,12 @@ function RegisterPropertyWizard() {
                       <span className="text-muted-foreground">State Profile:</span>
                       <span className="font-medium text-foreground">
                         {currentProfile.stateName} ({currentProfile.stateCode})
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1">
+                      <span className="text-muted-foreground">Official Identifier:</span>
+                      <span className="font-medium text-primary font-mono">
+                        {recordIdentifierType}: {recordIdentifierValue}
                       </span>
                     </div>
                     <div className="flex justify-between py-1">

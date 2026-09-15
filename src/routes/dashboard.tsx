@@ -3,18 +3,26 @@ import { AppShell, StatusBadge } from "@/components/layout/AppShell";
 import { StatCard } from "@/components/ui-ext/StatCard";
 import { TrustScore } from "@/components/ui-ext/TrustScore";
 import { Button } from "@/components/ui/button";
-import { notifications } from "@/lib/mock-data";
 import { ArrowRight, Plus, Sparkles, Bell, ShieldCheck, ClipboardCheck } from "lucide-react";
 import { MapMock } from "@/components/ui-ext/MapMock";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
 import { loadOwnedProperties } from "@/lib/property-repository";
+import { supabase } from "@/lib/supabase";
 import type { Property } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — TerraTrust AI" }] }),
   component: Dashboard,
 });
+
+interface NotificationRow {
+  id: string;
+  title: string;
+  message: string | null;
+  read: boolean;
+  created_at: string;
+}
 
 function formatInr(val: number): string {
   if (!val) return "₹0";
@@ -26,6 +34,7 @@ function formatInr(val: number): string {
 function Dashboard() {
   const { user, profile } = useAuth();
   const [userProperties, setUserProperties] = useState<Property[]>([]);
+  const [recentNotifications, setRecentNotifications] = useState<NotificationRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const userName =
@@ -39,10 +48,20 @@ function Dashboard() {
         setUserProperties(props || []);
         setLoading(false);
       });
+      const role = profile?.role || user.user_metadata?.role || "citizen";
+      supabase
+        .from("notifications")
+        .select("id, title, message, read, created_at")
+        .or(`user_id.eq.${user.id},recipient_role.eq.${role}`)
+        .order("created_at", { ascending: false })
+        .limit(4)
+        .then(({ data }) => {
+          if (data) setRecentNotifications(data);
+        });
     } else {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, profile?.role]);
 
   const verifiedCount = userProperties.filter((p) => p.status === "verified").length;
   const pendingCount = userProperties.filter((p) => p.status === "pending").length;
@@ -98,6 +117,7 @@ function Dashboard() {
     <AppShell
       title={`Welcome back, ${userName}`}
       subtitle="Overview of your verified land parcels, Property Passports, and trust scores."
+      requiredRole={["citizen", "admin"]}
       actions={
         <div className="flex items-center gap-2">
           <Link to="/valuation">
@@ -304,23 +324,38 @@ function Dashboard() {
               All notifications
             </Link>
           </div>
-          <ul className="space-y-3">
-            {notifications.slice(0, 4).map((n) => (
-              <li
-                key={n.id}
-                className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/30 transition"
-              >
-                <span
-                  className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${n.kind === "success" ? "bg-success" : n.kind === "warning" ? "bg-warning" : n.kind === "alert" ? "bg-destructive" : "bg-primary"}`}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
-                  <p className="text-xs text-muted-foreground">{n.body}</p>
-                  <p className="mt-0.5 text-[10px] text-muted-foreground">{n.at}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {recentNotifications.length === 0 ? (
+            <div className="py-6 text-center text-xs text-muted-foreground">
+              No recent alerts or verification updates.
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {recentNotifications.map((n) => (
+                <li
+                  key={n.id}
+                  className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/30 transition"
+                >
+                  <span
+                    className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${!n.read ? "bg-primary" : "bg-muted-foreground/40"}`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
+                    {n.message && (
+                      <p className="text-xs text-muted-foreground truncate">{n.message}</p>
+                    )}
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">
+                      {new Date(n.created_at).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 

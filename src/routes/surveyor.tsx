@@ -1,9 +1,10 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export const Route = createFileRoute("/surveyor")({
   component: SurveyorLayout,
 });
 
 function SurveyorLayout() {
-  return <Outlet />;
+  return <ProtectedRoute allowedRoles={["surveyor", "admin"]} />;
 }

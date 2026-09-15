@@ -263,18 +263,18 @@ The document is then available as evidence for the verification payload and for 
 
 ### AI feature truth table
 
-| Feature | Intended purpose | Server-side Gemini wiring | Fresh production proof | Persistence |
-|---|---|---|---|---|
-| OCR / document intelligence | Extract and organize document fields and identify missing or unusual evidence. | The current n8n workflow uses deterministic Code-node evidence analysis; the feature page itself is not proven as a Gemini call. | Not freshly proven as a Gemini document run. | Document metadata and verification results can be persisted; do not claim a fresh OCR model row without evidence. |
-| Valuation | Produce an evidence-grounded, indicative INR estimate, range and confidence. | **Yes.** `/valuation` calls the server-side Gemini function. | **Not proven in the final run:** the fresh action returned no visible result. | The code attempts to persist `ai_analyses`; a fresh row was not created for the final QA property. |
-| Fraud detection | Identify signals such as duplicate or conflicting evidence and route cases for review. | Deterministic local and n8n analysis paths exist; not proven as Gemini-backed. | Verification outputs have prior evidence; fresh full browser acceptance was not repeated. | Verification results can contain fraud score, band and reasons. |
-| Risk analysis | Summarize property risk dimensions and identify attention areas. | Deterministic property intelligence and n8n Code nodes exist; not proven as Gemini-backed. | Not freshly proven as an independent production AI run. | Risk can be included in verification results. |
-| Confidence | Combine evidence factors into a score and explain why confidence is high or low. | The current confidence engine is deterministic; it is not presented as a Gemini decision. | Core confidence/verification path has prior evidence; latest pass did not reaccept every role. | Confidence is part of verification results and property trust data. |
-| Property summary | Explain the property and evidence in plain language. | A screen exists; fresh Gemini backing was not proven. | Not freshly proven. | Persistence of a generated summary was not established in the latest pass. |
-| Recommendations | Suggest next review or evidence steps. | A screen exists; fresh Gemini backing was not proven. | Not freshly proven. | Persistence was not established in the latest pass. |
-| Boundary-related analysis | Compare claimed, surveyor and referenced boundary information. | GIS calculations and deterministic checks exist; Gemini backing was not proven. | Persisted GIS evidence has prior proof; cross-role reload was not repeated in the final pass. | Boundary geometry and verification results can be persisted. |
-| Timeline / history | Show property events, decisions and evidence history. | The timeline surface exists; it is not proven as a Gemini feature. | Route exists; fresh complete history acceptance was not a final PASS. | Timeline/event data is part of the application model and review records. |
-| Passport intelligence | Bring property evidence, status, confidence, risk and valuation context together. | Passport surfaces exist; not proven as Gemini-generated. | Citizen passport visibility was production verified. | Passport/property and verification records are persisted. |
+| Feature                     | Intended purpose                                                                       | Server-side Gemini wiring                                                                                                        | Fresh production proof                                                                         | Persistence                                                                                                       |
+| --------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| OCR / document intelligence | Extract and organize document fields and identify missing or unusual evidence.         | The current n8n workflow uses deterministic Code-node evidence analysis; the feature page itself is not proven as a Gemini call. | Not freshly proven as a Gemini document run.                                                   | Document metadata and verification results can be persisted; do not claim a fresh OCR model row without evidence. |
+| Valuation                   | Produce an evidence-grounded, indicative INR estimate, range and confidence.           | **Yes.** `/valuation` calls the server-side Gemini function.                                                                     | **Not proven in the final run:** the fresh action returned no visible result.                  | The code attempts to persist `ai_analyses`; a fresh row was not created for the final QA property.                |
+| Fraud detection             | Identify signals such as duplicate or conflicting evidence and route cases for review. | Deterministic local and n8n analysis paths exist; not proven as Gemini-backed.                                                   | Verification outputs have prior evidence; fresh full browser acceptance was not repeated.      | Verification results can contain fraud score, band and reasons.                                                   |
+| Risk analysis               | Summarize property risk dimensions and identify attention areas.                       | Deterministic property intelligence and n8n Code nodes exist; not proven as Gemini-backed.                                       | Not freshly proven as an independent production AI run.                                        | Risk can be included in verification results.                                                                     |
+| Confidence                  | Combine evidence factors into a score and explain why confidence is high or low.       | The current confidence engine is deterministic; it is not presented as a Gemini decision.                                        | Core confidence/verification path has prior evidence; latest pass did not reaccept every role. | Confidence is part of verification results and property trust data.                                               |
+| Property summary            | Explain the property and evidence in plain language.                                   | A screen exists; fresh Gemini backing was not proven.                                                                            | Not freshly proven.                                                                            | Persistence of a generated summary was not established in the latest pass.                                        |
+| Recommendations             | Suggest next review or evidence steps.                                                 | A screen exists; fresh Gemini backing was not proven.                                                                            | Not freshly proven.                                                                            | Persistence was not established in the latest pass.                                                               |
+| Boundary-related analysis   | Compare claimed, surveyor and referenced boundary information.                         | GIS calculations and deterministic checks exist; Gemini backing was not proven.                                                  | Persisted GIS evidence has prior proof; cross-role reload was not repeated in the final pass.  | Boundary geometry and verification results can be persisted.                                                      |
+| Timeline / history          | Show property events, decisions and evidence history.                                  | The timeline surface exists; it is not proven as a Gemini feature.                                                               | Route exists; fresh complete history acceptance was not a final PASS.                          | Timeline/event data is part of the application model and review records.                                          |
+| Passport intelligence       | Bring property evidence, status, confidence, risk and valuation context together.      | Passport surfaces exist; not proven as Gemini-generated.                                                                         | Citizen passport visibility was production verified.                                           | Passport/property and verification records are persisted.                                                         |
 
 ### Important presentation rule
 
@@ -520,16 +520,16 @@ Surveyor evidence and Government review handle cases that should not be treated 
 
 Only use statuses that are supported by the current implementation:
 
-| Status | Meaning |
-|---|---|
-| `draft` | A property record is in an early editable state in the data model. It is supported by the database status constraint, although the latest final citizen QA property began as pending. |
-| `pending` | Submitted or awaiting review. A manual-review verification result is mapped to pending on the property. |
-| `verified` | The property has a verified property status after the verification/government path. Bank eligibility is based on verified properties. |
-| `disputed` | The property is in a conflict/rejected/disputed state and should not be treated as clear collateral. |
-| `manual_review` | A verification workflow result requiring human review. This is a workflow result, not the PostgreSQL property status value. |
-| `rejected` | A verification workflow result indicating rejection. The property can be mapped to a disputed state. |
-| `processing` | A temporary UI/action state while analysis or submission is running. It is not a confirmed persistent property status. |
-| `Passport ready` | A workflow/passport outcome shown when the evidence gates clear. It is not a separate confirmed property status in the database constraint. |
+| Status           | Meaning                                                                                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `draft`          | A property record is in an early editable state in the data model. It is supported by the database status constraint, although the latest final citizen QA property began as pending. |
+| `pending`        | Submitted or awaiting review. A manual-review verification result is mapped to pending on the property.                                                                               |
+| `verified`       | The property has a verified property status after the verification/government path. Bank eligibility is based on verified properties.                                                 |
+| `disputed`       | The property is in a conflict/rejected/disputed state and should not be treated as clear collateral.                                                                                  |
+| `manual_review`  | A verification workflow result requiring human review. This is a workflow result, not the PostgreSQL property status value.                                                           |
+| `rejected`       | A verification workflow result indicating rejection. The property can be mapped to a disputed state.                                                                                  |
+| `processing`     | A temporary UI/action state while analysis or submission is running. It is not a confirmed persistent property status.                                                                |
+| `Passport ready` | A workflow/passport outcome shown when the evidence gates clear. It is not a separate confirmed property status in the database constraint.                                           |
 
 Do not describe `submitted` as a separate persistent status unless the screen is clearly showing a submission event rather than a database status.
 
@@ -554,25 +554,25 @@ It is not a replacement for government title records. It is not automatically co
 
 ## 17. What Is Actually Working Right Now?
 
-| Feature | Implemented | Production verified | Current limitation |
-|---|---|---|---|
-| Production login and Citizen dashboard | Yes | Yes, latest pass | Fresh citizen flow was the strongest current acceptance; broader role acceptance remains incomplete. |
-| Citizen property list and property passport | Yes | Yes for a fresh persisted QA property/passport | Full mutation/reload audit was not repeated for every path. |
-| Add/Create Property | Yes | Core path and prior persistence evidence | Complete latest browser acceptance of every step was not repeated. |
-| GIS boundary capture and area | Yes | Prior QA persisted boundary evidence; latest citizen property was visible | Cross-role geometry reload was not repeated in the final pass. |
-| Document upload and metadata | Yes | Prior QA upload and metadata evidence | Storage authorization checks were not repeated in the final pass. |
-| Live n8n verification webhook | Yes | Prior webhook evidence exists | Latest n8n editor/API access had 401/502/store errors; fresh Gemini-in-n8n execution is not proven. |
-| Deterministic verification result | Yes | Prior verification result and workflow reference exist | Do not call it Gemini-backed. |
-| Server-side Gemini valuation path | Yes | Server code and feature route exist; prior historical persistence evidence exists | Fresh valuation response was not visible in the final browser run. |
-| OCR/fraud/risk/confidence screens | Yes | Some deterministic verification evidence exists | Not all are server-side Gemini features or freshly run production analyses. |
-| Surveyor assignment and evidence code | Yes | Route/persistence implementation exists | Fresh authorized submission was not completed in the final pass. |
-| Government review and decision code | Yes | Route and decision persistence code exist | Fresh authorized decision was not completed in the final pass. |
-| Bank eligible-property and loan workflow | Yes | Route/authorization observed | Fresh persisted bank assessment was not completed in the final pass. |
-| Admin dashboard and controls | Yes | `/admin` rendered | Full fresh control audit was not completed; shared session showed zero live records. |
-| Supabase Auth, database and RLS design | Yes | Auth and persisted QA records evidenced | Full fresh mutation and unauthorized-access audit was not repeated. |
-| Private Storage documents | Yes | Prior upload evidence | Latest final Storage access checks were not proven. |
-| Aparsoft authenticated widget | Yes | Yes: real responses, one iframe, history survived navigation, no failed requests observed | It is an external provider integration; do not confuse it with verification or Gemini. |
-| Production deployment | Yes | Production URL loaded and `/login` returned HTTP 200 | The final source change was not deployed during the latest pass. |
+| Feature                                     | Implemented | Production verified                                                                       | Current limitation                                                                                   |
+| ------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Production login and Citizen dashboard      | Yes         | Yes, latest pass                                                                          | Fresh citizen flow was the strongest current acceptance; broader role acceptance remains incomplete. |
+| Citizen property list and property passport | Yes         | Yes for a fresh persisted QA property/passport                                            | Full mutation/reload audit was not repeated for every path.                                          |
+| Add/Create Property                         | Yes         | Core path and prior persistence evidence                                                  | Complete latest browser acceptance of every step was not repeated.                                   |
+| GIS boundary capture and area               | Yes         | Prior QA persisted boundary evidence; latest citizen property was visible                 | Cross-role geometry reload was not repeated in the final pass.                                       |
+| Document upload and metadata                | Yes         | Prior QA upload and metadata evidence                                                     | Storage authorization checks were not repeated in the final pass.                                    |
+| Live n8n verification webhook               | Yes         | Prior webhook evidence exists                                                             | Latest n8n editor/API access had 401/502/store errors; fresh Gemini-in-n8n execution is not proven.  |
+| Deterministic verification result           | Yes         | Prior verification result and workflow reference exist                                    | Do not call it Gemini-backed.                                                                        |
+| Server-side Gemini valuation path           | Yes         | Server code and feature route exist; prior historical persistence evidence exists         | Fresh valuation response was not visible in the final browser run.                                   |
+| OCR/fraud/risk/confidence screens           | Yes         | Some deterministic verification evidence exists                                           | Not all are server-side Gemini features or freshly run production analyses.                          |
+| Surveyor assignment and evidence code       | Yes         | Route/persistence implementation exists                                                   | Fresh authorized submission was not completed in the final pass.                                     |
+| Government review and decision code         | Yes         | Route and decision persistence code exist                                                 | Fresh authorized decision was not completed in the final pass.                                       |
+| Bank eligible-property and loan workflow    | Yes         | Route/authorization observed                                                              | Fresh persisted bank assessment was not completed in the final pass.                                 |
+| Admin dashboard and controls                | Yes         | `/admin` rendered                                                                         | Full fresh control audit was not completed; shared session showed zero live records.                 |
+| Supabase Auth, database and RLS design      | Yes         | Auth and persisted QA records evidenced                                                   | Full fresh mutation and unauthorized-access audit was not repeated.                                  |
+| Private Storage documents                   | Yes         | Prior upload evidence                                                                     | Latest final Storage access checks were not proven.                                                  |
+| Aparsoft authenticated widget               | Yes         | Yes: real responses, one iframe, history survived navigation, no failed requests observed | It is an external provider integration; do not confuse it with verification or Gemini.               |
+| Production deployment                       | Yes         | Production URL loaded and `/login` returned HTTP 200                                      | The final source change was not deployed during the latest pass.                                     |
 
 ## 18. What Is Not Fully Proven?
 
@@ -743,40 +743,53 @@ The product separates the browser experience, Supabase persistence, server-side 
 ## 23. Final One-Page Cheat Sheet
 
 ### PROBLEM
+
 Property evidence is fragmented across documents, maps, surveys, registries and institutional workflows.
 
 ### SOLUTION
+
 A property trust layer that organizes evidence, GIS, verification, review and bank intelligence around one parcel identity.
 
 ### USERS
+
 Citizens, Surveyors, Government officers, Banks and Administrators.
 
 ### CORE FLOW
+
 Citizen property -> information -> GIS polygon -> documents -> server-side AI when available -> n8n verification -> surveyor evidence -> Government review -> Passport -> bank assessment.
 
 ### AI
+
 Gemini is a server-side structured-analysis service, primarily wired to the valuation path. Fresh valuation output was not proven in the final browser run. Do not call every AI screen Gemini-backed.
 
 ### GIS
+
 A stored citizen-claimed polygon with editable points and calculated area. Useful evidence, not legal title.
 
 ### N8N
+
 External verification orchestrator. Current workflow validates, normalizes, runs deterministic Code-node checks, applies decision gates, persists the run and responds. Gemini inside n8n is not proven.
 
 ### SUPABASE
+
 Auth, profiles, PostgreSQL property records, private document Storage, verification results, review cases, role access and RLS.
 
 ### PASSPORT
+
 An evidence/trust summary for a parcel: identity, boundary, documents, status, scores, risk, review history and available valuation context.
 
 ### LEGAL DISCLAIMER
+
 The passport and AI outputs do not replace government title records. Government retains final legal authority.
 
 ### CURRENT LIMITATIONS
+
 Fresh valuation response not proven; Gemini-in-n8n not proven; complete fresh role acceptance not proven; n8n editor/API access had external 401/502 issues; Storage security checks and fresh institutional mutations were not fully repeated; not all AI screens are proven live Gemini features.
 
 ### 5-MINUTE DEMO ORDER
+
 Dashboard -> Property -> GIS boundary -> Documents -> Valuation only if visible -> Verification/n8n -> Surveyor evidence -> Government decision -> Passport -> Bank.
 
 ### CLOSING LINE
+
 “TerraTrust turns fragmented property evidence into an organized, auditable trust record while keeping AI assistive and Government legally in control.”

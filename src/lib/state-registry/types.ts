@@ -101,3 +101,11 @@ export interface NormalizedGovernmentEvidence {
   evidenceDocumentUrl?: string;
   evidenceDocumentName?: string;
 }
+
+export interface StateRecordIdentifierType {
+  id: string;
+  label: string;
+  description: string;
+  placeholder: string;
+  systemName: string;
+}

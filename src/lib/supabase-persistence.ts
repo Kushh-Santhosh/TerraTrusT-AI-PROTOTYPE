@@ -79,6 +79,9 @@ export async function createProperty(input: {
   ownerId: string;
   propertyName: string;
   passportId: string;
+  propertyState?: string;
+  recordIdentifierType?: string;
+  recordIdentifierValue?: string;
   location?: {
     address?: string;
     region?: string;
@@ -89,6 +92,9 @@ export async function createProperty(input: {
     latitude?: number;
     longitude?: number;
     boundary?: PropertyBoundary[];
+    cadastralIdentifiers?: Record<string, unknown>;
+    sourceChecks?: Record<string, unknown>;
+    stateCode?: string;
   };
   area: number;
   status?: "verified" | "pending" | "disputed" | "draft";
@@ -99,12 +105,33 @@ export async function createProperty(input: {
   }
 
   try {
+    // Check for duplicate property identifier if provided
+    if (input.propertyState && input.recordIdentifierType && input.recordIdentifierValue) {
+      const { data: existing } = await supabase
+        .from("properties")
+        .select("id, passport_id, property_name")
+        .eq("property_state", input.propertyState)
+        .eq("record_identifier_type", input.recordIdentifierType)
+        .eq("record_identifier_value", input.recordIdentifierValue.trim())
+        .maybeSingle();
+
+      if (existing) {
+        return {
+          error: `A property with this ${input.recordIdentifierType} ("${input.recordIdentifierValue}") is already registered in ${input.propertyState} (Passport: ${existing.passport_id}). Duplicate property identifiers are prohibited.`,
+          persisted: false,
+        };
+      }
+    }
+
     const { data, error } = await supabase
       .from("properties")
       .insert({
         owner_id: input.ownerId,
         property_name: input.propertyName,
         passport_id: input.passportId,
+        property_state: input.propertyState ?? null,
+        record_identifier_type: input.recordIdentifierType ?? null,
+        record_identifier_value: input.recordIdentifierValue?.trim() ?? null,
         location: input.location ?? {},
         area: input.area,
         status: input.status ?? "pending",
@@ -114,6 +141,12 @@ export async function createProperty(input: {
       .single();
 
     if (error) {
+      if (error.code === "23505" || error.message.includes("idx_properties_state_identifier")) {
+        return {
+          error: `Duplicate identifier: A property with this ${input.recordIdentifierType || "identifier"} already exists in ${input.propertyState || "the selected state"}.`,
+          persisted: false,
+        };
+      }
       return { error: error.message, persisted: false };
     }
 
@@ -195,6 +228,35 @@ export async function uploadPropertyDocumentBinary(input: {
     return {
       storagePath: null,
       error: err instanceof Error ? err.message : "Storage upload exception",
+    };
+  }
+}
+
+/**
+ * Generates a temporary signed URL to view/download a private document from 'property-documents'
+ */
+export async function createDocumentSignedUrl(
+  storagePath: string,
+  expiresInSeconds = 120,
+): Promise<{ signedUrl: string | null; error: string | null }> {
+  if (!supabaseConfigured) {
+    return { signedUrl: null, error: "Supabase not configured" };
+  }
+
+  try {
+    const { data, error } = await supabase.storage
+      .from("property-documents")
+      .createSignedUrl(storagePath, expiresInSeconds);
+
+    if (error) {
+      return { signedUrl: null, error: error.message };
+    }
+
+    return { signedUrl: data.signedUrl, error: null };
+  } catch (err) {
+    return {
+      signedUrl: null,
+      error: err instanceof Error ? err.message : "Failed to generate signed document URL",
     };
   }
 }

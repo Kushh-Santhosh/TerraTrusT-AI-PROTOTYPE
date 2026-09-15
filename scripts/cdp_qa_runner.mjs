@@ -1,7 +1,9 @@
 async function getWsUrl() {
   const res = await fetch("http://127.0.0.1:9222/json/list");
   const list = await res.json();
-  const page = list.find((p) => p.type === "page" && p.url.includes("localhost:3000")) || list.find((p) => p.type === "page");
+  const page =
+    list.find((p) => p.type === "page" && p.url.includes("localhost:3000")) ||
+    list.find((p) => p.type === "page");
   if (!page) throw new Error("No Chrome page found");
   return page.webSocketDebuggerUrl;
 }
@@ -46,7 +48,9 @@ class CDPClient {
       awaitPromise: true,
     });
     if (res.exceptionDetails) {
-      throw new Error(`Eval error: ${res.exceptionDetails.text || JSON.stringify(res.exceptionDetails)}`);
+      throw new Error(
+        `Eval error: ${res.exceptionDetails.text || JSON.stringify(res.exceptionDetails)}`,
+      );
     }
     return res.result ? res.result.value : undefined;
   }
@@ -90,7 +94,9 @@ async function loginAsRole(cdp, roleName, expectedPath) {
   await new Promise((r) => setTimeout(r, 2000));
 
   const curPath = await cdp.eval(`window.location.pathname`);
-  const curRole = await cdp.eval(`document.querySelector("aside div.rounded-md span")?.innerText || ""`);
+  const curRole = await cdp.eval(
+    `document.querySelector("aside div.rounded-md span")?.innerText || ""`,
+  );
   console.log(`  Landed at: ${curPath}, Active UI Role Badge: "${curRole}"`);
 
   return { curPath, curRole };
@@ -106,7 +112,10 @@ async function testRoleNavigation(cdp, roleName) {
     }));
   })()`);
 
-  console.log(`Found ${navItems.length} sidebar items for ${roleName}:`, navItems.map(n => n.text).join(", "));
+  console.log(
+    `Found ${navItems.length} sidebar items for ${roleName}:`,
+    navItems.map((n) => n.text).join(", "),
+  );
 
   const results = [];
 
@@ -129,7 +138,12 @@ async function testRoleNavigation(cdp, roleName) {
 
     if (!clickSuccess) {
       console.log(`FAILED TO CLICK`);
-      results.push({ role: roleName, item: item.text, target: item.href, result: "FAIL (Click missing)" });
+      results.push({
+        role: roleName,
+        item: item.text,
+        target: item.href,
+        result: "FAIL (Click missing)",
+      });
       continue;
     }
 
@@ -150,16 +164,40 @@ async function testRoleNavigation(cdp, roleName) {
 
     if (state.isRestricted) {
       console.log(`FAIL (Access Restricted)`);
-      results.push({ ...state, role: roleName, item: item.text, target: item.href, result: "FAIL (Access Restricted)" });
+      results.push({
+        ...state,
+        role: roleName,
+        item: item.text,
+        target: item.href,
+        result: "FAIL (Access Restricted)",
+      });
     } else if (state.is404) {
       console.log(`FAIL (404 Not Found)`);
-      results.push({ ...state, role: roleName, item: item.text, target: item.href, result: "FAIL (404)" });
+      results.push({
+        ...state,
+        role: roleName,
+        item: item.text,
+        target: item.href,
+        result: "FAIL (404)",
+      });
     } else if (state.isError) {
       console.log(`FAIL (Router Error)`);
-      results.push({ ...state, role: roleName, item: item.text, target: item.href, result: "FAIL (Router Error)" });
+      results.push({
+        ...state,
+        role: roleName,
+        item: item.text,
+        target: item.href,
+        result: "FAIL (Router Error)",
+      });
     } else {
       console.log(`PASS (path=${state.path}, h1="${state.h1}", buttons=${state.buttonCount})`);
-      results.push({ ...state, role: roleName, item: item.text, target: item.href, result: "PASS" });
+      results.push({
+        ...state,
+        role: roleName,
+        item: item.text,
+        target: item.href,
+        result: "PASS",
+      });
     }
   }
 
@@ -200,7 +238,9 @@ async function runMobileTest(cdp) {
     }));
   })()`);
 
-  console.log(`  Mobile drawer opened: ${drawerOpened}, found ${mobileLinks.length} mobile navigation links.`);
+  console.log(
+    `  Mobile drawer opened: ${drawerOpened}, found ${mobileLinks.length} mobile navigation links.`,
+  );
 
   if (mobileLinks.length > 0) {
     const testTarget = mobileLinks[1] || mobileLinks[0];
@@ -252,8 +292,8 @@ async function main() {
   console.log(`FINAL NAVIGATION QA SUMMARY`);
   console.log(`========================================`);
   const total = allResults.length;
-  const passed = allResults.filter(r => r.result === "PASS").length;
-  const failed = allResults.filter(r => r.result !== "PASS").length;
+  const passed = allResults.filter((r) => r.result === "PASS").length;
+  const failed = allResults.filter((r) => r.result !== "PASS").length;
 
   console.log(`Total Sidebar Items Tested: ${total}`);
   console.log(`Passed: ${passed}`);
@@ -261,9 +301,11 @@ async function main() {
 
   if (failed > 0) {
     console.log("\nFAILURES:");
-    allResults.filter(r => r.result !== "PASS").forEach(f => {
-      console.log(`  - [${f.role}] "${f.item}" -> ${f.target}: ${f.result}`);
-    });
+    allResults
+      .filter((r) => r.result !== "PASS")
+      .forEach((f) => {
+        console.log(`  - [${f.role}] "${f.item}" -> ${f.target}: ${f.result}`);
+      });
   } else {
     console.log("\nALL NAVIGATION CHECKS PASSED WITH ZERO FAILURES!");
   }
@@ -271,7 +313,7 @@ async function main() {
   cdp.close();
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error("CDP QA Test encountered error:", err);
   process.exit(1);
 });

@@ -15,12 +15,47 @@ export const signInDemoAccount = createServerFn({ method: "POST" })
       return { error: "Unknown demo role." as const, session: null };
     }
 
-    const url = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL)?.trim();
-    const publishableKey = (
+    let url = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL)?.trim();
+    let publishableKey = (
       process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY
     )?.trim();
-    const email = process.env[`DEMO_${data.role.toUpperCase()}_EMAIL`]?.trim();
-    const password = process.env[`DEMO_${data.role.toUpperCase()}_PASSWORD`];
+    let email = process.env[`DEMO_${data.role.toUpperCase()}_EMAIL`]?.trim();
+    let password = process.env[`DEMO_${data.role.toUpperCase()}_PASSWORD`];
+
+    // Fallback: in local dev, Nitro/Vite might not inject non-VITE variables into process.env
+    if (!url || !publishableKey || !email || !password) {
+      try {
+        const fs = await import("node:fs");
+        const path = await import("node:path");
+        const envPath = path.resolve(process.cwd(), ".env.local");
+        if (fs.existsSync(envPath)) {
+          const content = fs.readFileSync(envPath, "utf8");
+          const map: Record<string, string> = {};
+          for (const line of content.split("\n")) {
+            const m = line.match(/^([^=]+)=(.*)$/);
+            if (m) {
+              let v = m[2].trim();
+              if (
+                (v.startsWith('"') && v.endsWith('"')) ||
+                (v.startsWith("'") && v.endsWith("'"))
+              ) {
+                v = v.slice(1, -1);
+              }
+              map[m[1].trim()] = v;
+            }
+          }
+          if (!url) url = (map.SUPABASE_URL || map.VITE_SUPABASE_URL)?.trim();
+          if (!publishableKey)
+            publishableKey = (
+              map.SUPABASE_PUBLISHABLE_KEY || map.VITE_SUPABASE_PUBLISHABLE_KEY
+            )?.trim();
+          if (!email) email = map[`DEMO_${data.role.toUpperCase()}_EMAIL`]?.trim();
+          if (!password) password = map[`DEMO_${data.role.toUpperCase()}_PASSWORD`];
+        }
+      } catch {
+        // Continue with whatever variables exist
+      }
+    }
 
     if (!url || !publishableKey || !email || !password) {
       return {

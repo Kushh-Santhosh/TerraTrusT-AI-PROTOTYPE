@@ -5,11 +5,12 @@ async function run() {
   console.log("Connecting to Chrome on port 9222...");
   const browser = await puppeteer.connect({
     browserURL: "http://127.0.0.1:9222",
-    defaultViewport: { width: 1440, height: 900 }
+    defaultViewport: { width: 1440, height: 900 },
   });
 
   const pages = await browser.pages();
-  const page = pages.find(p => p.url().includes("localhost:3000")) || pages[0] || (await browser.newPage());
+  const page =
+    pages.find((p) => p.url().includes("localhost:3000")) || pages[0] || (await browser.newPage());
 
   console.log("Navigating to http://localhost:3000/login...");
   await page.goto("http://localhost:3000/login", { waitUntil: "networkidle2", timeout: 15000 });
@@ -24,8 +25,18 @@ async function run() {
   }
 
   const rolesToTest = [
-    { name: "Government", id: "#test-login-government", expectedUrl: "/government", roleName: "government" },
-    { name: "Surveyor", id: "#test-login-surveyor", expectedUrl: "/surveyor", roleName: "surveyor" },
+    {
+      name: "Government",
+      id: "#test-login-government",
+      expectedUrl: "/government",
+      roleName: "government",
+    },
+    {
+      name: "Surveyor",
+      id: "#test-login-surveyor",
+      expectedUrl: "/surveyor",
+      roleName: "surveyor",
+    },
     { name: "Bank", id: "#test-login-bank", expectedUrl: "/bank", roleName: "bank" },
     { name: "Admin", id: "#test-login-admin", expectedUrl: "/admin", roleName: "admin" },
     { name: "Citizen", id: "#test-login-citizen", expectedUrl: "/dashboard", roleName: "citizen" },
@@ -47,22 +58,26 @@ async function run() {
 
     // Wait for URL to transition
     console.log(`Waiting for navigation to ${role.expectedUrl}...`);
-    await page.waitForFunction((expected) => window.location.pathname.startsWith(expected), { timeout: 10000 }, role.expectedUrl);
+    await page.waitForFunction(
+      (expected) => window.location.pathname.startsWith(expected),
+      { timeout: 10000 },
+      role.expectedUrl,
+    );
     console.log(`Successfully navigated to: ${page.url()}`);
 
     // Wait for authenticated profile state in React
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500));
 
     // Verify localStorage has supabase session
     const authState = await page.evaluate(() => {
       const keys = Object.keys(localStorage);
-      const authKey = keys.find(k => k.includes("auth-token"));
+      const authKey = keys.find((k) => k.includes("auth-token"));
       if (!authKey) return null;
       try {
         const item = JSON.parse(localStorage.getItem(authKey));
         return {
           email: item.user?.email,
-          role: item.user?.user_metadata?.role
+          role: item.user?.user_metadata?.role,
         };
       } catch {
         return null;
@@ -80,7 +95,11 @@ async function run() {
     const signedOut = await page.evaluate(async () => {
       // Find sign out button
       const buttons = Array.from(document.querySelectorAll("button, a"));
-      const signOutBtn = buttons.find(b => b.innerText.toLowerCase().includes("sign out") || b.innerText.toLowerCase().includes("log out"));
+      const signOutBtn = buttons.find(
+        (b) =>
+          b.innerText.toLowerCase().includes("sign out") ||
+          b.innerText.toLowerCase().includes("log out"),
+      );
       if (signOutBtn) {
         signOutBtn.click();
         return true;
@@ -89,7 +108,7 @@ async function run() {
     });
 
     if (signedOut) {
-      await new Promise(r => setTimeout(r, 1500));
+      await new Promise((r) => setTimeout(r, 1500));
     } else {
       // Alternatively trigger supabase signout directly or navigate to /login after clearing storage
       await page.evaluate(() => {
@@ -108,7 +127,7 @@ async function run() {
   console.log("==================================================");
 }
 
-run().catch(err => {
+run().catch((err) => {
   console.error("Test failed:", err);
   process.exit(1);
 });

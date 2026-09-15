@@ -1,7 +1,7 @@
-import puppeteer from 'puppeteer-core';
+import puppeteer from "puppeteer-core";
 
 async function check() {
-  const browser = await puppeteer.connect({ browserURL: 'http://127.0.0.1:9222' });
+  const browser = await puppeteer.connect({ browserURL: "http://127.0.0.1:9222" });
   try {
     const pages = await browser.pages();
     for (const p of pages) {

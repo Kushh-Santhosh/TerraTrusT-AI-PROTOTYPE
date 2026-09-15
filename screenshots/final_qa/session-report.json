@@ -350,11 +350,7 @@
       "module": "AI Valuation",
       "path": "/ai-valuation",
       "status": "PASS",
-      "interactiveButtons": [
-        "Bengaluru (Karnataka)",
-        "Residential",
-        "Run AI Valuation"
-      ]
+      "interactiveButtons": ["Bengaluru (Karnataka)", "Residential", "Run AI Valuation"]
     },
     {
       "module": "AI OCR",
@@ -366,9 +362,7 @@
       "module": "AI Fraud",
       "path": "/ai-fraud",
       "status": "PASS",
-      "interactiveButtons": [
-        "Run full re-scan"
-      ]
+      "interactiveButtons": ["Run full re-scan"]
     },
     {
       "module": "AI Risk",
@@ -427,10 +421,7 @@
       "module": "AI Suggestions",
       "path": "/ai-suggestions",
       "status": "PASS",
-      "interactiveButtons": [
-        "Start",
-        "Start"
-      ]
+      "interactiveButtons": ["Start", "Start"]
     },
     {
       "module": "AI Assistant",

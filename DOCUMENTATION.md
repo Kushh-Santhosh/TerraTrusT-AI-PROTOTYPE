@@ -38,18 +38,22 @@
 ## 1. Executive Summary
 
 ### 1.1 What is TerraTrust AI?
+
 **TerraTrust AI** is an AI-powered national land registry and verification platform that replaces slow, paper-based, fraud-prone land administration with a machine-verifiable **Digital Property Passport**. It brings citizens, surveyors, government bureaus, and banks onto one explainable, auditable trust layer.
 
 Every parcel in the system gets:
+
 - A cryptographically signed **Property Passport** with QR verification.
 - A **Confidence Score (0–100)** computed by an explainable AI engine.
 - An **AI Valuation** with attribution to specific location and infrastructure factors.
 - Continuous **fraud, boundary, and risk monitoring**.
 
 ### 1.2 Why It Exists
+
 Across emerging economies, up to **70% of land is undocumented or contested**. Fraudulent double-sales, forged deeds, and boundary overlaps freeze trillions of dollars in "dead capital" (De Soto), block mortgage lending, and generate multi-year court disputes. TerraTrust AI exists to make land tenure **provable, portable, and programmable**.
 
 ### 1.3 The Problem
+
 - Paper deeds are forgeable and easily lost.
 - Verification takes 60–180 days across siloed bureaus.
 - Banks cannot underwrite loans without trust in the title.
@@ -57,18 +61,23 @@ Across emerging economies, up to **70% of land is undocumented or contested**. F
 - Communities cannot flag disputes early.
 
 ### 1.4 The Solution
+
 An **AI-first registry** where every property carries a live, explainable trust profile. Documents are OCR-parsed, cross-checked against registry data, verified by surveyors, attested by community members, approved by government, and made loan-ready for banks — end-to-end, in days not months.
 
 ### 1.5 Target Users
+
 Citizens · Licensed surveyors · Land bureau officers · Bank underwriters · Community verifiers · System administrators · Government auditors.
 
 ### 1.6 Vision
-> *A world where every parcel of land has a passport, every owner has proof, and every transaction is trustworthy.*
+
+> _A world where every parcel of land has a passport, every owner has proof, and every transaction is trustworthy._
 
 ### 1.7 Mission
+
 Deliver the world's most trusted land verification infrastructure by combining AI, community attestation, and government authority into one auditable platform.
 
 ### 1.8 Impact (see `/impact` route)
+
 - **47 days saved** per verification case (median).
 - **78% reduction** in fraudulent registrations detected upstream.
 - **$1.2B+** in dormant real-estate capital unlocked at national scale.
@@ -80,16 +89,16 @@ Deliver the world's most trusted land verification infrastructure by combining A
 
 Land is the largest untapped asset class in emerging markets. Yet the systems that record and protect it are broken:
 
-| Problem | Real-world Consequence |
-|---|---|
-| **Forged deeds & fake stamps** | Same plot sold to 2–4 buyers; buyers lose life savings. |
-| **Boundary disputes** | Neighbours in litigation for 5–15 years; violence in extreme cases. |
-| **Opaque bureaus** | Citizens bribe intermediaries; SDG 16 undermined. |
-| **Slow bank verification** | Mortgage approvals take 90–180 days; many collapse. |
-| **Zero citizen trust** | 60%+ of urban land in informal tenure. |
-| **Manual cross-checks** | Officers open 3–7 systems per case; error-prone. |
-| **Community silence** | No channel to flag "someone else built on my grandfather's land". |
-| **Missing digital primitives** | No standard passport, no QR, no signed audit trail. |
+| Problem                        | Real-world Consequence                                              |
+| ------------------------------ | ------------------------------------------------------------------- |
+| **Forged deeds & fake stamps** | Same plot sold to 2–4 buyers; buyers lose life savings.             |
+| **Boundary disputes**          | Neighbours in litigation for 5–15 years; violence in extreme cases. |
+| **Opaque bureaus**             | Citizens bribe intermediaries; SDG 16 undermined.                   |
+| **Slow bank verification**     | Mortgage approvals take 90–180 days; many collapse.                 |
+| **Zero citizen trust**         | 60%+ of urban land in informal tenure.                              |
+| **Manual cross-checks**        | Officers open 3–7 systems per case; error-prone.                    |
+| **Community silence**          | No channel to flag "someone else built on my grandfather's land".   |
+| **Missing digital primitives** | No standard passport, no QR, no signed audit trail.                 |
 
 Existing point solutions — GIS-only tools, blockchain title projects, isolated e-government portals — fail because they solve **one** slice. TerraTrust AI is the first horizontal trust layer that connects them.
 
@@ -113,10 +122,12 @@ TerraTrust AI is building the **operating system for national land trust**.
 ## 4. Product Goals & KPIs
 
 ### 4.1 Business Goals
+
 - Reach 100k signed passports in year 1 across 3 pilot cities.
 - Become the default title verification API for tier-1 banks in the region.
 
 ### 4.2 User Goals
+
 - **Citizens:** Prove ownership in minutes, share with a QR code.
 - **Government:** Reduce backlog, publish trusted analytics, resolve disputes fast.
 - **Banks:** Cut collateral verification from 90 days to under 48 hours.
@@ -125,57 +136,64 @@ TerraTrust AI is building the **operating system for national land trust**.
 
 ### 4.3 Success Metrics / KPIs
 
-| KPI | Target |
-|---|---|
-| Median passport issuance time | ≤ 7 days |
-| Fraud signals caught pre-registry | ≥ 75% |
+| KPI                                    | Target    |
+| -------------------------------------- | --------- |
+| Median passport issuance time          | ≤ 7 days  |
+| Fraud signals caught pre-registry      | ≥ 75%     |
 | Confidence score explainability rating | ≥ 4.5 / 5 |
-| Bank verification SLA | ≤ 48h |
-| Surveyor assignment acceptance | ≥ 90% |
-| Citizen NPS | ≥ 55 |
-| Dispute resolution median | ≤ 30 days |
+| Bank verification SLA                  | ≤ 48h     |
+| Surveyor assignment acceptance         | ≥ 90%     |
+| Citizen NPS                            | ≥ 55      |
+| Dispute resolution median              | ≤ 30 days |
 
 ---
 
 ## 5. User Personas
 
 ### 5.1 Amara — Citizen (Lagos)
+
 - **Goals:** Prove inherited land, get a mortgage.
 - **Pain:** Papers are 30 years old; bureau is unresponsive.
 - **Workflow:** Register → upload docs → track verification → share passport.
 - **Permissions:** Own properties, upload docs, view own audit, raise disputes.
 
 ### 5.2 David — Licensed Surveyor
+
 - **Goals:** More assignments, less paperwork.
 - **Pain:** Chasing payments; re-doing measurements.
 - **Workflow:** Accept assignment → field capture → upload polygon → sign report.
 - **Permissions:** Manage assignments, submit boundary reports, sign attestations.
 
 ### 5.3 Ngozi — Government Land Officer
+
 - **Goals:** Clear backlog, prevent fraud on her watch.
 - **Pain:** Multiple legacy systems; no cross-check.
 - **Workflow:** Queue → review AI dossier → approve or return → issue passport.
 - **Permissions:** Approve/reject, issue passports, view audit, resolve disputes.
 
 ### 5.4 Kwame — Bank Underwriter
+
 - **Goals:** Confidently underwrite land-collateralised loans.
 - **Pain:** Cannot trust deeds; site visits are expensive.
 - **Workflow:** Verify passport → pull confidence & valuation → decision.
 - **Permissions:** Read passport, request re-verify, mark loan status.
 
 ### 5.5 Sara — Administrator
+
 - **Goals:** Keep platform healthy and compliant.
 - **Pain:** Role sprawl, secrets management.
 - **Workflow:** Manage users, roles, regions, API keys, feedback.
 - **Permissions:** Full admin surface incl. audit.
 
 ### 5.6 Musa — Community Verifier
+
 - **Goals:** Protect neighbourhood from land grabs.
 - **Pain:** No formal channel to speak.
 - **Workflow:** Receive attestation request → confirm or dispute → earn reputation.
 - **Permissions:** Attest within geo-radius; cannot approve.
 
 ### 5.7 Aisha — Support Agent
+
 - **Goals:** Resolve tickets fast with context.
 - **Workflow:** Triage tickets → escalate → close with resolution notes.
 - **Permissions:** Read most surfaces; write to ticket threads only.
@@ -184,27 +202,27 @@ TerraTrust AI is building the **operating system for national land trust**.
 
 ## 6. Roles & Permissions Matrix
 
-| Capability | Citizen | Surveyor | Government | Bank | Admin | Community | Support |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Register property | ✅ | — | ✅ | — | ✅ | — | — |
-| Upload documents | ✅ (own) | ✅ (assigned) | ✅ | — | ✅ | — | — |
-| Edit property metadata | ✅ (own, pre-verify) | — | ✅ | — | ✅ | — | — |
-| Delete draft property | ✅ (own) | — | ✅ | — | ✅ | — | — |
-| Submit boundary report | — | ✅ | ✅ | — | ✅ | — | — |
-| Approve verification | — | — | ✅ | — | ✅ | — | — |
-| Issue Digital Passport | — | — | ✅ | — | ✅ | — | — |
-| Attest as neighbour | — | — | — | — | — | ✅ | — |
-| Raise dispute | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| Resolve dispute | — | — | ✅ | — | ✅ | — | — |
-| Bank verification pull | — | — | — | ✅ | ✅ | — | — |
-| Mark loan status | — | — | — | ✅ | ✅ | — | — |
-| Export passport PDF | ✅ (own) | ✅ (assigned) | ✅ | ✅ | ✅ | — | — |
-| View analytics | Limited | Limited | ✅ | ✅ (portfolio) | ✅ | — | Read |
-| Access audit logs | — | — | ✅ | — | ✅ | — | Read |
-| Manage users / roles | — | — | — | — | ✅ | — | — |
-| Manage API keys | — | — | — | — | ✅ | — | — |
-| Read tickets | ✅ (own) | ✅ (own) | ✅ (own) | ✅ (own) | ✅ | — | ✅ |
-| Reply to tickets | Own | Own | Own | Own | ✅ | — | ✅ |
+| Capability             |       Citizen        |   Surveyor    | Government |      Bank      | Admin | Community | Support |
+| ---------------------- | :------------------: | :-----------: | :--------: | :------------: | :---: | :-------: | :-----: |
+| Register property      |          ✅          |       —       |     ✅     |       —        |  ✅   |     —     |    —    |
+| Upload documents       |       ✅ (own)       | ✅ (assigned) |     ✅     |       —        |  ✅   |     —     |    —    |
+| Edit property metadata | ✅ (own, pre-verify) |       —       |     ✅     |       —        |  ✅   |     —     |    —    |
+| Delete draft property  |       ✅ (own)       |       —       |     ✅     |       —        |  ✅   |     —     |    —    |
+| Submit boundary report |          —           |      ✅       |     ✅     |       —        |  ✅   |     —     |    —    |
+| Approve verification   |          —           |       —       |     ✅     |       —        |  ✅   |     —     |    —    |
+| Issue Digital Passport |          —           |       —       |     ✅     |       —        |  ✅   |     —     |    —    |
+| Attest as neighbour    |          —           |       —       |     —      |       —        |   —   |    ✅     |    —    |
+| Raise dispute          |          ✅          |      ✅       |     ✅     |       ✅       |  ✅   |    ✅     |    —    |
+| Resolve dispute        |          —           |       —       |     ✅     |       —        |  ✅   |     —     |    —    |
+| Bank verification pull |          —           |       —       |     —      |       ✅       |  ✅   |     —     |    —    |
+| Mark loan status       |          —           |       —       |     —      |       ✅       |  ✅   |     —     |    —    |
+| Export passport PDF    |       ✅ (own)       | ✅ (assigned) |     ✅     |       ✅       |  ✅   |     —     |    —    |
+| View analytics         |       Limited        |    Limited    |     ✅     | ✅ (portfolio) |  ✅   |     —     |  Read   |
+| Access audit logs      |          —           |       —       |     ✅     |       —        |  ✅   |     —     |  Read   |
+| Manage users / roles   |          —           |       —       |     —      |       —        |  ✅   |     —     |    —    |
+| Manage API keys        |          —           |       —       |     —      |       —        |  ✅   |     —     |    —    |
+| Read tickets           |       ✅ (own)       |   ✅ (own)    |  ✅ (own)  |    ✅ (own)    |  ✅   |     —     |   ✅    |
+| Reply to tickets       |         Own          |      Own      |    Own     |      Own       |  ✅   |     —     |   ✅    |
 
 ---
 
@@ -213,9 +231,11 @@ TerraTrust AI is building the **operating system for national land trust**.
 Every feature below maps to a live route in the current build.
 
 ### 7.1 AI Suite (`/ai`)
+
 Landing surface for all AI modules with model versioning and explainability guarantees.
 
 ### 7.2 AI Property Passport (`/ai-passport`)
+
 - **Purpose:** Composite trust view for one parcel.
 - **Inputs:** Property record, documents, community attestations, surveyor report.
 - **Outputs:** Confidence report, QR passport link, downloadable PDF.
@@ -223,69 +243,91 @@ Landing surface for all AI modules with model versioning and explainability guar
 - **Future:** ZK-attested cross-border passports.
 
 ### 7.3 AI Valuation Engine (`/ai-valuation`)
+
 Explainable price estimate with signed weight attribution over 10 factors (location, road access, comparables, size, infra, risk, market trend). See `src/lib/valuation-engine.ts`.
 
 ### 7.4 Document OCR (`/ai-ocr`)
+
 Extracts structured fields (plot no, grantor, grantee, date, stamps) from uploaded deeds. Flags stamp template variance.
 
 ### 7.5 Fraud Detection (`/ai-fraud`, `/fraud`)
+
 Signal-based engine (`src/lib/fraud-engine.ts`) producing severity-graded findings: boundary overlap, duplicate ownership, stamp forgery, signature drift, sparse documentary base.
 
 ### 7.6 Risk Analysis (`/ai-risk`)
+
 5-dimensional risk surface: flood, subsidence, encroachment, litigation, market.
 
 ### 7.7 Confidence Score (`/ai-confidence`)
+
 8-factor weighted score with expandable reasoning per factor (`src/lib/confidence-engine.ts`). Rendered by `ConfidenceBreakdown`.
 
 ### 7.8 Boundary Detection (`/ai-boundary`, `/properties/$id/boundary`)
+
 Polygon extraction from survey plans; IoU comparison to registry cadastre.
 
 ### 7.9 Satellite Comparison (`/ai-satellite`, `/properties/$id/satellite`)
+
 Multi-epoch imagery diff to detect encroachment or unauthorized construction.
 
 ### 7.10 Land Health (`/ai-land-health`)
+
 NDVI, soil, and hydrology composite for agricultural use cases.
 
 ### 7.11 Ownership Timeline (`/ai-timeline`, `/properties/$id/timeline`)
+
 Chronological chain of custody with actor + role per event.
 
 ### 7.12 AI Recommendations (`/ai-recommendations`)
+
 Context-aware next-best-action cards per property (e.g. "commission survey", "request bureau stamp").
 
 ### 7.13 Document Summary (`/ai-summary`)
+
 1-paragraph plain-language summary of a legal document.
 
 ### 7.14 Verification Suggestions (`/ai-suggestions`)
+
 Ranked list of remaining verification steps to reach the next confidence band.
 
 ### 7.15 Community Verification (`/community`, `/attestations`)
+
 Neighbour-weighted attestations; anti-collusion via proximity + history heuristics.
 
 ### 7.16 Disputes (`/disputes`, `/disputes/new`, `/disputes/$id`)
+
 Ticketed dispute cases with evidence, parties, and government adjudication.
 
 ### 7.17 Reports (`/reports`, `/reports/new`, `/reports/$id`)
+
 Signed property reports for third parties.
 
 ### 7.18 Surveyor Workspace (`/surveyor`, `/surveyor/assignments`, `/surveyor/tools`)
+
 Assignment inbox, field tools, deliverable upload.
 
 ### 7.19 Government Workbench (`/government`, `/government/parcels`, `/government/permits`, `/government/disputes`, `/government/audit`)
+
 Bureau-side queues, permit issuance, dispute adjudication, tamper-evident audit.
 
 ### 7.20 Bank Portal (`/bank`, `/bank/loans`)
+
 Collateral verification pulls, loan pipeline, portfolio risk view.
 
 ### 7.21 Analytics (`/analytics`)
+
 Cross-cutting dashboards with Recharts.
 
 ### 7.22 Impact (`/impact`)
+
 Public-facing outcome metrics with SDG alignment.
 
 ### 7.23 Admin (`/admin/*`)
+
 Users, roles, regions, API keys, system, feedback, audit.
 
 ### 7.24 Profile / Notifications / Settings / Support / Help
+
 Standard SaaS surfaces.
 
 Each feature exposes: **Purpose · How it works · Inputs · Outputs · Benefits · Future improvements** — see per-module deep-dive in §8.
@@ -295,6 +337,7 @@ Each feature exposes: **Purpose · How it works · Inputs · Outputs · Benefits
 ## 8. Module Documentation
 
 ### 8.1 Confidence Engine
+
 - **File:** `src/lib/confidence-engine.ts`
 - **Purpose:** Deterministic, explainable 0–100 trust score.
 - **Data flow:** Property record → 8 factor evaluators → weighted sum → `ConfidenceReport`.
@@ -303,28 +346,34 @@ Each feature exposes: **Purpose · How it works · Inputs · Outputs · Benefits
 - **UI:** `ConfidenceBreakdown` (`src/components/ui-ext/ConfidenceBreakdown.tsx`).
 
 ### 8.2 Fraud Engine
+
 - **File:** `src/lib/fraud-engine.ts`
 - Weighted severities: `info 0 · low 10 · moderate 28 · high 55 · critical 90`.
 - Bands: **Clear · Watch · Elevated · Critical**.
 
 ### 8.3 Valuation Engine
+
 - **File:** `src/lib/valuation-engine.ts`
 - Signed factor weights; confidence spread widens on disputed status.
 - Returns 5 comparable sales with distances.
 
 ### 8.4 Property Intelligence
+
 - **File:** `src/lib/property-intel.ts`
 - Encumbrances, infrastructure proximity, 5-D risk surface.
 
 ### 8.5 Assistant Brain
+
 - **File:** `src/lib/assistant-brain.ts`
 - Context-grounded chat over the four engines above; supports citations.
 
 ### 8.6 Mock Extended Dataset
+
 - **File:** `src/lib/mock-extended.ts`
 - 124 properties, 1,080 owners, 9 regional aggregates — deterministic PRNG.
 
 ### 8.7 Demo Mode
+
 - **File:** `src/lib/demo-mode.tsx`
 - 9-step guided tour; state in `localStorage`.
 
@@ -337,36 +386,45 @@ Each module lists: purpose · architecture · data flow · AI components · fron
 Every screen lives under `src/routes/`. High-signal screens:
 
 ### 9.1 `/` — Landing
+
 Hero, feature grid, impact strip, CTA to `/dashboard` and `/login`. States: static.
 
 ### 9.2 `/login` — Auth
+
 Prefilled demo credentials. States: idle, submitting, error, success (redirect).
 
 ### 9.3 `/dashboard` — Home
+
 Portfolio snapshot, recent alerts, quick actions to register / search / assistant.
 
 ### 9.4 `/properties` & `/properties/$id`
+
 Table with filters → detail tabs: **Overview · Confidence · Intel · Ownership · Documents · Timeline · AI · Boundary · Satellite · GIS · Share · Transfer**. Empty, loading, error states all wired.
 
 ### 9.5 `/properties/$id/passport-pdf`
+
 Print-optimised court-admissible passport with pseudo-QR and ed25519 signature hash.
 
 ### 9.6 `/search`
+
 Auto-detects intent: passport ID, GPS, owner name, survey #. Relevance-ranked.
 
 ### 9.7 `/assistant`
+
 Chat with citations to specific property records.
 
 ### 9.8 `/impact`
+
 Animated counters, bar & pie charts, SDG cards.
 
-*(All ~90 routes follow the same contract: Purpose · Components · Buttons · Cards · States · Nav.)*
+_(All ~90 routes follow the same contract: Purpose · Components · Buttons · Cards · States · Nav.)_
 
 ---
 
 ## 10. End-to-End User Journeys
 
 ### 10.1 Citizen
+
 ```
 Register → Verify email → Complete profile → Register property →
 Upload deed → OCR extract → AI summary → Fraud scan → Risk analysis →
@@ -375,31 +433,37 @@ Digital Passport issued → Share QR / export PDF → Bank verification → Loan
 ```
 
 ### 10.2 Surveyor
+
 ```
 Accept assignment → Field capture → Upload polygon → Sign report → Payout
 ```
 
 ### 10.3 Government Officer
+
 ```
 Open queue → Read AI dossier → Cross-check → Approve/Return → Issue passport → Audit log
 ```
 
 ### 10.4 Bank Officer
+
 ```
 Search by passport ID → Pull confidence + valuation → Underwrite → Mark loan status
 ```
 
 ### 10.5 Administrator
+
 ```
 Manage users → Assign roles → Manage regions → Rotate API keys → Review feedback → Read audit
 ```
 
 ### 10.6 Community
+
 ```
 Receive attestation request → Confirm/Dispute → Reputation update
 ```
 
 ### 10.7 Support
+
 ```
 Triage ticket → Reproduce → Escalate/Resolve → Close with note
 ```
@@ -409,6 +473,7 @@ Triage ticket → Reproduce → Escalate/Resolve → Close with note
 ## 11. System Workflow Diagrams
 
 ### 11.1 High-level User Flow
+
 ```mermaid
 flowchart LR
   U[User] --> A[Login]
@@ -422,6 +487,7 @@ flowchart LR
 ```
 
 ### 11.2 Verification Flow
+
 ```mermaid
 flowchart TD
   Doc[Upload Doc] --> OCR
@@ -436,6 +502,7 @@ flowchart TD
 ```
 
 ### 11.3 Fraud Flow
+
 ```mermaid
 flowchart LR
   Signals --> Score
@@ -447,6 +514,7 @@ flowchart LR
 ```
 
 ### 11.4 Dispute Flow
+
 ```mermaid
 flowchart LR
   Raise --> Evidence --> Notify[All Parties]
@@ -454,6 +522,7 @@ flowchart LR
 ```
 
 ### 11.5 Bank Flow
+
 ```mermaid
 sequenceDiagram
   Bank->>API: GET /passport/{id}
@@ -461,13 +530,14 @@ sequenceDiagram
   Bank->>API: POST /loan/decision
 ```
 
-*(Similar mermaid diagrams exist for Document, AI, Government, Survey, Community, Notification, Report flows — same shape as above.)*
+_(Similar mermaid diagrams exist for Document, AI, Government, Survey, Community, Notification, Report flows — same shape as above.)_
 
 ---
 
 ## 12. Database Design
 
 ### 12.1 ER Diagram
+
 ```mermaid
 erDiagram
   USERS ||--o{ PROPERTIES : owns
@@ -486,23 +556,24 @@ erDiagram
 ```
 
 ### 12.2 Core Tables
-| Table | Key Columns |
-|---|---|
-| `users` | id, email, name, phone, created_at |
-| `user_roles` | id, user_id, role (enum) |
-| `properties` | id, passport_id, owner_id, region, coords, area, valuation, status |
-| `documents` | id, property_id, kind, uri, uploaded_at, verified |
-| `ocr_results` | id, document_id, fields_jsonb, confidence |
-| `ai_results` | id, property_id, engine, payload_jsonb, model_version, signed_at |
-| `attestations` | id, property_id, verifier_id, verdict, weight |
-| `survey_reports` | id, property_id, surveyor_id, polygon_geojson, signed_at |
-| `fraud_signals` | id, property_id, kind, severity, score, evidence_jsonb |
-| `disputes` | id, property_id, opener_id, status, ruling |
-| `passports` | id, property_id, qr_url, signature_hash, issued_at |
-| `notifications` | id, user_id, kind, payload, read_at |
-| `tickets` | id, opener_id, subject, status |
-| `audit_logs` | id, actor_id, action, entity, entity_id, at |
-| `analytics_snapshots` | id, region, kpis_jsonb, taken_at |
+
+| Table                 | Key Columns                                                        |
+| --------------------- | ------------------------------------------------------------------ |
+| `users`               | id, email, name, phone, created_at                                 |
+| `user_roles`          | id, user_id, role (enum)                                           |
+| `properties`          | id, passport_id, owner_id, region, coords, area, valuation, status |
+| `documents`           | id, property_id, kind, uri, uploaded_at, verified                  |
+| `ocr_results`         | id, document_id, fields_jsonb, confidence                          |
+| `ai_results`          | id, property_id, engine, payload_jsonb, model_version, signed_at   |
+| `attestations`        | id, property_id, verifier_id, verdict, weight                      |
+| `survey_reports`      | id, property_id, surveyor_id, polygon_geojson, signed_at           |
+| `fraud_signals`       | id, property_id, kind, severity, score, evidence_jsonb             |
+| `disputes`            | id, property_id, opener_id, status, ruling                         |
+| `passports`           | id, property_id, qr_url, signature_hash, issued_at                 |
+| `notifications`       | id, user_id, kind, payload, read_at                                |
+| `tickets`             | id, opener_id, subject, status                                     |
+| `audit_logs`          | id, actor_id, action, entity, entity_id, at                        |
+| `analytics_snapshots` | id, region, kpis_jsonb, taken_at                                   |
 
 Row-level security scopes reads/writes to `auth.uid()` with `has_role` for privileged surfaces.
 
@@ -513,28 +584,41 @@ Row-level security scopes reads/writes to `auth.uid()` with `has_role` for privi
 All endpoints are Bearer-authenticated (Supabase JWT) unless marked public.
 
 ### 13.1 `GET /api/properties/:id`
+
 - **Auth:** Bearer required.
 - **Response 200:**
+
 ```json
-{ "id": "TT-1029-LG", "owner": "Amara Okafor", "status": "verified",
-  "confidence": 87, "valuation": 245000 }
+{
+  "id": "TT-1029-LG",
+  "owner": "Amara Okafor",
+  "status": "verified",
+  "confidence": 87,
+  "valuation": 245000
+}
 ```
+
 - **Errors:** 401, 403, 404.
 
 ### 13.2 `POST /api/properties`
+
 Body: `{ title, address, region, coords, area, type }`.
 Returns created property.
 
 ### 13.3 `POST /api/documents`
+
 Multipart upload → returns `document_id` + OCR job id.
 
 ### 13.4 `GET /api/passport/:id` — **Public read**
+
 Public confidence + valuation for a passport (no PII).
 
 ### 13.5 `POST /api/disputes`
+
 Open a dispute; requires `property_id`, `reason`, `evidence[]`.
 
 ### 13.6 `POST /api/webhooks/bank` (public, HMAC-signed)
+
 Bank decision webhook. Verified via `x-webhook-signature`.
 
 Every endpoint documents: **method · params · auth · validation · response · errors · example**.
@@ -575,25 +659,25 @@ All engines emit `modelVersion` + `signedAt` for auditability.
 
 ## 15. Technology Stack
 
-| Layer | Choice |
-|---|---|
-| Frontend | React 19, TanStack Start v1, Vite 7, TypeScript strict |
-| Styling | Tailwind v4 (semantic tokens in `src/styles.css`) |
-| Routing | TanStack Router (file-based, `src/routes/*`) |
-| Data | TanStack Query |
-| Animations | Framer Motion |
-| Charts | Recharts |
-| Icons | lucide-react |
-| Backend | Supabase (PostgreSQL + Auth + Storage) |
-| Auth | Supabase Auth (email + OAuth) |
-| DB | Postgres with RLS |
-| Storage | Supabase Storage (documents, images) |
-| Server logic | TanStack `createServerFn`, Supabase Edge for webhooks |
-| Maps / GIS | Mapbox-compatible tile layer (`MapMock` in demo) |
-| OCR | Cloud OCR provider (pluggable) |
-| Hosting | Cloudflare Workers (edge) |
-| Deployment | Vite / Vercel / Cloudflare standalone build |
-| Security | JWT, RLS, HMAC webhook signatures, ed25519 doc signatures |
+| Layer        | Choice                                                    |
+| ------------ | --------------------------------------------------------- |
+| Frontend     | React 19, TanStack Start v1, Vite 7, TypeScript strict    |
+| Styling      | Tailwind v4 (semantic tokens in `src/styles.css`)         |
+| Routing      | TanStack Router (file-based, `src/routes/*`)              |
+| Data         | TanStack Query                                            |
+| Animations   | Framer Motion                                             |
+| Charts       | Recharts                                                  |
+| Icons        | lucide-react                                              |
+| Backend      | Supabase (PostgreSQL + Auth + Storage)                    |
+| Auth         | Supabase Auth (email + OAuth)                             |
+| DB           | Postgres with RLS                                         |
+| Storage      | Supabase Storage (documents, images)                      |
+| Server logic | TanStack `createServerFn`, Supabase Edge for webhooks     |
+| Maps / GIS   | Mapbox-compatible tile layer (`MapMock` in demo)          |
+| OCR          | Cloud OCR provider (pluggable)                            |
+| Hosting      | Cloudflare Workers (edge)                                 |
+| Deployment   | Vite / Vercel / Cloudflare standalone build               |
+| Security     | JWT, RLS, HMAC webhook signatures, ed25519 doc signatures |
 
 ---
 
@@ -615,16 +699,16 @@ All engines emit `modelVersion` + `signedAt` for auditability.
 
 ## 17. Non-Functional Requirements
 
-| NFR | Target |
-|---|---|
-| P95 page load | ≤ 1.8s on 4G |
-| API P95 latency | ≤ 300ms |
-| Availability | 99.9% monthly |
-| Scalability | 10M passports, 100M events/yr |
-| Accessibility | WCAG 2.1 AA (keyboard, ARIA, contrast) |
-| Maintainability | Strict TS, ESLint, small components, doc coverage |
-| Reliability | Idempotent writes; retry-safe webhooks |
-| Storage | Tiered: hot (Postgres), warm (Storage), cold (archive) |
+| NFR             | Target                                                 |
+| --------------- | ------------------------------------------------------ |
+| P95 page load   | ≤ 1.8s on 4G                                           |
+| API P95 latency | ≤ 300ms                                                |
+| Availability    | 99.9% monthly                                          |
+| Scalability     | 10M passports, 100M events/yr                          |
+| Accessibility   | WCAG 2.1 AA (keyboard, ARIA, contrast)                 |
+| Maintainability | Strict TS, ESLint, small components, doc coverage      |
+| Reliability     | Idempotent writes; retry-safe webhooks                 |
+| Storage         | Tiered: hot (Postgres), warm (Storage), cold (archive) |
 
 ---
 
@@ -654,6 +738,7 @@ All engines emit `modelVersion` + `signedAt` for auditability.
 ## 20. Architecture Diagrams
 
 ### 20.1 System Architecture
+
 ```mermaid
 flowchart TB
   subgraph Client
@@ -678,6 +763,7 @@ flowchart TB
 ```
 
 ### 20.2 Data Flow
+
 ```mermaid
 flowchart LR
   User --> UI --> Query[TanStack Query]
@@ -733,11 +819,13 @@ DOCUMENTATION.md       # (this file)
 ## 22. Deployment Guide
 
 ### 22.1 Install
+
 ```bash
 bun install
 ```
 
 ### 22.2 Environment
+
 ```
 VITE_SUPABASE_URL=...
 VITE_SUPABASE_PUBLISHABLE_KEY=...
@@ -748,33 +836,37 @@ WEBHOOK_SECRET=...
 ```
 
 ### 22.3 Local dev
+
 ```bash
 bun run dev   # Vite dev on :8080
 ```
 
 ### 22.4 Production
+
 Vite / Vercel / Cloudflare standalone build → Cloudflare Workers edge. Custom domain via project settings.
 
 ### 22.5 CI/CD
+
 - PR → typecheck (`tsgo`) → lint → build → preview URL.
 - Main → publish → smoke tests against preview URL.
 
 ### 22.6 Monitoring
+
 Cloudflare analytics; Supabase logs; in-app `/status`.
 
 ---
 
 ## 23. Testing Strategy
 
-| Layer | Tooling |
-|---|---|
-| Unit | Vitest for engines (`confidence`, `fraud`, `valuation`) |
-| Integration | Vitest + msw for server functions |
-| UI | Playwright — the sandbox `browser-use` workflow |
-| Security | HMAC verification tests; RLS policy tests via `pgTAP` |
-| Performance | Lighthouse budgets in CI |
-| AI | Golden-record snapshots per engine (deterministic PRNG makes this stable) |
-| Acceptance | Journey scripts for the 7 personas |
+| Layer       | Tooling                                                                   |
+| ----------- | ------------------------------------------------------------------------- |
+| Unit        | Vitest for engines (`confidence`, `fraud`, `valuation`)                   |
+| Integration | Vitest + msw for server functions                                         |
+| UI          | Playwright — the sandbox `browser-use` workflow                           |
+| Security    | HMAC verification tests; RLS policy tests via `pgTAP`                     |
+| Performance | Lighthouse budgets in CI                                                  |
+| AI          | Golden-record snapshots per engine (deterministic PRNG makes this stable) |
+| Acceptance  | Journey scripts for the 7 personas                                        |
 
 ---
 
@@ -836,6 +928,7 @@ Cloudflare analytics; Supabase logs; in-app `/status`.
 ## 25. Documentation Index
 
 This single file serves as:
+
 - **PRD** — §1–7
 - **SDD** — §8, §14, §20
 - **System Architecture Document** — §20, §21, §15
@@ -849,7 +942,7 @@ For source code specifics, cross-reference `README.md` and the file paths named 
 
 ---
 
-*© 2026 TerraTrust AI. Built for a world where every parcel has a passport.*
+_© 2026 TerraTrust AI. Built for a world where every parcel has a passport._
 
 ---
 
@@ -858,6 +951,7 @@ For source code specifics, cross-reference `README.md` and the file paths named 
 ## A1. Business Model
 
 ### A1.1 Revenue Streams
+
 1. **Government SaaS subscriptions** — bureau seats + regional deployment.
 2. **Bank per-verification API pulls** — priced per passport lookup.
 3. **Enterprise licensing** — developers, insurers, notaries, escrow agents.
@@ -868,23 +962,25 @@ For source code specifics, cross-reference `README.md` and the file paths named 
 
 ### A1.2 Pricing (indicative USD)
 
-| Tier | Audience | Price | Includes |
-|---|---|---|---|
-| **Gov · Municipality** | Single city bureau | $6k / month | 20 seats, unlimited parcels, audit, SLA 99.9% |
-| **Gov · State** | State-level authority | $28k / month | 200 seats, GIS, dispute engine, dedicated CSM |
-| **Gov · National** | Federal registry | Custom (from $250k / yr) | Unlimited, on-prem option, custom integrations |
-| **Bank · Starter** | Micro-lenders | $0.80 / pull | Confidence + valuation, 100 free pulls/mo |
-| **Bank · Growth** | Mid-market lenders | $0.40 / pull, $2k min | Portfolio dashboard, webhooks |
-| **Bank · Enterprise** | Tier-1 banks | Volume tiered | Dedicated infra, SLA, co-branded UX |
-| **Enterprise API** | Insurers / notaries | From $1.5k / mo | 5k pulls, sandbox, SDKs |
-| **White-label** | Sovereign deploy | Custom | Rebrand, on-prem, source escrow |
-| **Citizen Free** | Individuals | $0 | 1 property, standard verification |
-| **Citizen Premium** | Individuals | $4.99 / mo | Priority queue, notarised PDF packs |
+| Tier                   | Audience              | Price                    | Includes                                       |
+| ---------------------- | --------------------- | ------------------------ | ---------------------------------------------- |
+| **Gov · Municipality** | Single city bureau    | $6k / month              | 20 seats, unlimited parcels, audit, SLA 99.9%  |
+| **Gov · State**        | State-level authority | $28k / month             | 200 seats, GIS, dispute engine, dedicated CSM  |
+| **Gov · National**     | Federal registry      | Custom (from $250k / yr) | Unlimited, on-prem option, custom integrations |
+| **Bank · Starter**     | Micro-lenders         | $0.80 / pull             | Confidence + valuation, 100 free pulls/mo      |
+| **Bank · Growth**      | Mid-market lenders    | $0.40 / pull, $2k min    | Portfolio dashboard, webhooks                  |
+| **Bank · Enterprise**  | Tier-1 banks          | Volume tiered            | Dedicated infra, SLA, co-branded UX            |
+| **Enterprise API**     | Insurers / notaries   | From $1.5k / mo          | 5k pulls, sandbox, SDKs                        |
+| **White-label**        | Sovereign deploy      | Custom                   | Rebrand, on-prem, source escrow                |
+| **Citizen Free**       | Individuals           | $0                       | 1 property, standard verification              |
+| **Citizen Premium**    | Individuals           | $4.99 / mo               | Priority queue, notarised PDF packs            |
 
 ### A1.3 API Licensing
+
 Tiered pull pricing above. Volume discounts, PII-scoped keys, rotation and audit built-in.
 
 ### A1.4 White-Label
+
 Full theming, custom domain, sovereign data residency, source escrow, quarterly training.
 
 ---
@@ -893,55 +989,56 @@ Full theming, custom domain, sovereign data residency, source escrow, quarterly 
 
 ### A2.1 Sizing
 
-| Layer | Definition | Size |
-|---|---|---|
-| **TAM** | Global land registry, title verification & related fintech | **~$78B / year** |
-| **SAM** | Emerging markets (Africa, LATAM, SEA) government + bank land verification | **~$14B / year** |
-| **SOM (5-yr)** | Realistic capture in 3 pilot countries + regional banks | **~$420M / year** |
+| Layer          | Definition                                                                | Size              |
+| -------------- | ------------------------------------------------------------------------- | ----------------- |
+| **TAM**        | Global land registry, title verification & related fintech                | **~$78B / year**  |
+| **SAM**        | Emerging markets (Africa, LATAM, SEA) government + bank land verification | **~$14B / year**  |
+| **SOM (5-yr)** | Realistic capture in 3 pilot countries + regional banks                   | **~$420M / year** |
 
 ### A2.2 Competitor Comparison
 
-| | TerraTrust AI | Traditional bureau | Blockchain title projects | GIS-only vendors | E-gov portals |
-|---|:-:|:-:|:-:|:-:|:-:|
-| AI trust score | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Explainable AI | ✅ | — | ❌ | ❌ | ❌ |
-| Digital passport | ✅ | ❌ | Partial | ❌ | ❌ |
-| Community attestation | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Bank API | ✅ | ❌ | ❌ | ❌ | Partial |
-| Fraud engine | ✅ | Manual | ❌ | ❌ | Partial |
-| Government workbench | ✅ | Legacy | ❌ | Partial | ✅ |
-| Court-admissible PDF | ✅ | Paper | Rare | ❌ | Partial |
-| Time to passport | Days | Months | Months | N/A | Weeks |
+|                       | TerraTrust AI | Traditional bureau | Blockchain title projects | GIS-only vendors | E-gov portals |
+| --------------------- | :-----------: | :----------------: | :-----------------------: | :--------------: | :-----------: |
+| AI trust score        |      ✅       |         ❌         |            ❌             |        ❌        |      ❌       |
+| Explainable AI        |      ✅       |         —          |            ❌             |        ❌        |      ❌       |
+| Digital passport      |      ✅       |         ❌         |          Partial          |        ❌        |      ❌       |
+| Community attestation |      ✅       |         ❌         |            ❌             |        ❌        |      ❌       |
+| Bank API              |      ✅       |         ❌         |            ❌             |        ❌        |    Partial    |
+| Fraud engine          |      ✅       |       Manual       |            ❌             |        ❌        |    Partial    |
+| Government workbench  |      ✅       |       Legacy       |            ❌             |     Partial      |      ✅       |
+| Court-admissible PDF  |      ✅       |       Paper        |           Rare            |        ❌        |    Partial    |
+| Time to passport      |     Days      |       Months       |          Months           |       N/A        |     Weeks     |
 
 ### A2.3 Differentiation
+
 Only TerraTrust AI is **horizontal (citizen ↔ surveyor ↔ gov ↔ bank), AI-explainable, and government-integrated** in a single product.
 
 ---
 
 ## A3. SDG Mapping
 
-| SDG | Alignment |
-|---|---|
-| **SDG 1 — No Poverty** | Provable tenure unlocks credit, formalises informal settlements, protects inherited land. |
-| **SDG 9 — Industry, Innovation & Infrastructure** | AI-first registry, open APIs for financial infrastructure. |
-| **SDG 11 — Sustainable Cities & Communities** | Trusted cadastre enables urban planning, reduces slum evictions. |
-| **SDG 16 — Peace, Justice & Strong Institutions** | Tamper-evident audit trails reduce corruption; transparent adjudication. |
-| **SDG 17 — Partnerships for the Goals** | Interoperable between government, banks, community and surveyors. |
+| SDG                                               | Alignment                                                                                 |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **SDG 1 — No Poverty**                            | Provable tenure unlocks credit, formalises informal settlements, protects inherited land. |
+| **SDG 9 — Industry, Innovation & Infrastructure** | AI-first registry, open APIs for financial infrastructure.                                |
+| **SDG 11 — Sustainable Cities & Communities**     | Trusted cadastre enables urban planning, reduces slum evictions.                          |
+| **SDG 16 — Peace, Justice & Strong Institutions** | Tamper-evident audit trails reduce corruption; transparent adjudication.                  |
+| **SDG 17 — Partnerships for the Goals**           | Interoperable between government, banks, community and surveyors.                         |
 
 ---
 
 ## A4. Hackathon Judging Alignment
 
-| Criterion | Weight (typical) | TerraTrust AI Score (self-assessed) | Evidence |
-|---|:-:|:-:|---|
-| **Innovation** | 20% | **9.5 / 10** | First horizontal explainable-AI land trust layer + community attestation primitive |
-| **Technical Complexity** | 15% | **9 / 10** | 5 deterministic engines, TanStack Start edge SSR, RLS, HMAC webhooks, PDF signing |
-| **Scalability** | 15% | **9 / 10** | Edge-first, RLS partitioning, stateless engines, 10M-parcel target |
-| **Social Impact** | 20% | **10 / 10** | Directly unlocks dead capital; 5 SDGs; 47 days saved / case |
-| **Feasibility** | 10% | **9 / 10** | Runs today; mock engines swap to real models via same contract |
-| **UI / UX** | 10% | **9.5 / 10** | ~90 production-grade screens, WCAG-AA, guided demo mode |
-| **Business Potential** | 10% | **9 / 10** | 7 revenue streams; $420M SOM in 5 yrs |
-| **Total weighted** | **100%** | **≈ 9.4 / 10** | — |
+| Criterion                | Weight (typical) | TerraTrust AI Score (self-assessed) | Evidence                                                                           |
+| ------------------------ | :--------------: | :---------------------------------: | ---------------------------------------------------------------------------------- |
+| **Innovation**           |       20%        |            **9.5 / 10**             | First horizontal explainable-AI land trust layer + community attestation primitive |
+| **Technical Complexity** |       15%        |             **9 / 10**              | 5 deterministic engines, TanStack Start edge SSR, RLS, HMAC webhooks, PDF signing  |
+| **Scalability**          |       15%        |             **9 / 10**              | Edge-first, RLS partitioning, stateless engines, 10M-parcel target                 |
+| **Social Impact**        |       20%        |             **10 / 10**             | Directly unlocks dead capital; 5 SDGs; 47 days saved / case                        |
+| **Feasibility**          |       10%        |             **9 / 10**              | Runs today; mock engines swap to real models via same contract                     |
+| **UI / UX**              |       10%        |            **9.5 / 10**             | ~90 production-grade screens, WCAG-AA, guided demo mode                            |
+| **Business Potential**   |       10%        |             **9 / 10**              | 7 revenue streams; $420M SOM in 5 yrs                                              |
+| **Total weighted**       |     **100%**     |           **≈ 9.4 / 10**            | —                                                                                  |
 
 ---
 
@@ -978,14 +1075,15 @@ Every AI output in TerraTrust AI is **reason-traced** — no black boxes.
 
 ### A7.1 Scaling Tiers
 
-| Tier | Parcels | Users | Peak req/s | Strategy |
-|---|---|---|---|---|
-| **One city** | 100k | 10k | 200 | Single edge region, single Postgres, no sharding |
-| **One state** | 2M | 200k | 2k | Multi-region edge, read replicas, warm cache |
-| **One country** | 20M | 5M | 15k | Regional shards by district, Postgres partitioning, dedicated ingest queue |
-| **Global** | 200M+ | 50M+ | 100k+ | Multi-tenant sovereign cells, CDN-fronted public reads, ML co-location |
+| Tier            | Parcels | Users | Peak req/s | Strategy                                                                   |
+| --------------- | ------- | ----- | ---------- | -------------------------------------------------------------------------- |
+| **One city**    | 100k    | 10k   | 200        | Single edge region, single Postgres, no sharding                           |
+| **One state**   | 2M      | 200k  | 2k         | Multi-region edge, read replicas, warm cache                               |
+| **One country** | 20M     | 5M    | 15k        | Regional shards by district, Postgres partitioning, dedicated ingest queue |
+| **Global**      | 200M+   | 50M+  | 100k+      | Multi-tenant sovereign cells, CDN-fronted public reads, ML co-location     |
 
 ### A7.2 Techniques
+
 - **CDN** for public passport reads, static assets, PDF renderings.
 - **Edge SSR** (Cloudflare Workers) — sub-100ms TTFB globally.
 - **Caching** — TanStack Query on the client; edge KV for hot passports.
@@ -1049,27 +1147,28 @@ Every AI output in TerraTrust AI is **reason-traced** — no black boxes.
 
 The following supplementary artifacts are available on request; each maps 1:1 to a section of this document:
 
-| Deliverable | Source in this doc |
-|---|---|
-| **Investor Pitch Deck (12–15 slides)** | §1, §19, A1, A2, A4, A10 |
-| **Technical Architecture Document** | §14, §15, §20 |
-| **Software Design Document (SDD)** | §8, §12, §14 |
-| **System Architecture Document** | §20, §21 |
-| **API Reference** | §13 |
-| **User Manual** | §5, §9, §10 |
-| **Judge Demo Guide** | A8 |
-| **Deployment Guide** | §22 |
-| **Testing Report** | §23 |
-| **One-page Executive Summary** | §1 |
-| **One-page Project Abstract** | §1, §19 |
-| **2-minute Demo Script** | A8 (compressed) |
-| **1-minute Elevator Pitch** | §1.4, A10 |
-| **Architecture Diagrams (SVG/PNG)** | §20 |
-| **ER / Sequence / Use Case / Class Diagrams** | §11, §12 |
+| Deliverable                                   | Source in this doc       |
+| --------------------------------------------- | ------------------------ |
+| **Investor Pitch Deck (12–15 slides)**        | §1, §19, A1, A2, A4, A10 |
+| **Technical Architecture Document**           | §14, §15, §20            |
+| **Software Design Document (SDD)**            | §8, §12, §14             |
+| **System Architecture Document**              | §20, §21                 |
+| **API Reference**                             | §13                      |
+| **User Manual**                               | §5, §9, §10              |
+| **Judge Demo Guide**                          | A8                       |
+| **Deployment Guide**                          | §22                      |
+| **Testing Report**                            | §23                      |
+| **One-page Executive Summary**                | §1                       |
+| **One-page Project Abstract**                 | §1, §19                  |
+| **2-minute Demo Script**                      | A8 (compressed)          |
+| **1-minute Elevator Pitch**                   | §1.4, A10                |
+| **Architecture Diagrams (SVG/PNG)**           | §20                      |
+| **ER / Sequence / Use Case / Class Diagrams** | §11, §12                 |
 
 ### A11.1 One-Page Executive Summary
+
 > **TerraTrust AI** is the AI-first national land registry. Every parcel gets a QR-verifiable **Digital Property Passport** with an explainable **Confidence Score**, live **fraud detection**, and **AI valuation**. Citizens prove ownership in days; governments cut backlog; banks underwrite in 48h. 90+ production-grade screens, 5 deterministic AI engines, edge-scale architecture. Aligned to SDG 1, 9, 11, 16, 17. TAM $78B · SAM $14B · SOM $420M in 5 years.
 
 ### A11.2 One-Minute Elevator Pitch
-> *Across emerging markets, 70% of land is undocumented and trillions of dollars sit frozen in dead capital. Existing registries are paper, siloed, and forgeable. TerraTrust AI is the operating system for national land trust — an explainable AI layer that gives every parcel a digital passport, cross-verified by community, surveyor, government, and bank. We've built ninety production-grade screens, five deterministic AI engines, and an edge-scale architecture that runs today. Governments cut verification from months to days. Banks underwrite in forty-eight hours. Citizens finally own what they own. This is how a continent unlocks a trillion dollars — one passport at a time.*
 
+> _Across emerging markets, 70% of land is undocumented and trillions of dollars sit frozen in dead capital. Existing registries are paper, siloed, and forgeable. TerraTrust AI is the operating system for national land trust — an explainable AI layer that gives every parcel a digital passport, cross-verified by community, surveyor, government, and bank. We've built ninety production-grade screens, five deterministic AI engines, and an edge-scale architecture that runs today. Governments cut verification from months to days. Banks underwrite in forty-eight hours. Citizens finally own what they own. This is how a continent unlocks a trillion dollars — one passport at a time._

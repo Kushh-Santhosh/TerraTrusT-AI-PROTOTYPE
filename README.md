@@ -75,7 +75,7 @@ The result: an enormous trust deficit between landholders and the institutions t
 
 ## 3. Solution
 
-TerraTrust AI is a **Digital Property Trust Platform** that issues every parcel a *Property Passport* — a machine-verifiable, AI-augmented identity record built from:
+TerraTrust AI is a **Digital Property Trust Platform** that issues every parcel a _Property Passport_ — a machine-verifiable, AI-augmented identity record built from:
 
 - **AI Property Valuation** — explainable estimates with comparable sales and factor attribution.
 - **Document OCR + Summarization** — extract, validate, and plain-English-summarize titles, deeds, mutations, and survey reports.
@@ -198,24 +198,24 @@ terratrust-ai/
 
 ## 6. Technology Stack
 
-| Layer | Technology |
-|------|------------|
-| **Framework** | TanStack Start v1 (SSR + Edge) |
-| **UI Runtime** | React 19 |
-| **Routing** | TanStack Router (file-based, typed) |
-| **Data fetching** | TanStack Query v5 |
-| **Build tool** | Vite 7 |
-| **Language** | TypeScript (strict) |
-| **Styling** | Tailwind CSS v4 + native CSS @theme tokens |
-| **Design tokens** | OKLCH color model, Instrument Serif + Inter Tight |
-| **Components** | shadcn-style primitives + custom AI/GIS primitives |
-| **Charts** | Recharts |
-| **Motion** | Framer Motion |
-| **Icons** | lucide-react |
-| **Validation** | Zod |
-| **Backend (production)** | Supabase (PostgreSQL + Auth + Storage + Edge Functions) |
-| **AI** | n8n Verification Orchestrator (chat, vision, embeddings, OCR) |
-| **Deployment** | Cloudflare Workers (edge) standalone |
+| Layer                    | Technology                                                    |
+| ------------------------ | ------------------------------------------------------------- |
+| **Framework**            | TanStack Start v1 (SSR + Edge)                                |
+| **UI Runtime**           | React 19                                                      |
+| **Routing**              | TanStack Router (file-based, typed)                           |
+| **Data fetching**        | TanStack Query v5                                             |
+| **Build tool**           | Vite 7                                                        |
+| **Language**             | TypeScript (strict)                                           |
+| **Styling**              | Tailwind CSS v4 + native CSS @theme tokens                    |
+| **Design tokens**        | OKLCH color model, Instrument Serif + Inter Tight             |
+| **Components**           | shadcn-style primitives + custom AI/GIS primitives            |
+| **Charts**               | Recharts                                                      |
+| **Motion**               | Framer Motion                                                 |
+| **Icons**                | lucide-react                                                  |
+| **Validation**           | Zod                                                           |
+| **Backend (production)** | Supabase (PostgreSQL + Auth + Storage + Edge Functions)       |
+| **AI**                   | n8n Verification Orchestrator (chat, vision, embeddings, OCR) |
+| **Deployment**           | Cloudflare Workers (edge) standalone                          |
 
 ---
 
@@ -238,6 +238,7 @@ queryClient.invalidateQueries(...) ──► dependent views re-fetch
 ```
 
 **Principles**
+
 - Loaders prefetch; components consume via `useSuspenseQuery`.
 - No `useEffect` + `fetch` for first paint.
 - Server functions are the only privileged surface — clients never call DB directly.
@@ -423,23 +424,23 @@ For teams porting TerraTrust AI to **Firebase / Firestore**, the equivalent NoSQ
 
 ## 13. Reusable Components
 
-| Component | Path | Purpose |
-|----------|------|---------|
-| `Logo` | `components/brand/Logo.tsx` | Brand mark with size variants |
-| `GlassCard` | `components/ui-ext` | Glassmorphism surface |
-| `StatCard` | `components/ui-ext` | KPI tile with delta |
-| `TrustScore` | `components/ui-ext` | Custom SVG gauge (0–100) |
-| `MapMock` | `components/ui-ext/MapMock.tsx` | Stylized GIS canvas |
-| `Scaffold` | `components/ui-ext/Scaffold.tsx` | Page scaffolding |
-| `DataTable` | `components/ui-ext` | Sortable, filterable table |
-| `KpiRow`, `Stepper`, `Pill`, `SectionTitle` | `components/ui-ext` | Composition helpers |
-| `ScoreRing` | `components/ai` | SVG confidence ring |
-| `ConfidenceMeter` | `components/ai` | Calibrated progress |
-| `RiskGauge` | `components/ai` | Semi-circle meter |
-| `AIInsightCard` | `components/ai` | Insight w/ delta |
-| `ExplainabilityPanel` | `components/ai` | Factor weighting |
-| `ReasoningTrace` | `components/ai` | Step-by-step model trace |
-| `AppShell`, `SiteHeader`, `SiteFooter` | `components/layout` | Navigation surfaces |
+| Component                                   | Path                             | Purpose                       |
+| ------------------------------------------- | -------------------------------- | ----------------------------- |
+| `Logo`                                      | `components/brand/Logo.tsx`      | Brand mark with size variants |
+| `GlassCard`                                 | `components/ui-ext`              | Glassmorphism surface         |
+| `StatCard`                                  | `components/ui-ext`              | KPI tile with delta           |
+| `TrustScore`                                | `components/ui-ext`              | Custom SVG gauge (0–100)      |
+| `MapMock`                                   | `components/ui-ext/MapMock.tsx`  | Stylized GIS canvas           |
+| `Scaffold`                                  | `components/ui-ext/Scaffold.tsx` | Page scaffolding              |
+| `DataTable`                                 | `components/ui-ext`              | Sortable, filterable table    |
+| `KpiRow`, `Stepper`, `Pill`, `SectionTitle` | `components/ui-ext`              | Composition helpers           |
+| `ScoreRing`                                 | `components/ai`                  | SVG confidence ring           |
+| `ConfidenceMeter`                           | `components/ai`                  | Calibrated progress           |
+| `RiskGauge`                                 | `components/ai`                  | Semi-circle meter             |
+| `AIInsightCard`                             | `components/ai`                  | Insight w/ delta              |
+| `ExplainabilityPanel`                       | `components/ai`                  | Factor weighting              |
+| `ReasoningTrace`                            | `components/ai`                  | Step-by-step model trace      |
+| `AppShell`, `SiteHeader`, `SiteFooter`      | `components/layout`              | Navigation surfaces           |
 
 Plus the full shadcn primitive set in `components/ui/` (button, input, dialog, tabs, etc.).
 
@@ -447,18 +448,18 @@ Plus the full shadcn primitive set in `components/ui/` (button, input, dialog, t
 
 ## 14. Hooks
 
-| Hook | Purpose |
-|------|---------|
-| `useAuth()` | Current user, role, sign-in/out helpers |
-| `useProperty(id)` | Single-property query wrapper |
-| `usePropertyList()` | Portfolio query with filters |
-| `useAIRun(kind, subjectId)` | Subscribes to latest AI run for a subject |
-| `useTrustScore(propertyId)` | Composite score with breakdown |
-| `useToast()` | Toast notifications |
-| `useMediaQuery(q)` | Responsive logic |
-| `useDebouncedValue(v, ms)` | Search inputs |
-| `useLocalStorage(key, init)` | Persistent UI state |
-| `usePagination(total, size)` | Table paging |
+| Hook                         | Purpose                                   |
+| ---------------------------- | ----------------------------------------- |
+| `useAuth()`                  | Current user, role, sign-in/out helpers   |
+| `useProperty(id)`            | Single-property query wrapper             |
+| `usePropertyList()`          | Portfolio query with filters              |
+| `useAIRun(kind, subjectId)`  | Subscribes to latest AI run for a subject |
+| `useTrustScore(propertyId)`  | Composite score with breakdown            |
+| `useToast()`                 | Toast notifications                       |
+| `useMediaQuery(q)`           | Responsive logic                          |
+| `useDebouncedValue(v, ms)`   | Search inputs                             |
+| `useLocalStorage(key, init)` | Persistent UI state                       |
+| `usePagination(total, size)` | Table paging                              |
 
 ---
 
@@ -475,17 +476,17 @@ Plus the full shadcn primitive set in `components/ui/` (button, input, dialog, t
 
 > Service layer = **server functions** (`createServerFn`) under `src/lib/*.functions.ts`. Each one is typed RPC, Zod-validated, and (when needed) wrapped in `requireSupabaseAuth`.
 
-| Service | Responsibility |
-|---------|---------------|
-| `properties.functions.ts` | CRUD, transfer, share |
-| `documents.functions.ts` | Upload, OCR enqueue, verify |
-| `valuation.functions.ts` | Trigger AI valuation, return comparables |
-| `fraud.functions.ts` | Run fraud signals, manage cases |
-| `attestations.functions.ts` | Submit/withdraw community attestations |
-| `disputes.functions.ts` | Open, comment, resolve disputes |
-| `reports.functions.ts` | Generate exportable reports |
-| `admin.functions.ts` | Roles, audit, system health |
-| `ai.functions.ts` | Unified gateway to AI Gateway (chat, vision, OCR) |
+| Service                     | Responsibility                                    |
+| --------------------------- | ------------------------------------------------- |
+| `properties.functions.ts`   | CRUD, transfer, share                             |
+| `documents.functions.ts`    | Upload, OCR enqueue, verify                       |
+| `valuation.functions.ts`    | Trigger AI valuation, return comparables          |
+| `fraud.functions.ts`        | Run fraud signals, manage cases                   |
+| `attestations.functions.ts` | Submit/withdraw community attestations            |
+| `disputes.functions.ts`     | Open, comment, resolve disputes                   |
+| `reports.functions.ts`      | Generate exportable reports                       |
+| `admin.functions.ts`        | Roles, audit, system health                       |
+| `ai.functions.ts`           | Unified gateway to AI Gateway (chat, vision, OCR) |
 
 Public webhook endpoints (e.g. external imagery callbacks) live under `src/routes/api/public/*` and verify signatures inside the handler.
 
@@ -518,12 +519,14 @@ Public webhook endpoints (e.g. external imagery callbacks) live under `src/route
 ```
 
 **Explainability is non-negotiable.** Every AI surface ships:
+
 - A **confidence score** (0–100) with calibration history.
 - An **explainability panel** (factor weights, top contributors).
 - A **reasoning trace** (step-by-step model decisions).
 - A **signed run record** stored in `ai_runs` for audit replay.
 
 **Model classes**
+
 - **LLM** (n8n Verification Orchestrator) — assistant chat, document summarization, recommendations.
 - **Vision** — boundary detection, satellite change detection, stamp/signature anomaly.
 - **OCR** — multilingual, with field-level confidence and bureau cross-validation.
@@ -573,6 +576,7 @@ TerraTrust AI deploys to **Cloudflare Workers** (edge) standalone.
 6. **Custom domain** — configure via project domains setting.
 
 Stable URLs:
+
 - `terratrust-ai.vercel.app` — production.
 - `dev.terratrust-ai.vercel.app` — preview.
 
@@ -580,15 +584,15 @@ Stable URLs:
 
 ## 21. Environment Variables
 
-| Variable | Scope | Purpose |
-|----------|-------|---------|
-| `SUPABASE_URL` | server | Cloud DB URL |
-| `SUPABASE_PUBLISHABLE_KEY` | server | Public anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | server | Admin (server-only) |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | server | AI Gateway key |
-| `WEBHOOK_SECRET` | server | HMAC for `/api/public/*` |
-| `VITE_APP_NAME` | client | Branding override |
-| `VITE_MAP_STYLE_URL` | client | Map tile style |
+| Variable                        | Scope  | Purpose                  |
+| ------------------------------- | ------ | ------------------------ |
+| `SUPABASE_URL`                  | server | Cloud DB URL             |
+| `SUPABASE_PUBLISHABLE_KEY`      | server | Public anon key          |
+| `SUPABASE_SERVICE_ROLE_KEY`     | server | Admin (server-only)      |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | server | AI Gateway key           |
+| `WEBHOOK_SECRET`                | server | HMAC for `/api/public/*` |
+| `VITE_APP_NAME`                 | client | Branding override        |
+| `VITE_MAP_STYLE_URL`            | client | Map tile style           |
 
 `process.env.*` is **server-only**. Client-side public config uses `import.meta.env.VITE_*`.
 
@@ -630,16 +634,17 @@ bun run build
 
 ## 24. Testing Strategy
 
-| Layer | Tooling | Focus |
-|-------|---------|-------|
-| **Unit** | Vitest | utilities, formatters, pure logic |
-| **Component** | Vitest + Testing Library | reusable UI + AI primitives |
-| **Integration** | Vitest + msw | server functions with mocked services |
-| **E2E** | Playwright (headless Chromium) | auth, property creation, AI flows |
-| **Visual** | Playwright screenshots | per-route smoke set |
-| **Type** | `tsgo --noEmit` | strict mode on every commit |
+| Layer           | Tooling                        | Focus                                 |
+| --------------- | ------------------------------ | ------------------------------------- |
+| **Unit**        | Vitest                         | utilities, formatters, pure logic     |
+| **Component**   | Vitest + Testing Library       | reusable UI + AI primitives           |
+| **Integration** | Vitest + msw                   | server functions with mocked services |
+| **E2E**         | Playwright (headless Chromium) | auth, property creation, AI flows     |
+| **Visual**      | Playwright screenshots         | per-route smoke set                   |
+| **Type**        | `tsgo --noEmit`                | strict mode on every commit           |
 
 Run all tests:
+
 ```bash
 bunx vitest run
 bunx playwright test
@@ -720,27 +725,30 @@ bunx playwright test
 ## 31. Developer Guide
 
 **Adding a new route**
+
 1. Create `src/routes/<your-route>.tsx`.
 2. Export `Route = createFileRoute('/<your-route>')({ component, head })`.
 3. The TanStack Router Vite plugin regenerates `routeTree.gen.ts` automatically.
 
 **Adding a server function**
+
 ```ts
 // src/lib/example.functions.ts
-import { createServerFn } from '@tanstack/react-start'
-import { z } from 'zod'
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
-export const doThing = createServerFn({ method: 'POST' })
-  .inputValidator(d => z.object({ id: z.string() }).parse(d))
+export const doThing = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ id: z.string() }).parse(d))
   .handler(async ({ data }) => {
     // privileged work here
-    return { ok: true }
-  })
+    return { ok: true };
+  });
 ```
 
 **Adding a UI primitive** — drop it under `src/components/ui-ext/` or `components/ai/` and export from a barrel only when widely shared.
 
 **Design rules**
+
 - Never hardcode colors. Use semantic tokens (`bg-background`, `text-foreground`, etc.).
 - Never `@import` remote stylesheets in `styles.css` — use `<link>` in `__root.tsx` head.
 - Prefer SVG over icon fonts. Prefer Recharts over heavy chart libs.

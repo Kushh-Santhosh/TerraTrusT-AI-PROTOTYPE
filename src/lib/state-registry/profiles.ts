@@ -888,3 +888,160 @@ export function formatStateArea(
     displayText: `${sqm.toLocaleString("en-IN")} m² · ${acres} acres · ${localUnits} ${profile.unitConversion.primaryLocalUnit}`,
   };
 }
+
+/**
+ * Returns researched official property record identifier types for the specified state.
+ * Prevents inventing terminology; adheres to actual government registry systems.
+ */
+export function getStateIdentifierTypes(
+  stateCodeOrName?: string,
+): import("./types").StateRecordIdentifierType[] {
+  const profile = getStateProfile(stateCodeOrName);
+  switch (profile.stateCode) {
+    case "KA":
+      return [
+        {
+          id: "e-Khata / PID",
+          label: "e-Khata / PID (BBMP / e-Aasthi 10-digit Property ID)",
+          description:
+            "Mandatory digital property record issued by Urban Local Bodies & BBMP across Karnataka.",
+          placeholder: "e.g. 1502001002003004 or 10-digit PID",
+          systemName: "e-Aasthi / BBMP Urban Land Records",
+        },
+        {
+          id: "Bhoomi RTC / Survey & Hissa",
+          label: "Bhoomi RTC / Survey & Hissa",
+          description:
+            "Revenue Department Record of Rights, Tenancy and Crops (Pahani) for rural/agricultural land.",
+          placeholder: "e.g. Survey 14/2, Hissa 2A, Varthur Hobli",
+          systemName: "Bhoomi Land Records System",
+        },
+        {
+          id: "Khata Certificate",
+          label: "Khata Certificate (A-Khata / B-Khata)",
+          description:
+            "Municipal property tax assessment certificate with Khata registration number.",
+          placeholder: "e.g. A-Khata 8421/2024",
+          systemName: "Karnataka Municipal Administration",
+        },
+        {
+          id: "Kaveri 2.0 Registration Reference",
+          label: "Kaveri 2.0 Registration Reference",
+          description:
+            "Department of Stamps and Registration deed number or encumbrance reference.",
+          placeholder: "e.g. KVR-BNG-2024-DOC-9821",
+          systemName: "Kaveri 2.0 Registration & Stamps",
+        },
+      ];
+    case "MH":
+      return [
+        {
+          id: "7/12 (Saat Baara) Gat Number",
+          label: "7/12 (Saat Baara) Gat/Survey Number",
+          description:
+            "Mahabhulekh Record of Rights and ownership extract for rural land parcels in Maharashtra.",
+          placeholder: "e.g. Gat No. 241/1A",
+          systemName: "Mahabhulekh Land Records",
+        },
+        {
+          id: "City Survey (CTS) / Property Card",
+          label: "City Survey (CTS) / Property Card (Milkat Patra)",
+          description: "Urban land records department property card with City Survey (CTS) number.",
+          placeholder: "e.g. CTS No. 1042-B, Ward 4",
+          systemName: "Maharashtra City Survey Office",
+        },
+        {
+          id: "IGR SARITA Registration Document",
+          label: "IGR SARITA Registration Document Number",
+          description:
+            "Department of Registration & Stamps deed or Index II registration reference.",
+          placeholder: "e.g. HAV-4-12401-2023",
+          systemName: "IGR SARITA Registration",
+        },
+      ];
+    case "TS":
+      return [
+        {
+          id: "Dharani Passbook / Survey Number",
+          label: "Dharani Passbook / Survey Number",
+          description:
+            "Integrated land records management system pattadar passbook and survey reference in Telangana.",
+          placeholder: "e.g. PPB-TS-2024-9912 / Sy 84",
+          systemName: "Dharani Portal",
+        },
+        {
+          id: "CDMA / GHMC PTIN",
+          label: "PTIN (Property Tax Identification Number - CDMA/GHMC)",
+          description:
+            "Urban property tax assessment identifier across Hyderabad (GHMC) and Telangana municipalities.",
+          placeholder: "e.g. PTIN-1092837465",
+          systemName: "CDMA / GHMC Municipal Records",
+        },
+      ];
+    case "AP":
+      return [
+        {
+          id: "Meebhoomi 1B Adangal / Survey LP Number",
+          label: "Meebhoomi 1B Adangal / Survey LP Number",
+          description:
+            "Andhra Pradesh revenue department record of rights and land parcel identifier.",
+          placeholder: "e.g. LP No. 45/2023, Survey 112/3",
+          systemName: "Meebhoomi Land Records",
+        },
+        {
+          id: "Puraseva Assessment / PTIN",
+          label: "Puraseva Assessment / PTIN",
+          description: "Urban local body property tax assessment number across Andhra Pradesh.",
+          placeholder: "e.g. AP-ASSMT-98214",
+          systemName: "Puraseva Urban Portal",
+        },
+      ];
+    case "TN":
+      return [
+        {
+          id: "Patta / Chitta Number",
+          label: "Patta / Chitta Number (e-Services Tamil Nilam)",
+          description: "Tamil Nadu Revenue Department record of land ownership and crop history.",
+          placeholder: "e.g. Patta No. 1421, Survey 88/2",
+          systemName: "Tamil Nilam Land Records",
+        },
+        {
+          id: "TSLR (Town Survey Land Register) Extract",
+          label: "TSLR (Town Survey Land Register) Extract",
+          description:
+            "Urban municipal survey land register extract for Chennai and Tamil Nadu cities.",
+          placeholder: "e.g. TSLR Ward C, Block 12, TS 44",
+          systemName: "Tamil Nadu Town Survey",
+        },
+      ];
+    case "UP":
+      return [
+        {
+          id: "Bhulekh Khasra / Gata Number & Khatauni ID",
+          label: "Bhulekh Khasra / Gata Number & Khatauni ID",
+          description:
+            "Uttar Pradesh Board of Revenue record of rights and land parcel identifier.",
+          placeholder: "e.g. Gata No. 512, Khatauni 00412",
+          systemName: "UP Bhulekh Portal",
+        },
+        {
+          id: "UP Urban Property Identification (UPIC)",
+          label: "UPIC (Urban Property Identification Code)",
+          description:
+            "Municipal tax and property identification code in Uttar Pradesh urban areas.",
+          placeholder: "e.g. UPIC-LKO-88219",
+          systemName: "UP Municipal Development",
+        },
+      ];
+    default:
+      return [
+        {
+          id: "State Property Record ID",
+          label: "State Property Record ID",
+          description: "Official state revenue or municipal property identification number.",
+          placeholder: "e.g. Official State Land/Property Record ID",
+          systemName: "State Revenue / Municipal Department",
+        },
+      ];
+  }
+}

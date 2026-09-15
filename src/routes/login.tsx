@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,17 +17,49 @@ const demoAccounts: Array<[string, Role]> = [
 ];
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
+    return {
+      redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+    };
+  },
   head: () => ({ meta: [{ title: "Sign in — TerraTrust AI" }] }),
   component: LoginPage,
 });
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { signIn, signInDemo, configError } = useAuth();
+  const search = useSearch({ from: "/login" });
+  const { session, user, profile, loading, signIn, signInDemo, configError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // If already authenticated with a valid Supabase session, redirect immediately
+  useEffect(() => {
+    if (!loading && session && user) {
+      const destination =
+        search?.redirect && search.redirect !== "/login"
+          ? search.redirect
+          : roleHome(profile?.role || user.user_metadata?.role || "citizen");
+      navigate({ to: destination as never, replace: true });
+    }
+  }, [loading, session, user, profile, search?.redirect, navigate]);
+
+  // Handle browser bfcache navigation (e.g. Back button restores page from cache)
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (session && user) {
+        const destination =
+          search?.redirect && search.redirect !== "/login"
+            ? search.redirect
+            : roleHome(profile?.role || user.user_metadata?.role || "citizen");
+        navigate({ to: destination as never, replace: true });
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [session, user, profile, search?.redirect, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,9 +80,12 @@ function LoginPage() {
       return;
     }
 
-    const destination = roleHome(role || "citizen");
+    const destination =
+      search?.redirect && search.redirect !== "/login"
+        ? search.redirect
+        : roleHome(role || "citizen");
     toast.success("Signed in successfully");
-    navigate({ to: destination });
+    navigate({ to: destination as never, replace: true });
   };
 
   const handleDemoSignIn = async (label: string, role: Role) => {
@@ -63,10 +98,27 @@ function LoginPage() {
       toast.error(result.error);
       return;
     }
-    const destination = roleHome(result.role || "citizen");
+    const destination =
+      search?.redirect && search.redirect !== "/login"
+        ? search.redirect
+        : roleHome(result.role || "citizen");
     toast.success(`Signed in as Demo ${label} via Supabase Auth`);
-    navigate({ to: destination });
+    navigate({ to: destination as never, replace: true });
   };
+
+  // If loading session, show clean hydration state to prevent UI flicker
+  if (loading || (session && user)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            {session && user ? "Redirecting to your workspace…" : "Verifying session…"}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthLayout

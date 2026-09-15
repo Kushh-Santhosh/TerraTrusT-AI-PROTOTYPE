@@ -13,10 +13,7 @@
       "name": "TerraTrust Verify Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [
-        0,
-        288
-      ],
+      "position": [0, 288],
       "webhookId": "7f9d822d-a0a7-4506-93a8-46bc3741daca",
       "credentials": {
         "httpHeaderAuth": {
@@ -33,10 +30,7 @@
       "name": "Validate & Normalize",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        224,
-        288
-      ]
+      "position": [224, 288]
     },
     {
       "parameters": {
@@ -66,10 +60,7 @@
       "name": "Is Valid?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [
-        448,
-        288
-      ]
+      "position": [448, 288]
     },
     {
       "parameters": {
@@ -99,10 +90,7 @@
       "name": "Is Authorized?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [
-        672,
-        192
-      ]
+      "position": [672, 192]
     },
     {
       "parameters": {
@@ -132,10 +120,7 @@
       "name": "Exists & Not Duplicate?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [
-        896,
-        96
-      ]
+      "position": [896, 96]
     },
     {
       "parameters": {
@@ -145,10 +130,7 @@
       "name": "Analysis Engine (OCR→Confidence)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1120,
-        0
-      ]
+      "position": [1120, 0]
     },
     {
       "parameters": {
@@ -158,10 +140,7 @@
       "name": "Automated Decision Gate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1344,
-        0
-      ]
+      "position": [1344, 0]
     },
     {
       "parameters": {
@@ -171,10 +150,7 @@
       "name": "Build VerificationResult",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1568,
-        0
-      ]
+      "position": [1568, 0]
     },
     {
       "parameters": {
@@ -228,10 +204,7 @@
       "name": "Supabase: Save Verification Run",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [
-        1792,
-        0
-      ],
+      "position": [1792, 0],
       "credentials": {
         "supabaseApi": {
           "id": "8AkmNGJ2kRyQtg3e",
@@ -276,10 +249,7 @@
       "name": "Supabase: Save Valuation",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [
-        2016,
-        0
-      ],
+      "position": [2016, 0],
       "credentials": {
         "supabaseApi": {
           "id": "8AkmNGJ2kRyQtg3e",
@@ -328,10 +298,7 @@
       "name": "Supabase: Write Audit Log",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [
-        2240,
-        0
-      ],
+      "position": [2240, 0],
       "credentials": {
         "supabaseApi": {
           "id": "8AkmNGJ2kRyQtg3e",
@@ -376,10 +343,7 @@
       "name": "Supabase: Create Notification",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [
-        2464,
-        0
-      ],
+      "position": [2464, 0],
       "credentials": {
         "supabaseApi": {
           "id": "8AkmNGJ2kRyQtg3e",
@@ -400,10 +364,7 @@
       "name": "Respond 200 (VerificationResult)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [
-        2688,
-        0
-      ]
+      "position": [2688, 0]
     },
     {
       "parameters": {
@@ -417,10 +378,7 @@
       "name": "Respond 500 / 404 / 409 / 403",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [
-        1120,
-        192
-      ]
+      "position": [1120, 192]
     },
     {
       "parameters": {
@@ -434,10 +392,7 @@
       "name": "Respond Auth Error",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [
-        896,
-        288
-      ]
+      "position": [896, 288]
     },
     {
       "parameters": {
@@ -451,10 +406,7 @@
       "name": "Respond 400",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [
-        672,
-        384
-      ]
+      "position": [672, 384]
     }
   ],
   "pinData": {},

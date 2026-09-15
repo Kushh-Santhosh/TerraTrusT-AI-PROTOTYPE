@@ -87,6 +87,9 @@ export function mapPropertyRow(row: {
   owner_id?: string;
   passport_id: string;
   property_name: string;
+  property_state?: string | null;
+  record_identifier_type?: string | null;
+  record_identifier_value?: string | null;
   location: PropertyLocation | null;
   area: number;
   status: Property["status"];
@@ -123,6 +126,9 @@ export function mapPropertyRow(row: {
       ? (loc.governmentBoundary as PropertyBoundary[])
       : undefined,
     stateCode: loc.stateCode ?? (loc.region?.toLowerCase().includes("maharashtra") ? "MH" : "KA"),
+    propertyState: row.property_state ?? (loc.stateCode === "MH" ? "Maharashtra" : "Karnataka"),
+    recordIdentifierType: row.record_identifier_type ?? undefined,
+    recordIdentifierValue: row.record_identifier_value ?? undefined,
     cadastralIdentifiers: loc.cadastralIdentifiers ?? ({} as Record<string, unknown>),
     sourceChecks: loc.sourceChecks ?? ({} as Record<string, unknown>),
     surveyorDecision: loc.surveyorDecision,
@@ -146,7 +152,7 @@ export async function loadOwnedProperties(userId: string): Promise<Property[]> {
     const { data, error } = await supabase
       .from("properties")
       .select(
-        "id, owner_id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
+        "id, owner_id, passport_id, property_name, property_state, record_identifier_type, record_identifier_value, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
       )
       .eq("owner_id", userId)
       .order("created_at", { ascending: false });
@@ -166,7 +172,7 @@ export async function loadPropertyById(idOrPassport: string): Promise<Property |
       const query = supabase
         .from("properties")
         .select(
-          "id, owner_id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
+          "id, owner_id, passport_id, property_name, property_state, record_identifier_type, record_identifier_value, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
         );
 
       const { data, error } = isUuid(idOrPassport)
@@ -197,7 +203,7 @@ export async function loadInstitutionalProperties(
     let query = supabase
       .from("properties")
       .select(
-        "id, owner_id, passport_id, property_name, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
+        "id, owner_id, passport_id, property_name, property_state, record_identifier_type, record_identifier_value, location, area, status, trust_score, property_documents(id, name, kind, storage_path, verified, created_at)",
       )
       .order("created_at", { ascending: false });
 

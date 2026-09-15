@@ -2,34 +2,35 @@
 
 > **Audit Timestamp:** 2026-09-07T13:58:00+05:30  
 > **Repository:** `Kushh-Santhosh/TerraTrust-AI-PROTOTYPE`  
-> **Production Target:** `https://terratrust-ai.vercel.app`  
+> **Production Target:** `https://terratrust-ai.vercel.app`
 
 ---
 
 ## 1. Executive Summary of Audit Status
 
-| Requirement Domain | Status | Key Evidence / Verification Mechanism |
-| :--- | :---: | :--- |
-| **Community Removal** | **PASS** | 0 community roles, routes, or UI references. Redirects active on `/community` & `/attestations`. |
-| **Role Isolation & Navigation** | **PASS** | 5 distinct navigations (Citizen, Surveyor, Government, Bank, Admin) with 0 cross-role leakage. |
-| **Dynamic Data & Zero Demo Text**| **PASS** | All "Demo", "prototype workspace", "sample dataset" strings eliminated. Supabase-driven counts. |
-| **Citizen End-to-End Workflow** | **PASS** | Multi-state dynamic form (KA, MH, AP), MapLibre polygon capture, Supabase Storage uploads. |
-| **Surveyor Workflow** | **PASS** | Interactive boundary inspection, GPS field marker logging, non-destructive boundary versioning. |
-| **Government Legal Determination** | **PASS** | Operational APPROVE, REJECT, REQUEST CLARIFICATION actions persisting to Supabase `properties`. |
-| **Bank Underwriting Book** | **PASS** | Displays verified properties, INR valuations, LTV calculations, and interactive mortgage origination. |
-| **Admin & India Registry Tree** | **PASS** | Interactive hierarchy of Republic of India across 8 states and 34 official land record systems. |
-| **State-Aware Land Profiles** | **PASS** | Researched configurations for KA, MH, AP, TS, KL, UP, RJ, DL with localized units and terminology. |
-| **Live n8n Webhook Connection** | **PASS** | Webhook `POST /webhook/terratrust/verify` executed live across 3 test scenarios (KA, MH, Invalid). |
-| **Chatbot / Widget Removal** | **PASS** | Removed `AparsoftChatbot` external script loader and WebSocket connections completely. |
-| **Performance & Stickiness** | **PASS** | Removed blocking third-party scripts; optimized MapLibre read-only marker rendering. |
-| **Desktop Chrome QA** | **PASS** | Verified multi-role workflow transitions with discrete authentications and clean console logs. |
-| **Production Deployment** | **PASS** | Vercel production deployment verified healthy (`HTTP 200` at `https://terratrust-ai.vercel.app`). |
+| Requirement Domain                 |  Status  | Key Evidence / Verification Mechanism                                                                 |
+| :--------------------------------- | :------: | :---------------------------------------------------------------------------------------------------- |
+| **Community Removal**              | **PASS** | 0 community roles, routes, or UI references. Redirects active on `/community` & `/attestations`.      |
+| **Role Isolation & Navigation**    | **PASS** | 5 distinct navigations (Citizen, Surveyor, Government, Bank, Admin) with 0 cross-role leakage.        |
+| **Dynamic Data & Zero Demo Text**  | **PASS** | All "Demo", "prototype workspace", "sample dataset" strings eliminated. Supabase-driven counts.       |
+| **Citizen End-to-End Workflow**    | **PASS** | Multi-state dynamic form (KA, MH, AP), MapLibre polygon capture, Supabase Storage uploads.            |
+| **Surveyor Workflow**              | **PASS** | Interactive boundary inspection, GPS field marker logging, non-destructive boundary versioning.       |
+| **Government Legal Determination** | **PASS** | Operational APPROVE, REJECT, REQUEST CLARIFICATION actions persisting to Supabase `properties`.       |
+| **Bank Underwriting Book**         | **PASS** | Displays verified properties, INR valuations, LTV calculations, and interactive mortgage origination. |
+| **Admin & India Registry Tree**    | **PASS** | Interactive hierarchy of Republic of India across 8 states and 34 official land record systems.       |
+| **State-Aware Land Profiles**      | **PASS** | Researched configurations for KA, MH, AP, TS, KL, UP, RJ, DL with localized units and terminology.    |
+| **Live n8n Webhook Connection**    | **PASS** | Webhook `POST /webhook/terratrust/verify` executed live across 3 test scenarios (KA, MH, Invalid).    |
+| **Chatbot / Widget Removal**       | **PASS** | Removed `AparsoftChatbot` external script loader and WebSocket connections completely.                |
+| **Performance & Stickiness**       | **PASS** | Removed blocking third-party scripts; optimized MapLibre read-only marker rendering.                  |
+| **Desktop Chrome QA**              | **PASS** | Verified multi-role workflow transitions with discrete authentications and clean console logs.        |
+| **Production Deployment**          | **PASS** | Vercel production deployment verified healthy (`HTTP 200` at `https://terratrust-ai.vercel.app`).     |
 
 ---
 
 ## 2. Granular Role & Requirement Verification
 
 ### Role 1: Citizen
+
 - **Navigation Items Tested:** Dashboard, My Properties, Add Property, GIS Cadastral Map, Digital Passport, AI Intelligence Hub, AI Valuation, Document OCR, Boundary Detection, Satellite Compare, Land Health, Risk Analysis, AI Assistant, Verification Status, Reports & Certificates, Disputes & Claims, Notifications, Profile, Settings, Support.
 - **Add Property Flow (`/properties/new`):**
   - Selecting **Karnataka** loads Bhoomi RTC, Surnoc, Hissa, ePID / SAS Tax ID, and Kaveri 2.0.
@@ -39,6 +40,7 @@
 - **Status:** **PASS**
 
 ### Role 2: Surveyor
+
 - **Navigation Items Tested:** Surveyor Dashboard, My Assignments, Field Tools, Boundary Capture, Assigned Properties, GIS Map, Satellite Compare, Document Review, Verification Evidence, Survey Reports, Surveyor Profile, Notifications, Settings, Support.
 - **Field Assignment Workflow (`/surveyor/assignments/$id`):**
   - Loads real parcel geometry from Supabase.
@@ -46,6 +48,7 @@
 - **Status:** **PASS**
 
 ### Role 3: Government
+
 - **Navigation Items Tested:** Government Dashboard, Cadastral Parcels, Verification Queue, Building Permits, Registry Disputes, Audit Ledger, GIS Cadastral Map, Property Search, Risk & Fraud Cases, Boundary Review, Ownership Timeline, Official Reports, Jurisdiction Analytics, Officer Profile, Notifications, Settings, Support.
 - **Workbench (`/properties/$id/verify`):**
   - Displays multi-layer boundary overlay (Citizen Claimed vs Surveyor Field Verified).
@@ -54,6 +57,7 @@
 - **Status:** **PASS**
 
 ### Role 4: Bank
+
 - **Navigation Items Tested:** Bank Dashboard, Property Search, Eligible Properties, Verification Results, Collateral Review, Active Loan Cases, AI Valuation Engine, Trust / Confidence, Property Passport, Portfolio Analytics, Audit Reports, Banker Profile, Notifications, Settings, Support.
 - **Underwriting Portal (`/bank` & `/bank/loans`):**
   - Lists verified properties with Digital Property Passports and INR valuations.
@@ -61,6 +65,7 @@
 - **Status:** **PASS**
 
 ### Role 5: Admin
+
 - **Navigation Items Tested:** Admin Dashboard, User Management, RBAC & Permissions, Jurisdictions & Regions, System Settings & Health, n8n & External Services, API Credentials, System Audit Logs, User Feedback, Platform Analytics, Security Center, Admin Profile, Settings, Support.
 - **Admin Dashboard (`/admin`):** Queries real counts from Supabase `profiles`, `properties`, and `verification_results`.
 - **State Profiles (`/admin/regions`):** Interactive India Land Registry Tree with all 8 researched states and 34 official systems.

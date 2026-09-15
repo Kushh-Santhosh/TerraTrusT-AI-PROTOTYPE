@@ -60,6 +60,7 @@ Show a verified property, valuation, risk context, and a persisted collateral or
 - Distinguish AI interpretation from verified government evidence.
 - Never claim a Gemini-in-n8n execution until the canonical workflow visibly contains and executes the Gemini node.
 - Never expose credentials during the demo.
+
 # TerraTrust AI Pitch Flow
 
 ## 0:00-0:30: Problem
