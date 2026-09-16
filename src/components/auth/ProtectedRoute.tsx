@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useNavigate, useRouterState, Outlet } from "@tanstack/react-router";
 import { useAuth, roleHome, normalizeRole, type Role } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import { ShieldAlert, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -28,6 +29,21 @@ export function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) 
       });
     }
   }, [loading, isAuthenticated, pathname, navigate]);
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+
+      supabase.auth.getSession().then(({ data }) => {
+        if (!data.session) {
+          window.location.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+        }
+      });
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [pathname]);
 
   if (loading) {
     return (

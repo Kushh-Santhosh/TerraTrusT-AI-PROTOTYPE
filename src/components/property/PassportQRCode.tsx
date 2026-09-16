@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import type { Property } from "@/lib/types";
 
 export const publicAppOrigin =
-  import.meta.env.VITE_PUBLIC_APP_URL?.trim() || "https://terra-trus-t-ai-prototype.vercel.app";
+  import.meta.env.VITE_PUBLIC_APP_URL?.trim() ||
+  (typeof window !== "undefined" ? window.location.origin : "https://terratrust-ai.vercel.app");
 
 export function passportVerificationUrl(propertyId: string): string {
   const origin = publicAppOrigin;

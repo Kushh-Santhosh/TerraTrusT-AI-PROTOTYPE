@@ -330,6 +330,16 @@ export function AppShell({
     setMobileNavOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({
+        to: "/login",
+        search: { redirect: pathname } as never,
+        replace: true,
+      });
+    }
+  }, [loading, navigate, pathname, user]);
+
   const getEffectiveRole = (): Role => {
     const authRole = profile?.role || user?.user_metadata?.role;
     if (authRole) {
@@ -380,6 +390,14 @@ export function AppShell({
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6">
         <p className="text-sm text-muted-foreground">Loading your authorized workspace...</p>
+      </div>
+    );
+  }
+
+  if (!loading && !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <p className="text-sm text-muted-foreground">Redirecting to sign in...</p>
       </div>
     );
   }

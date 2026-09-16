@@ -123,6 +123,7 @@ async function requestGemini(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(20_000),
     });
     if (response.ok || ![429, 500, 502, 503, 504].includes(response.status) || attempt === 2) {
       return response;
@@ -339,7 +340,7 @@ export const analyzePropertyWithAI = createServerFn({ method: "POST" })
           responseMimeType: "application/json",
           responseSchema,
           temperature: 0.1,
-          maxOutputTokens: 1800,
+          maxOutputTokens: 3200,
         },
       });
 
