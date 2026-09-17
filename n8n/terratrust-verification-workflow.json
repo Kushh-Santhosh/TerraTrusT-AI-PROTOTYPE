@@ -210,8 +210,7 @@
           "id": "8AkmNGJ2kRyQtg3e",
           "name": "Supabase account"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -220,11 +219,11 @@
           "fieldValues": [
             {
               "fieldId": "property_id",
-              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.propertyUuid }}"
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.propertyId }}"
             },
             {
               "fieldId": "amount",
-              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.valuationData.valuation }}"
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.valuation }}"
             },
             {
               "fieldId": "currency",
@@ -232,11 +231,11 @@
             },
             {
               "fieldId": "confidence_low",
-              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.valuationData.confidenceInterval.low }}"
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.confidenceInterval.low }}"
             },
             {
               "fieldId": "confidence_high",
-              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.valuationData.confidenceInterval.high }}"
+              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.confidenceInterval.high }}"
             },
             {
               "fieldId": "factors",
@@ -255,8 +254,7 @@
           "id": "8AkmNGJ2kRyQtg3e",
           "name": "Supabase account"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -304,8 +302,7 @@
           "id": "8AkmNGJ2kRyQtg3e",
           "name": "Supabase account"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -321,12 +318,8 @@
               "fieldValue": "={{ $(\"Build VerificationResult\").item.json.propertyId }}"
             },
             {
-              "fieldId": "passport_id",
-              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.passportId }}"
-            },
-            {
-              "fieldId": "type",
-              "fieldValue": "={{ $(\"Build VerificationResult\").item.json.notifyType }}"
+              "fieldId": "title",
+              "fieldValue": "Property verification completed"
             },
             {
               "fieldId": "recipient_role",
@@ -349,8 +342,7 @@
           "id": "8AkmNGJ2kRyQtg3e",
           "name": "Supabase account"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {

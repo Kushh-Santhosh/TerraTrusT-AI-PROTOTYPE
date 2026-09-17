@@ -252,6 +252,12 @@ function PassportPage() {
                 ? "Surveyor field verification completed"
                 : "Surveyor field verification pending"}
             </p>
+            {p.governmentDecision === "approved" && p.status === "pending" && (
+              <p className="mt-2 text-xs text-warning-foreground">
+                Government approval is recorded. The Passport remains pending while the automated
+                evidence review is unresolved.
+              </p>
+            )}
           </div>
           {isOwner && p.surveyorDecision !== "verified" && (
             <Button

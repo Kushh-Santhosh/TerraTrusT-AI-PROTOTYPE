@@ -190,7 +190,7 @@ function Page() {
       } else {
         setGovDecision(decision);
         setPropertyStatus(
-          decision === "approved" ? "verified" : decision === "rejected" ? "disputed" : "pending",
+          decision === "rejected" ? "disputed" : "pending",
         );
         toast.success(
           decision === "approved"
