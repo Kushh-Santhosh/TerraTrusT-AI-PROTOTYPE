@@ -39,10 +39,12 @@ export function MapMock({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const initialCenter =
-      activeProp?.coords && activeProp.coords.lat !== 0
-        ? activeProp.coords
-        : { lat: 12.9716, lng: 77.5946 };
+    const initialCenter = activeProp?.coords && activeProp.coords.lat !== 0 ? activeProp.coords : null;
+
+    if (!initialCenter) {
+      setWebGlError(true);
+      return;
+    }
 
     let map: Map;
     try {
@@ -212,61 +214,36 @@ export function MapMock({
         )}
         style={{ height }}
       >
-        <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
               <Layers className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-foreground">GIS Cadastral Vector Grid</p>
+              <p className="text-xs font-semibold text-foreground">GIS map unavailable</p>
               <p className="text-[11px] text-muted-foreground font-mono">
-                {activeProp?.title || "Property Parcel"} · {activeProp?.region || "Karnataka"}
+                {activeProp?.title || "No persisted property selected"}
               </p>
             </div>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface border border-border text-muted-foreground">
-            {activeProp?.coords
-              ? `${activeProp.coords.lat.toFixed(4)}°N, ${activeProp.coords.lng.toFixed(4)}°E`
-              : "GPS Active"}
+            Coordinates unavailable
           </span>
         </div>
 
-        {/* Vector parcel illustration */}
         <div className="my-auto py-4 flex flex-col items-center justify-center text-center">
-          <div className="relative w-48 h-32 border-2 border-dashed border-primary/40 rounded-xl bg-primary/5 flex items-center justify-center">
-            <div className="absolute inset-2 border border-primary/30 rounded-lg bg-primary/10 flex items-center justify-center">
-              <MapPin className="h-6 w-6 text-primary animate-bounce" />
-            </div>
-            <div className="absolute top-1 left-2 text-[9px] font-mono text-primary/80">
-              Vertex 1
-            </div>
-            <div className="absolute top-1 right-2 text-[9px] font-mono text-primary/80">
-              Vertex 2
-            </div>
-            <div className="absolute bottom-1 right-2 text-[9px] font-mono text-primary/80">
-              Vertex 3
-            </div>
-            <div className="absolute bottom-1 left-2 text-[9px] font-mono text-primary/80">
-              Vertex 4
-            </div>
-          </div>
-          <p className="mt-3 text-xs font-medium text-foreground">
-            {activeProp?.area
-              ? `${activeProp.area.toLocaleString()} sq ft`
-              : "Boundary Geometry Recorded"}
-          </p>
+          <MapPin className="h-7 w-7 text-muted-foreground" />
+          <p className="mt-3 text-xs font-medium text-foreground">No map rendered</p>
           <p className="text-[11px] text-muted-foreground">
-            {activeProp?.boundary?.length
-              ? `${activeProp.boundary.length} boundary coordinates saved`
-              : "Georeferenced Polygon"}
+            The persisted coordinates or online map provider could not be loaded.
           </p>
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-muted-foreground border-t border-border/60 pt-3">
           <span className="flex items-center gap-1.5 font-mono">
-            <Globe className="h-3 w-3 text-primary" /> OpenStreetMap · CARTO Cadastral
+            <Globe className="h-3 w-3 text-muted-foreground" /> Online GIS unavailable
           </span>
-          <span className="font-mono text-[10px] text-primary">Spatial Trust Verified</span>
+          <span className="font-mono text-[10px] text-muted-foreground">Not verified</span>
         </div>
       </div>
     );

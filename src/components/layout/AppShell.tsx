@@ -42,11 +42,11 @@ import {
 import type { ComponentType, ReactNode } from "react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { notifications } from "@/lib/mock-data";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth, roleLabels, normalizeRole, type Role } from "@/lib/auth";
+import { supabase, supabaseConfigured } from "@/lib/supabase";
 
 export interface NavItem {
   to: string;
@@ -323,12 +323,33 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { user, profile, loading, signOut } = useAuth();
-  const unread = notifications.filter((n) => !n.read).length;
+  const [unread, setUnread] = useState(0);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     setMobileNavOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!supabaseConfigured || !user?.id) {
+      setUnread(0);
+      return () => {
+        cancelled = true;
+      };
+    }
+    supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("read", false)
+      .then(({ count }) => {
+        if (!cancelled) setUnread(count ?? 0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     if (!loading && !user) {
